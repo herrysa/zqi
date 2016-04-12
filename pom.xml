@@ -16,6 +16,7 @@
 		<jsp.version>2.1</jsp.version>
 		<junit.version>4.8.2</junit.version>
 		<servlet.version>2.5</servlet.version>
+		<jackson.version>1.9.13</jackson.version>
   
   		<spring.version>4.2.5.RELEASE</spring.version>
   		<mybatis.version>3.3.1</mybatis.version>
@@ -45,6 +46,11 @@
 		<scope>provided</scope>
 	</dependency>
 	<dependency>
+		<groupId>taglibs</groupId>
+		<artifactId>standard</artifactId>
+		<version>${jstl.version}</version>
+	</dependency>
+	<dependency>
 		<groupId>javax.servlet</groupId>
 		<artifactId>jstl</artifactId>
 		<version>${jstl.version}</version>
@@ -54,6 +60,26 @@
 		<artifactId>jsp-api</artifactId>
 		<version>${jsp.version}</version>
 		<!-- <scope>provided</scope> -->
+	</dependency>
+	<dependency>
+		<groupId>org.codehaus.jackson</groupId>
+		<artifactId>jackson-jaxrs</artifactId>
+		<version>1.7.1</version>
+	</dependency>
+	<dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+		<artifactId>jackson-databind</artifactId>
+		<version>2.7.3</version>
+	</dependency>
+	<dependency>
+		<groupId>org.codehaus.jackson</groupId>
+		<artifactId>jackson-core-asl</artifactId>
+		<version>${jackson.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.codehaus.jackson</groupId>
+		<artifactId>jackson-mapper-asl</artifactId>
+		<version>${jackson.version}</version>
 	</dependency>
 	<dependency>
 		<groupId>${jdbc.groupId}</groupId>
