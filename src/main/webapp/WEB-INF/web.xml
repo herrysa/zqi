@@ -1,8 +1,11 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
+<?xml version="1.0" encoding="UTF-8"?> 
+<!-- <web-app  xmlns:xs="http://www.jboss.org/j2ee/schema"  
+       xs:schemaLocation="http://www.jboss.org/j2ee/schema/jboss_5_0.xsd"  
+             version="5.0">       -->   
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-<web-app>
   <display-name>zqi</display-name>
 	<!-- 指定Spring Bean的配置文件所在目录。默认配置在WEB-INF目录下 -->  
     <context-param>  

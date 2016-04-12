@@ -7,18 +7,19 @@ if touch event support is needed (mobile devices)
 <script type="text/javascript" src="/path/to/jquery.ui.touch-punch.min.js"></script>
   
 <!--  PAGINATION plugin -->
-<link rel="stylesheet" type="text/css" href="./scripts/bs_pagination/jquery.bs_pagination.css">
-<script type="text/javascript" src="./scripts/bs_pagination/jquery.bs_pagination.js"></script>
-<script type="text/javascript" src="./scripts/bs_pagination/en.js"></script>
+<link rel="stylesheet" type="text/css" href="${ctx}/scripts/bs_pagination/jquery.bs_pagination.css">
+<script type="text/javascript" src="${ctx}/scripts/bs_pagination/jquery.bs_pagination.js"></script>
+<script type="text/javascript" src="${ctx}/scripts/bs_pagination/en.js"></script>
  
 <!--  FILTERS plugin --> 
-<link rel="stylesheet" type="text/css" href="./scripts/jui_filter_rules/jquery.jui_filter_rules.bs.css">
-<script type="text/javascript" src="./scripts/jui_filter_rules/jquery.jui_filter_rules.js"></script>
-<script type="text/javascript" src="./scripts/jui_filter_rules/en.js"></script>
+<link rel="stylesheet" type="text/css" href="${ctx}/scripts/jui_filter_rules/jquery.jui_filter_rules.css">
+<link rel="stylesheet" type="text/css" href="${ctx}/scripts/jui_filter_rules/jquery.jui_filter_rules.bs.css">
+<script type="text/javascript" src="${ctx}/scripts/jui_filter_rules/jquery.jui_filter_rules.js"></script>
+<script type="text/javascript" src="${ctx}/scripts/jui_filter_rules/en.js"></script>
 <!--  required from filters plugin -->
-<script type="text/javascript" src="./script/moment.js"></script>
+<script type="text/javascript" src="${ctx}/scripts/moment.js"></script>
  
 <!--  DATAGRID plugin -->
-<link rel="stylesheet" type="text/css" href="./scripts/bs_grid/jquery.bs_grid.css">
-<script type="text/javascript" src="./scripts/bs_grid/jquery.bs_grid.js"></script>
-<script type="text/javascript" src="./scripts/bs_grid/en.js"></script>
+<link rel="stylesheet" type="text/css" href="${ctx}/scripts/bs_grid/jquery.bs_grid.css">
+<script type="text/javascript" src="${ctx}/scripts/bs_grid/jquery.bs_grid.js"></script>
+<script type="text/javascript" src="${ctx}/scripts/bs_grid/en.js"></script>
