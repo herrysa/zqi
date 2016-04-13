@@ -33,6 +33,7 @@ public class QiInit {
         	}
         	String name = fileName.split("\\.")[0];
         	String[] typeAndCode = name.split("#");
+        	System.out.println("-------"+name+"-------");
         	name = typeAndCode[0]+typeAndCode[1];
         	//String dicSql= "select * from d_gpDic where code='"+fileName+"'";
         	String dicSql= "select * from d_gpDic where code='"+name+"'";
@@ -57,7 +58,7 @@ public class QiInit {
                         	dicDb.pst.execute();
                     	}
                     }
-                    dicSql= "select count(*) from information_schema.TABLES where table_name = 'g_d_"+name+"' and TABLE_SCHEMA = 'zqi'";
+                   /* dicSql= "select count(*) from information_schema.TABLES where table_name = 'g_d_"+name+"' and TABLE_SCHEMA = 'zqi'";
                 	dicDb = new DBHelper();
                 	dicDb.prepareStatementSql(dicSql);
                 	rs = dicDb.pst.executeQuery();
@@ -73,12 +74,41 @@ public class QiInit {
                     while((lineTxt = bufferedReader.readLine()) != null){
                         //System.out.println(lineTxt);
                         String[] price = lineTxt.split("\t");
-                        dicSql= "insert into g_d_"+name+"(period,open,high,low,close,volume,turnover) values ('"+price[Integer.parseInt(priceMap.get("period"))]+"','"+price[Integer.parseInt(priceMap.get("open"))]+"','"+price[Integer.parseInt(priceMap.get("high"))]+"','"+price[Integer.parseInt(priceMap.get("low"))]+"','"+price[Integer.parseInt(priceMap.get("close"))]+"','"+price[Integer.parseInt(priceMap.get("volume"))]+"','"+price[Integer.parseInt(priceMap.get("turnover"))]+"');";
+                        String period = "";
+                        String open = "0";
+                        String high = "0";
+                        String low = "0";
+                        String close = "0";
+                        String volume = "0";
+                        String turnover = "0";
+                        if(price.length>6){
+                        	turnover = price[Integer.parseInt(priceMap.get("turnover"))];
+                        }
+                        if(price.length>5){
+                        	volume = price[Integer.parseInt(priceMap.get("volume"))];
+                        }
+                        if(price.length>4){
+                        	close = price[Integer.parseInt(priceMap.get("close"))];
+                        }
+                        if(price.length>3){
+                        	low = price[Integer.parseInt(priceMap.get("low"))];
+                        }
+                        if(price.length>2){
+                        	high = price[Integer.parseInt(priceMap.get("high"))];
+                        }
+                        if(price.length>1){
+                        	open = price[Integer.parseInt(priceMap.get("open"))];
+                        }
+                        if(price.length>0){
+                        	period = price[Integer.parseInt(priceMap.get("period"))];
+                        }
+                        System.out.println(period+":"+price.length);
+                        dicSql= "insert into g_d_"+name+"(period,open,high,low,close,volume,turnover) values ('"+period+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+turnover+"');";
                     	dicDb = new DBHelper();
                     	dicDb.prepareStatementSql(dicSql);
                     	dicDb.pst.execute();
                         lineIndex++;
-                    }
+                    }*/
                     read.close();
         }else{
             System.out.println("找不到指定的文件");
