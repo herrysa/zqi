@@ -26,8 +26,11 @@ public class QiInit {
 		
 		File parentFile = new File(basePath);
 		String[] files = parentFile.list();
-		int fileIndex = 0,daytableIndex = 1;
+		int fileIndex = 0,daytableIndex = 1,fileFrom = 0,fileTo = 10;
         for(String fileName : files){
+        	if(fileFrom>fileIndex||fileIndex>fileTo){
+        		break;
+        	}
         	fileIndex++;
         	if(fileIndex%50==0){
         		daytableIndex++;
@@ -116,6 +119,8 @@ public class QiInit {
                         lineIndex++;
                     }
                     dayDb.st.executeBatch();
+                    //DBHelper logDb = new DBHelper();
+                    //logDb.
                     read.close();
         }else{
             System.out.println("找不到指定的文件");
