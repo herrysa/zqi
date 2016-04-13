@@ -26,7 +26,12 @@ public class QiInit {
 		
 		File parentFile = new File(basePath);
 		String[] files = parentFile.list();
+		int fileIndex = 0,daytableIndex = 1;
         for(String fileName : files){
+        	fileIndex++;
+        	if(fileIndex%50==0){
+        		daytableIndex++;
+        	}
         	File file = new File(basePath+"//"+fileName);
         	if(file.isDirectory()){
         		continue;
@@ -52,25 +57,26 @@ public class QiInit {
                     if(lineTxt!=null){
                     	String[] title = lineTxt.replace("  ", " ").split(" ");
                     	if(!rs.next()){
-                    		dicSql= "insert into d_gpDic (code,name) values('"+name+"','"+title[1]+"');";
-                        	dicDb = new DBHelper();
+                    		dicSql= "insert into d_gpDic (code,name,daytable) values('"+name+"','"+title[1]+"','daytable"+daytableIndex+"');";
+                        	//dicDb = new DBHelper();
                         	dicDb.prepareStatementSql(dicSql);
                         	dicDb.pst.execute();
                     	}
                     }
-                   /* dicSql= "select count(*) from information_schema.TABLES where table_name = 'g_d_"+name+"' and TABLE_SCHEMA = 'zqi'";
-                	dicDb = new DBHelper();
+                   dicSql= "select count(*) from information_schema.TABLES where table_name = 'daytable"+daytableIndex+"' and TABLE_SCHEMA = 'zqi'";
+                	//dicDb = new DBHelper();
                 	dicDb.prepareStatementSql(dicSql);
                 	rs = dicDb.pst.executeQuery();
                 	boolean hasRs = rs.next();
                 	int count = rs.getInt(1);
                 	if(count==0){
-                		dicSql= "create table g_d_"+name+"(period varchar(10) not null,open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),turnover decimal(20,2));";
-                    	dicDb = new DBHelper();
+                		dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),turnover decimal(20,2));";
+                    	//dicDb = new DBHelper();
                     	dicDb.prepareStatementSql(dicSql);
                     	dicDb.pst.execute();
                 	}
                     lineTxt = bufferedReader.readLine();
+                    DBHelper dayDb = new DBHelper();
                     while((lineTxt = bufferedReader.readLine()) != null){
                         //System.out.println(lineTxt);
                         String[] price = lineTxt.split("\t");
@@ -102,13 +108,14 @@ public class QiInit {
                         if(price.length>0){
                         	period = price[Integer.parseInt(priceMap.get("period"))];
                         }
-                        System.out.println(period+":"+price.length);
-                        dicSql= "insert into g_d_"+name+"(period,open,high,low,close,volume,turnover) values ('"+period+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+turnover+"');";
-                    	dicDb = new DBHelper();
-                    	dicDb.prepareStatementSql(dicSql);
-                    	dicDb.pst.execute();
+                        //System.out.println(period+":"+price.length);
+                        dicSql= "insert into daytable"+daytableIndex+"(period,code,open,high,low,close,volume,turnover) values ('"+period+"','"+name+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+turnover+"');";
+                        dayDb.addBatchSql(dicSql);
+                    	//dicDb.prepareStatementSql(dicSql);
+                    	//dicDb.pst.execute();
                         lineIndex++;
-                    }*/
+                    }
+                    dayDb.st.executeBatch();
                     read.close();
         }else{
             System.out.println("找不到指定的文件");
