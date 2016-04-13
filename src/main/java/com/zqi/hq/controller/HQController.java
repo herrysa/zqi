@@ -2,6 +2,7 @@ package com.zqi.hq.controller;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -76,7 +77,22 @@ public class HQController {
         hqMap.put("low", rsArr[5]);
         hqMap.put("volume", rsArr[8]);
         hqMap.put("turnover", rsArr[9]);
-        
+        String yesterday = rsArr[2];
+        String now = rsArr[3];
+        if(yesterday!=null&&!yesterday.equals("")&&now!=null&&!now.equals("")){
+        	BigDecimal y = new BigDecimal(yesterday);
+        	BigDecimal limitPrice = y.multiply(new BigDecimal(0.1)).setScale(2, BigDecimal.ROUND_HALF_UP);
+        	BigDecimal limitUpPrice = y.add(limitPrice);
+        	BigDecimal limitDownPrice = y.subtract(limitPrice);
+        	BigDecimal n = new BigDecimal(now);
+        	BigDecimal increasePrice = n.subtract(y).setScale(2, BigDecimal.ROUND_HALF_UP);
+        	BigDecimal increasePercent = n.subtract(y).divide(y).setScale(2, BigDecimal.ROUND_HALF_UP);
+        	//boolean limitUp =false,limitDown =false;
+        	int limitUp = n.compareTo(limitUpPrice);
+        	int limitDown = n.compareTo(limitDownPrice);
+        	
+
+        }
         System.out.println("股票:"+rsArr[0]+" "+rsArr[30]+" "+rsArr[31]); 
         System.out.println("今日开盘:"+rsArr[1]); 
         System.out.println("昨日收盘:"+rsArr[2]); 
