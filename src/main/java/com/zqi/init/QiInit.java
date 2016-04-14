@@ -26,15 +26,18 @@ public class QiInit {
 		
 		File parentFile = new File(basePath);
 		String[] files = parentFile.list();
-		int fileIndex = 0,daytableIndex = 1,fileFrom = 0,fileTo = 10;
+		int fileIndex = 0,daytableIndex = 1,fileFrom = 301,fileTo = 400;
         for(String fileName : files){
-        	if(fileFrom>fileIndex||fileIndex>fileTo){
+        	if(fileIndex>fileTo){
         		break;
         	}
-        	fileIndex++;
-        	if(fileIndex%50==0){
-        		daytableIndex++;
+        	if(fileFrom>fileIndex){
+        		fileIndex++;
+        		continue;
         	}
+        	
+        	daytableIndex = fileIndex/50+1;
+        	fileIndex++;
         	File file = new File(basePath+"//"+fileName);
         	if(file.isDirectory()){
         		continue;
