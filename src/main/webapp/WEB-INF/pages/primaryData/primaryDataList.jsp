@@ -1,37 +1,33 @@
 <!DOCTYPE html>
 <%@page contentType="text/html; charset=UTF-8"%>
 <%@ include file="/common/taglibs.jsp"%>
-<%@ include file="/common/links.jsp"%>
-<%@ include file="/common/bootStrapLinks.jsp"%>
-<%@ include file="/common/bsgridLinks.jsp"%>
 <html>
 <head>
 </head>
 <script>
 $(function() {
-	 
     $("#demo_grid1").bs_grid({
  
-        ajaxFetchDataURL: "${ctx}/primaryData/primaryDataGridList",
-        row_primary_key: "customer_id",
+        ajaxFetchDataURL: "${ctx}/primaryData/primaryDataGridList?gpCode=${gpCode}&period=${period}",
+        row_primary_key: "period",
  
         columns: [
-            {field: "customer_id", header: "Code", visible: "no"},
-            {field: "lastname", header: "Lastname"},
-            {field: "firstname", header: "Firstname"},
-            {field: "email", header: "Email", visible: "no", "sortable": "no"},
-            {field: "gender", header: "Gender"},
-            {field: "date_updated", header: "Date updated"}
+            {field: "period", header: "日期"},
+            {field: "code", header: "编码"},
+            {field: "name", header: "名称"},
+            {field: "open", header: "开盘价"},
+            {field: "close", header: "收盘价"},
+            {field: "high", header: "最高价"}
         ],
  
         sorting: [
-            {sortingName: "Code", field: "customer_id", order: "none"},
-            {sortingName: "Lastname", field: "lastname", order: "ascending"},
-            {sortingName: "Firstname", field: "firstname", order: "ascending"},
-            {sortingName: "Date updated", field: "date_updated", order: "none"}
-        ],
+            {sortingName: "period", field: "period", order: "descending"},
+            {sortingName: "code", field: "code", order: "ascending"},
+            {sortingName: "open", field: "open", order: "none"},
+            {sortingName: "close", field: "close", order: "none"}
+        ]
  
-        filterOptions: {
+        /* filterOptions: {
             filters: [
                 {
                     filterName: "Lastname", "filterType": "text", field: "lastname", filterLabel: "Last name",
@@ -87,7 +83,7 @@ $(function() {
                     }
                 }
             ]
-        }
+        } */
     });
  
 });

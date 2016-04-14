@@ -2,8 +2,8 @@ package com.zqi.hq;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 public class HQFuc {
 
@@ -13,11 +13,11 @@ public class HQFuc {
          BufferedReader in = null;
 
      try {
-         String url = "http://hq.sinajs.cn/list=sh600094";
+         String url = "http://data.eastmoney.com/stock/lhb.html";
          String urlNameString = url;
          URL realUrl = new URL(urlNameString);
          // 打开和URL之间的连接
-         URLConnection connection = realUrl.openConnection();
+         HttpURLConnection connection = (java.net.HttpURLConnection)realUrl.openConnection();
          // 设置通用的请求属性
          connection.setRequestProperty("accept", "*/*");
          connection.setRequestProperty("connection", "Keep-Alive");

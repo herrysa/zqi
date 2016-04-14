@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.border.TitledBorder;
+
 import com.zqi.unit.DBHelper;
 
 public class QiInit {
@@ -26,7 +28,7 @@ public class QiInit {
 		
 		File parentFile = new File(basePath);
 		String[] files = parentFile.list();
-		int fileIndex = 0,daytableIndex = 1,fileFrom = 301,fileTo = 400;
+		int fileIndex = 0,daytableIndex = 1,fileFrom = 0,fileTo = 10;
         for(String fileName : files){
         	if(fileIndex>fileTo){
         		break;
@@ -46,6 +48,7 @@ public class QiInit {
         	String[] typeAndCode = name.split("#");
         	System.out.println("-------"+name+"-------");
         	name = typeAndCode[0]+typeAndCode[1];
+        	String cnName = "";
         	//String dicSql= "select * from d_gpDic where code='"+fileName+"'";
         	String dicSql= "select * from d_gpDic where code='"+name+"'";
         	DBHelper dicDb = new DBHelper();
@@ -62,8 +65,9 @@ public class QiInit {
                     ResultSet rs = dicDb.pst.executeQuery();
                     if(lineTxt!=null){
                     	String[] title = lineTxt.replace("  ", " ").split(" ");
+                    	cnName = title[1];
                     	if(!rs.next()){
-                    		dicSql= "insert into d_gpDic (code,name,daytable) values('"+name+"','"+title[1]+"','daytable"+daytableIndex+"');";
+                    		dicSql= "insert into d_gpDic (code,name,daytable) values('"+name+"','"+cnName+"','daytable"+daytableIndex+"');";
                         	//dicDb = new DBHelper();
                         	dicDb.prepareStatementSql(dicSql);
                         	dicDb.pst.execute();
@@ -76,7 +80,7 @@ public class QiInit {
                 	boolean hasRs = rs.next();
                 	int count = rs.getInt(1);
                 	if(count==0){
-                		dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),turnover decimal(20,2));";
+                		dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),name varchar(20),open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),turnover decimal(20,2));";
                     	//dicDb = new DBHelper();
                     	dicDb.prepareStatementSql(dicSql);
                     	dicDb.pst.execute();
@@ -115,7 +119,7 @@ public class QiInit {
                         	period = price[Integer.parseInt(priceMap.get("period"))];
                         }
                         //System.out.println(period+":"+price.length);
-                        dicSql= "insert into daytable"+daytableIndex+"(period,code,open,high,low,close,volume,turnover) values ('"+period+"','"+name+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+turnover+"');";
+                        dicSql= "insert into daytable"+daytableIndex+"(period,code,name,open,high,low,close,volume,turnover) values ('"+period+"','"+name+"','"+cnName+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+turnover+"');";
                         dayDb.addBatchSql(dicSql);
                     	//dicDb.prepareStatementSql(dicSql);
                     	//dicDb.pst.execute();

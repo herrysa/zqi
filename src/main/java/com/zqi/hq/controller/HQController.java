@@ -115,5 +115,6 @@ public class HQController {
         System.out.println("买四:"+rsArr[17]+" "+rsArr[16]); 
         System.out.println("买五:"+rsArr[19]+" "+rsArr[18]); 
 		}
+		return "";
 	}
 }

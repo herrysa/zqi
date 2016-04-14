@@ -3,6 +3,7 @@
 <%@ include file="/common/taglibs.jsp"%>
 <%@ include file="/common/links.jsp"%>
 <%@ include file="/common/bootStrapLinks.jsp"%>
+<%@ include file="/common/bsgridLinks.jsp"%>
 <html>
 <head>
    <title>量化投资系统</title>
@@ -142,7 +143,8 @@
    			}
    		};
 	function menuClick(url){
-		
+		//alert(url);
+		$("#mainContent_center").load(url);
 	}
    </script>
 </head>
@@ -155,7 +157,7 @@
 	<div class="content">
 		<h3><b>Outer Layout</b></h3>
 		<ul>
-			<li><a href="#" onClick="menuClick('')">原始数据</a></li>
+			<li><a href="javaScript:menuClick('${ctx}/primaryData/primaryDataList?gpCode=SH600000')">原始数据</a></li>
 			<li><a href="#" onClick="outerLayout.toggle('south')">Toggle South</a></li>
 			<li><a href="#" onClick="outerLayout.toggle('west')"> Toggle West</a></li>
 			<li><a href="#" onClick="outerLayout.toggle('east')"> Toggle East</a></li>
@@ -276,7 +278,7 @@
 	<!-- DIVs for the INNER LAYOUT -->
 
 	<div class="ui-layout-center">
-		<div class="ui-layout-content">
+		<div id="mainContent_center" class="ui-layout-content">
 		
 			
 		</div>

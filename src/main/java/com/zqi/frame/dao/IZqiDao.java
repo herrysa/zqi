@@ -46,5 +46,5 @@ public interface IZqiDao {
      */  
     public List findAll(String sql);
     
-    
+    public Map<String, Object> findFirst(String sql);
 }

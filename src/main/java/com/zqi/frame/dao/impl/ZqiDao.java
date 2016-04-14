@@ -1,19 +1,30 @@
 package com.zqi.frame.dao.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.KeyHolder;
 
 import com.zqi.frame.dao.IZqiDao;
 
-public class ZqiDao extends JdbcDaoSupport implements IZqiDao{
+public class ZqiDao implements IZqiDao{
 
-	JdbcTemplate jdbcTemplate = this.getJdbcTemplate();
-	public ZqiDao() {
-		// TODO Auto-generated constructor stub
+	JdbcTemplate jdbcTemplate;
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
+	}
+
+	@Autowired
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	public ZqiDao(){
+		
 	}
 
 	@Override
@@ -49,5 +60,19 @@ public class ZqiDao extends JdbcDaoSupport implements IZqiDao{
 	public List findAll(String sql) {
 		return jdbcTemplate.queryForList(sql);
 	}
+
+	@Override
+	public Map<String, Object> findFirst(String sql) {
+		List list = jdbcTemplate.queryForList(sql);
+		Map<String, Object> rs0 = null;
+		if(list!=null&&list.size()>0){
+			rs0 = (Map<String, Object>)list.get(0);
+		}else{
+			rs0 = new HashMap<String, Object>();
+		}
+		return rs0;
+	}
+	
+	
 
 }
