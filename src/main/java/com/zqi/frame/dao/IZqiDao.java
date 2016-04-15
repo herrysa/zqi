@@ -5,6 +5,9 @@ import java.util.Map;
 
 import org.springframework.jdbc.support.KeyHolder;
 
+import com.zqi.frame.controller.filter.PropertyFilter;
+import com.zqi.frame.controller.pagers.BSPager;
+
 public interface IZqiDao {
 
 	/**  
@@ -47,4 +50,6 @@ public interface IZqiDao {
     public List findAll(String sql);
     
     public Map<String, Object> findFirst(String sql);
+    
+    public List findByFilter(BSPager bsPager,String tableName,List<PropertyFilter> filters);
 }

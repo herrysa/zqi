@@ -25,13 +25,13 @@ $(function() {
             {sortingName: "code", field: "code", order: "ascending"},
             {sortingName: "open", field: "open", order: "none"},
             {sortingName: "close", field: "close", order: "none"}
-        ]
+        ],
  
-        /* filterOptions: {
+        filterOptions: {
             filters: [
                 {
-                    filterName: "Lastname", "filterType": "text", field: "lastname", filterLabel: "Last name",
-                    excluded_operators: ["in", "not_in"],
+                    filterName: "period", "filterType": "text", field: "period", filterLabel: "日期",
+                    excluded_operators: [],
                     filter_interface: [
                         {
                             filter_element: "input",
@@ -40,50 +40,17 @@ $(function() {
                     ]
                 },
                 {
-                    filterName: "Gender", "filterType": "number", "numberType": "integer", field: "lk_genders_id", filterLabel: "Gender",
-                    excluded_operators: ["equal", "not_equal", "less", "less_or_equal", "greater", "greater_or_equal"],
+                    filterName: "code", "filterType": "text", field: "code", filterLabel: "编码",
+                    excluded_operators: ["equal", "less_or_equal"],
                     filter_interface: [
                         {
                             filter_element: "input",
-                            filter_element_attributes: {type: "checkbox"}
+                            filter_element_attributes: {"type": "text"}
                         }
-                    ],
-                    lookup_values: [
-                        {lk_option: "Male", lk_value: "1"},
-                        {lk_option: "Female", lk_value: "2", lk_selected: "yes"}
                     ]
-                },
-                {
-                    filterName: "DateUpdated", "filterType": "date", field: "date_updated", filterLabel: "Datetime updated",
-                    excluded_operators: ["in", "not_in"],
-                    filter_interface: [
-                        {
-                            filter_element: "input",
-                            filter_element_attributes: {
-                                type: "text",
-                                title: "Set the date and time using format: dd/mm/yyyy hh:mm:ss"
-                            },
-                            filter_widget: "datetimepicker",
-                            filter_widget_properties: {
-                                dateFormat: "dd/mm/yy",
-                                timeFormat: "HH:mm:ss",
-                                changeMonth: true,
-                                changeYear: true,
-                                showSecond: true
-                            }
-                        }
-                    ],
-                    validate_dateformat: ["DD/MM/YYYY HH:mm:ss"],
-                    filter_value_conversion: {
-                        function_name: "local_datetime_to_UTC_timestamp",
-                        args: [
-                            {"filter_value": "yes"},
-                            {"value": "DD/MM/YYYY HH:mm:ss"}
-                        ]
-                    }
                 }
             ]
-        } */
+        }
     });
  
 });

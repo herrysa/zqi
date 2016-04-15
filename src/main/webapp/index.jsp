@@ -116,7 +116,7 @@
    			,	togglerTip_closed:		"Open West Pane"
    			,	resizerTip_open:		"Resize West Pane"
    			,	slideTrigger_open:		"click" 	// default
-   			,	initClosed:				true
+   			,	initClosed:				false
    			//	add 'bounce' option to default 'slide' effect
    			,	fxSettings_open:		{ easing: "easeOutBounce" }
    			}

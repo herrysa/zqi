@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.KeyHolder;
 
+import com.zqi.frame.controller.filter.PropertyFilter;
+import com.zqi.frame.controller.pagers.BSPager;
 import com.zqi.frame.dao.IZqiDao;
 
 public class ZqiDao implements IZqiDao{
@@ -71,6 +73,12 @@ public class ZqiDao implements IZqiDao{
 			rs0 = new HashMap<String, Object>();
 		}
 		return rs0;
+	}
+
+	@Override
+	public List findByFilter(BSPager bsPager, String tableName,List<PropertyFilter> filters) {
+		
+		return null;
 	}
 	
 	

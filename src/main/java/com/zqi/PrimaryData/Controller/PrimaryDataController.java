@@ -3,6 +3,8 @@ package com.zqi.PrimaryData.Controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,11 +31,26 @@ public class PrimaryDataController{
 		this.iPrimaryDataDao = iPrimaryDataDao;
 	}
 
+
 	@ResponseBody
 	@RequestMapping("/primaryDataGridList")
-	public Map<String, Object> primaryDataGridList(HttpServletRequest request){
+	public Map<String, Object> primaryDataGridList(HttpServletRequest request,String gpCode){
 		String code = request.getParameter("gpCode");
 		String period = request.getParameter("period");
+		String[] columns = request.getParameterValues("columns");
+		Object q = request.getAttribute("columns");
+		Map columns1 = request.getParameterMap();
+		Set<Entry<String, Object>> pp = columns1.entrySet();
+		Set<String> keys = columns1.keySet();
+		for(Entry<String, Object> p : pp){
+			Object v= p.getValue();
+			if(v instanceof String){
+				System.out.println(p.getKey()+":"+p.getValue());
+			}else{
+				String[] vArr = (String[])v;
+				System.out.println(p.getKey()+":"+vArr[0]);
+			}
+		}
 		Map<String, Object> r = new HashMap<String, Object>();
 		if(code!=null&&!"".equals(code)){
 			String findDayTableSql = "select daytable from d_gpDic where code='"+code+"'";
