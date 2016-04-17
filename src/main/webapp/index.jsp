@@ -4,6 +4,7 @@
 <%@ include file="/common/links.jsp"%>
 <%@ include file="/common/bootStrapLinks.jsp"%>
 <%@ include file="/common/bsgridLinks.jsp"%>
+<%@ include file="/common/zqiLinks.jsp"%>
 <html>
 <head>
    <title>量化投资系统</title>
@@ -107,7 +108,7 @@
    			,	onresize_end:			function () { alert("END South pane resize \n\n onresize_end callback \n\n NOTE: onresize_start event was skipped."); }
    			}
    		,	west: {
-   				size:					250
+   				size:					200
    			,	spacing_closed:			21			// wider space when closed
    			,	togglerLength_closed:	21			// make toggler 'square' - 21x21
    			,	togglerAlign_closed:	"top"		// align to top of resizer
@@ -152,49 +153,84 @@
 
 <div class="ui-layout-west">
 
-	<div class="header">Outer - West</div>
+	<div class="header" style="height:20px"></div>
 
-	<div class="content">
-		<h3><b>Outer Layout</b></h3>
-		<ul>
-			<li><a href="javaScript:menuClick('${ctx}/primaryData/primaryDataList?gpCode=SH600000')">原始数据</a></li>
-			<li><a href="#" onClick="outerLayout.toggle('south')">Toggle South</a></li>
-			<li><a href="#" onClick="outerLayout.toggle('west')"> Toggle West</a></li>
-			<li><a href="#" onClick="outerLayout.toggle('east')"> Toggle East</a></li>
-			<li><a href="#" onClick="outerLayout.hide('north')">Hide North</a></li>
-			<li><a href="#" onClick="outerLayout.hide('south')">Hide South</a></li>
-			<li><a href="#" onClick="outerLayout.show('south', false)">Unhide South</a></li>
-			<li><a href="#" onClick="outerLayout.hide('east')"> Hide East</a></li>
-			<li><a href="#" onClick="outerLayout.show('east', false)">Unhide East</a></li>
-			<li><a href="#" onClick="outerLayout.open('east')"> Open East</a></li>
-			<li><a href="#" onClick="outerLayout.open('north'); outerLayout.sizePane('north', 'auto')">  Resize North="auto"</a></li>
-			<li><a href="#" onClick="outerLayout.sizePane('north', 100); outerLayout.open('north')">  Resize North=100</a></li>
-			<li><a href="#" onClick="outerLayout.sizePane('north', 300); outerLayout.open('north')">  Resize North=300</a></li>
-			<li><a href="#" onClick="outerLayout.sizePane('north', 10000); outerLayout.open('north')">Resize North=10000</a></li>
-			<li><a href="#" onClick="outerLayout.open('south'); outerLayout.sizePane('south', 'auto')">  Resize South="auto"</a></li>
-			<li><a href="#" onClick="outerLayout.sizePane('south', 100); outerLayout.open('south')">  Resize South=100</a></li>
-			<li><a href="#" onClick="outerLayout.sizePane('south', 300); outerLayout.open('south')">  Resize South=300</a></li>
-			<li><a href="#" onClick="outerLayout.sizePane('south', 10000); outerLayout.open('south')">Resize South=10000</a></li>
-			<li><a href="#" onClick="outerLayout.panes.north.css('backgroundColor','#FCC')">North Color = Red</a></li>
-			<li><a href="#" onClick="outerLayout.panes.north.css('backgroundColor','#CFC')">North Color = Green</a></li>
-			<li><a href="#" onClick="outerLayout.panes.north.css('backgroundColor','')">    North Color = Default</a></li>
-			<li><a href="#" onClick="alert('outerLayout.name = \''+outerLayout.options.name+'\'')">Show Layout Name</a></li>
-			<li><a href="#" onClick="showOptions(outerLayout,'defaults')">Show Options.Defaults</a></li>
-			<li><a href="#" onClick="showOptions(outerLayout,'north')">   Show Options.North</a></li>
-			<li><a href="#" onClick="showOptions(outerLayout,'south')">   Show Options.South</a></li>
-			<li><a href="#" onClick="showOptions(outerLayout,'west')">    Show Options.West</a></li>
-			<li><a href="#" onClick="showOptions(outerLayout,'east')">    Show Options.East</a></li>
-			<li><a href="#" onClick="showOptions(outerLayout,'center')">  Show Options.Center</a></li>
-			<li><a href="#" onClick="showState(outerLayout,'container')"> Show State.Container</a></li>
-			<li><a href="#" onClick="showState(outerLayout,'north')">     Show State.North</a></li>
-			<li><a href="#" onClick="showState(outerLayout,'south')">     Show State.South</a></li>
-			<li><a href="#" onClick="showState(outerLayout,'west')">      Show State.West</a></li>
-			<li><a href="#" onClick="showState(outerLayout,'east')">      Show State.East</a></li>
-			<li><a href="#" onClick="showState(outerLayout,'center')">    Show State.Center</a></li>
-		</ul>
+	<div class="content" style="padding:1px">
+		<!-- <div class="navbar navbar-duomi navbar-static-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/Admin/index.html" id="logo">配置管理系统（流量包月）
+                </a>
+            </div>
+        </div>
+    </div> -->
+    <div class="container-fluid" style="padding:0px">
+        <div class="row" style="margin:0px">
+            <div class="col-md-2" style="width:100%;padding:0px">
+                <ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
+                    <!-- <li class="active">
+                        <a href="#">
+                            <i class="glyphicon glyphicon-th-large"></i>
+                            首页         
+                        </a>
+                    </li> -->
+                    <li>
+                        <a href="#systemSetting" class="nav-header collapsed" data-toggle="collapse">
+                            <i class="glyphicon glyphicon-cog"></i>
+                            系统管理
+                               <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                        </a>
+                        <ul id="systemSetting" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                            <li><a href="#"><i class="glyphicon glyphicon-user"></i>用户管理</a></li>
+                            <li><a href="#"><i class="glyphicon glyphicon-th-list"></i>菜单管理</a></li>
+                            <li><a href="#"><i class="glyphicon glyphicon-asterisk"></i>角色管理</a></li>
+                            <li><a href="#"><i class="glyphicon glyphicon-edit"></i>修改密码</a></li>
+                            <li><a href="#"><i class="glyphicon glyphicon-eye-open"></i>日志查看</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#primaryData" class="nav-header collapsed" data-toggle="collapse">
+                            <i class="glyphicon glyphicon-credit-card"></i>
+                            物料管理        
+                        </a>
+                        <ul id="primaryData" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        	<li><a href="javaScript:menuClick('primaryData/primaryDataList?gpCode=SH600000')"><i class="glyphicon glyphicon-user"></i>原始数据</a></li>
+                            <li><a href="javaScript:menuClick('hq/findHQ')"><i class="glyphicon glyphicon-th-list"></i>行情</a></li>
+                        </ul>
+                    </li>
+ 
+                    <li>
+                        <a href="#dataAnalysis" class="nav-header collapsed" data-toggle="collapse">
+                            <i class="glyphicon glyphicon-globe"></i>
+             数据分析
+                            <!-- <span class="label label-warning pull-right">5</span> -->
+                        </a>
+                        <ul id="dataAnalysis" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        	<li><a href="javaScript:menuClick('primaryData/primaryDataList?gpCode=SH600000')"><i class="glyphicon glyphicon-user"></i>赚钱效应</a></li>
+                        </ul>
+                    </li>
+ 
+                    <li>
+                        <a href="./charts.html">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                            图表统计
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="glyphicon glyphicon-fire"></i>
+                            关于系统
+                        </a>
+                    </li>
+ 
+                </ul>
+            </div>
+            <!-- <div class="col-md-10">
+                主窗口
+            </div> -->
+        </div>
+    </div>
 	</div>
-
-	<div class="footer">Automatically positioned footer</div>
 
 </div>
 

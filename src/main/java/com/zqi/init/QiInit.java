@@ -28,7 +28,7 @@ public class QiInit {
 		
 		File parentFile = new File(basePath);
 		String[] files = parentFile.list();
-		int fileIndex = 0,daytableIndex = 1,fileFrom = 0,fileTo = 10;
+		int fileIndex = 0,daytableIndex = 1,fileFrom = 400,fileTo = 10000;
         for(String fileName : files){
         	if(fileIndex>fileTo){
         		break;
@@ -125,7 +125,7 @@ public class QiInit {
                     	//dicDb.pst.execute();
                         lineIndex++;
                     }
-                    dayDb.st.executeBatch();
+                    //dayDb.st.executeBatch();
                     //DBHelper logDb = new DBHelper();
                     //logDb.
                     read.close();

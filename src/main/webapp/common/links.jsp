@@ -12,3 +12,6 @@
 <!-- <script type="text/javascript"	src="./scripts/layouts/complex.js"></script>
 <link rel="stylesheet" type="text/css" 	href="./scripts/layouts/complex.css" /> -->
 
+<script type="text/javascript" src="${ctx}/supcan/binary/dynaload.js"></script>
+<script type="text/javascript" src="${ctx}/scripts/supcan.js"></script>
+
