@@ -32,7 +32,6 @@ public class ZqiDao implements IZqiDao{
 	@Override
 	public void createTableBySQL(String sql) {
 		jdbcTemplate.execute(sql);
-		
 	}
 
 	@Override
@@ -79,6 +78,11 @@ public class ZqiDao implements IZqiDao{
 	public List findByFilter(BSPager bsPager, String tableName,List<PropertyFilter> filters) {
 		
 		return null;
+	}
+
+	@Override
+	public int[] bathUpdate(String[] sqls) {
+		return jdbcTemplate.batchUpdate(sqls);
 	}
 	
 	

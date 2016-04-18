@@ -173,15 +173,49 @@ $(function() {
             ]
         }
     }); */
- 
+	jQuery("#searchGpHq").click(function(){
+		var gpCode = jQuery("#searchGpHqTxt").val();
+		var filterStr = "1==1 ";
+		filterStr += " and code='" +gpCode+"'";
+		hq_gridtable.func("Filter", filterStr);
+		
+	});
+	
+	jQuery("#hqRk").click(function(){
+		$.ajax({
+			url: '${ctx}/hq/hqRk',
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data);
+			}
+		});
+		
+	});
 });
 
 </script>
 </head>
 <body>
+	<div class="row">
+         <div class="col-lg-6">
+            <div class="input-group">
+               <span class="input-group-btn">
+                  <button class="btn btn-default" type="button" id="searchGpHq">
+                     Go!
+                  </button>
+               </span>
+               <input type="text" class="form-control" id="searchGpHqTxt">
+            </div><!-- /input-group -->
+         </div>
+    </div>
 	<div class="btn-toolbar" role="toolbar" style="margin:2px">
-	  <div class="btn-group">
-	  <button type="button" class="btn btn-default">入库</button>
+	  <div class="btn-group" style="margin-left:0px">
+	  <button type="button" class="btn btn-primary" id="hqRk">入库</button>
 	  <button type="button" class="btn btn-default">按钮 2</button>
 	  <button type="button" class="btn btn-default">按钮 3</button>
 	 </div>
