@@ -1,6 +1,6 @@
-var supcanGridMap = new Map();
+var supcanGridMap = {};
 function OnReady( id ){
-	var supcanGrid = supcanGridMap.get(id);
+	var supcanGrid = supcanGridMap[id];
 	if(supcanGrid){
 		var main = supcanGrid.main;
 		if(main){
@@ -25,7 +25,7 @@ function OnReady( id ){
 	}
 }
 function OnEvent( id, Event, p1, p2, p3, p4){
-	var supcanGrid = supcanGridMap.get(id);
+	var supcanGrid = supcanGridMap[id];
 	if(supcanGrid){
 		var eventMap = supcanGrid.event;
 		if(eventMap){

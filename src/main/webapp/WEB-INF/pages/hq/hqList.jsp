@@ -91,8 +91,38 @@ var hqGridDefine = {
 			}
 		}
 	};
-supcanGridMap.put("hq_gridtable",hqDefine);
+supcanGridMap["hq_gridtable"] = hqGridDefine;
 $(function() {
+	var colModelDatas = [
+{name:'code',index:'code',align:'center',text : '代码',width:80,isHide:false,editable:false,dataType:'string'},
+{name:'name',index:'name',align:'center',text : '名称',width:80,isHide:false,editable:false,dataType:'string'},
+{name:'increasePercent',index:'increasePercent',align:'right',text : '涨幅',width:80,isHide:false,editable:false,dataType:'double',displayMask:'textColor=if(data>0, red, if(data=0,black,green))'},
+{name:'close',index:'close',align:'right',text : '现价',width:80,isHide:false,editable:false,dataType:'double'},
+{name:'high',index:'high',align:'right',text : '最高价',width:80,isHide:false,editable:false,dataType:'double'},
+{name:'low',index:'low',width:'80px',align:'right',text : '最低价',isHide:false,editable:false,dataType:'double'},
+{name:'volume',index:'volume',align:'right',text : '成交量',width:80,isHide:false,editable:false,dataType:'double'},
+{name:'turnover',index:'turnover',width:'80px',align:'right',text : '成交额',isHide:false,editable:false,dataType:'double'}
+		];  
+	var hqGrid = jQuery.extend(true, {}, supCanTreeListGrid);
+	hqGrid.Cols = colModelDatas;
+	hqGridDefine.main.Build = JSON.stringify(hqGrid);
+	
+	jQuery.ajax({
+		url: "${ctx}/hq/findHQGridList",
+		//data: {curPeriod:curPeriod,curIssueNumber:curIssueNumber,gzTypeId:gzTypeId,curPeriodStatus:curPeriodStatus,lastPeriod:lastPeriod},
+		type: 'post',
+		dataType: 'json',
+		async:true,
+		error: function(data){
+		},
+		success: function(data){
+			var page_data = data.page_data;
+			var hqGridData = {};
+			hqGridData.Record = page_data;
+			hqGridDefine.main.Load = JSON.stringify(hqGridData);
+			insertTreeListToDiv("hq_gridtable_div","hq_gridtable","","100%");
+		}
+	});
     /* $("#demo_grid1").bs_grid({
  
         ajaxFetchDataURL: "${ctx}/hq/findHQGridList",
@@ -149,7 +179,24 @@ $(function() {
 </script>
 </head>
 <body>
-	
+	<div class="btn-toolbar" role="toolbar" style="margin:2px">
+	  <div class="btn-group">
+	  <button type="button" class="btn btn-default">入库</button>
+	  <button type="button" class="btn btn-default">按钮 2</button>
+	  <button type="button" class="btn btn-default">按钮 3</button>
+	 </div>
+	  <div class="btn-group">
+	  <button type="button" class="btn btn-default">按钮 4</button>
+	  <button type="button" class="btn btn-default">按钮 5</button>
+	  <button type="button" class="btn btn-default">按钮 6</button>
+	  </div>
+	  <div class="btn-group">
+	  <button type="button" class="btn btn-default">按钮 7</button>
+	  <button type="button" class="btn btn-default">按钮 8</button>
+	  <button type="button" class="btn btn-default">按钮 9</button>
+	  </div>
+	</div>
 	<div id="demo_grid1"></div>
+	<div id="hq_gridtable_div" style="height:98%"></div>
 </body>
 </html>

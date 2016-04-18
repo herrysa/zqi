@@ -310,11 +310,11 @@
 </div>
 
 
-<div id="mainContent">
+<div id="mainContent" style="padding:0px">
 	<!-- DIVs for the INNER LAYOUT -->
 
-	<div class="ui-layout-center">
-		<div id="mainContent_center" class="ui-layout-content">
+	<div class="ui-layout-center" style="height:100%">
+		<div id="mainContent_center" class="ui-layout-content" style="height:100%;padding:2px">
 		
 			
 		</div>
