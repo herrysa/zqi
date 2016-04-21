@@ -86,7 +86,7 @@
 		<artifactId>${jdbc.artifactId}</artifactId>
 		<version>${jdbc.version}</version>
 	</dependency>
-	<dependency>
+	<!-- <dependency>
 	<groupId>org.htmlparser</groupId>
 		<artifactId>htmlparser</artifactId>
 		<version>2.1</version>
@@ -95,11 +95,16 @@
 		<groupId>org.jsoup</groupId>
 		<artifactId>jsoup</artifactId>
 		<version>1.9.1</version>
-	</dependency>
+	</dependency> -->
 	<!-- <dependency>
 		<groupId>jdic</groupId>
 		<artifactId>jdic</artifactId>
 		<version>1.0</version>
+	</dependency> -->
+	<!-- <dependency>
+		<groupId>net.sourceforge.htmlunit</groupId>
+		<artifactId>htmlunit</artifactId>
+		<version>2.15</version>
 	</dependency> -->
 	<dependency>
 		<groupId>net.sf.json-lib</groupId>
