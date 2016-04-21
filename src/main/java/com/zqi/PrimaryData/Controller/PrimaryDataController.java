@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.zqi.PrimaryData.dao.IPrimaryDataDao;
+import com.zqi.unit.DBHelper;
 
 @Controller
 @RequestMapping("/primaryData")
@@ -100,132 +103,94 @@ public class PrimaryDataController{
 	}
 	
 	public static void main(String[] args) {
-		//while(true){
-            String result = "";
-            BufferedReader in = null;
-
-        try {
-            String url = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22bknode%22,%22gainianbankuai%22,%22%22,0]]&callback=FDC_DC.theTableData";
-            String urlNameString = url;
-            URL realUrl = new URL(urlNameString);
-            // 打开和URL之间的连接
-            URLConnection connection = realUrl.openConnection();
-            // 设置通用的请求属性
-            connection.setRequestProperty("accept", "*/*");
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("user-agent",
-                    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
-            // 建立实际的连接
-            connection.connect();
-            // 获取所有响应头字段
-            /*Map<String, List<String>> map = connection.getHeaderFields();
-            // 遍历所有的响应头字段
-            for (String key : map.keySet()) {
-                System.out.println(key + "--->" + map.get(key));
-            }*/
-            // 定义 BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream(),"GBK"));
-            String line;
-            while ((line = in.readLine()) != null) {
-                result += line;
-            }
-        } catch (Exception e) {
-            System.out.println("发送GET请求出现异常！" + e);
-            e.printStackTrace();
-        }
-        // 使用finally块来关闭输入流
-        finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
-        result = result.substring(result.indexOf("theTableData")+13, result.length()-1);
-        JSONArray c = JSONArray.fromObject(result);
-        JSONObject cc = (JSONObject) c.get(0);
-        JSONArray ccc = (JSONArray) cc.get("items");
-        Iterator<JSONArray> cIt = ccc.iterator();
-        while (cIt.hasNext()) {
-        	JSONArray ct = cIt.next();
-        	Iterator<JSONArray> ccIt = ct.iterator();
-        	int i=1;
-        	while (ccIt.hasNext()) {
-        		Object oo = ccIt.next();
-        		if(i==2){
-        			System.out.println("----------------"+oo.toString());
-        			String result2 = "";
-                    BufferedReader in2 = null;
-
-                try {
-                    String url = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22bkshy_node%22,%22"+oo.toString()+"%22,%22%22,0,1,40]]&callback=FDC_DC.theTableData";
-                    String urlNameString = url;
-                    URL realUrl = new URL(urlNameString);
-                    // 打开和URL之间的连接
-                    URLConnection connection = realUrl.openConnection();
-                    // 设置通用的请求属性
-                    connection.setRequestProperty("accept", "*/*");
-                    connection.setRequestProperty("connection", "Keep-Alive");
-                    connection.setRequestProperty("user-agent",
-                            "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
-                    // 建立实际的连接
-                    connection.connect();
-                    // 获取所有响应头字段
-                    /*Map<String, List<String>> map = connection.getHeaderFields();
-                    // 遍历所有的响应头字段
-                    for (String key : map.keySet()) {
-                        System.out.println(key + "--->" + map.get(key));
-                    }*/
-                    // 定义 BufferedReader输入流来读取URL的响应
-                    in2 = new BufferedReader(new InputStreamReader(
-                            connection.getInputStream(),"GBK"));
-                    String line;
-                    while ((line = in2.readLine()) != null) {
-                        result2 += line;
-                    }
-                } catch (Exception e) {
-                    System.out.println("发送GET请求出现异常！" + e);
-                    e.printStackTrace();
-                }
-                // 使用finally块来关闭输入流
-                finally {
-                    try {
-                        if (in2 != null) {
-                            in2.close();
-                        }
-                    } catch (Exception e2) {
-                        e2.printStackTrace();
-                    }
-                }
-                result2 = result2.substring(result2.indexOf("theTableData")+13, result2.length()-1);
-                JSONArray c2 = JSONArray.fromObject(result2);
-                JSONObject cc2 = (JSONObject) c2.get(0);
-                JSONArray ccc2 = (JSONArray) cc2.get("items");
-                Iterator<JSONArray> cIt2 = ccc2.iterator();
-                while (cIt2.hasNext()) {
-                	JSONArray ct2 = cIt2.next();
-                	Iterator<JSONArray> ccIt2 = ct2.iterator();
-                	int i2=1;
-                	while (ccIt2.hasNext()) {
-                		Object oo2 = ccIt2.next();
-                		if(i2==3){
-                			System.out.println(oo2.toString());
-                		}
-                		i2++;
-                	}
-                }
-                //System.out.println(result2);
-        		}
-        		//System.out.println(oo.toString());
-        		i++;
+		
+		String[] gnbkKey = {"name","code","number","count","volume","amount","trade","changeprice","changepercent","symbol","sname","strade","schangeprice","schangepercent"};
+		String url = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22bknode%22,%22gainianbankuai%22,%22%22,0]]&callback=FDC_DC.theTableData";
+		List<Map<String, String>>  gnbkDataList = getHttpUrlMap(gnbkKey,url);
+		DBHelper dicDb = new DBHelper();
+		List<String> updateSqlList = new ArrayList<String>();
+		for(Map<String, String> gnbkData :gnbkDataList){
+			String code = gnbkData.get("code");
+			String bkName = gnbkData.get("name");
+			String[] gnbkgpKey = {"symbol","code","name","trade","pricechange","changepercent","buy","sell","settlement","open","high","low","volume","amount","ticktime","per","per_d","nta","pb","mktcap","nmc","turnoverratio","favor","guba"};
+			String gnbkgpUrl = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22bkshy_node%22,%22"+code+"%22,%22%22,0,1,40]]&callback=FDC_DC.theTableData";
+			List<Map<String, String>>  gnbkgpDataList = getHttpUrlMap(gnbkgpKey,gnbkgpUrl);
+			for(Map<String, String> gnbkgpData : gnbkgpDataList){
+				String symbol = gnbkgpData.get("symbol");
+				//String name = gnbkgpData.get("name");
+				String updateGnbkSql = "update d_gpdic set b_gn='"+bkName+"' where code='"+symbol.toUpperCase()+"'";
+				updateSqlList.add(updateGnbkSql);
+				dicDb.addBatchSql(updateGnbkSql);
 			}
 		}
-        //System.out.println(result);
-        //String[] rsArr = result.split("=")[1].split(",");
-        //}
+		try {
+			dicDb.st.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	private static List<Map<String,String>> getHttpUrlMap(String[] keys,String url){
+		List<Map<String,String>> dataList = new ArrayList<Map<String,String>>();
+		String result = "";
+		BufferedReader in = null;
+		try {
+			String urlNameString = url;
+			URL realUrl = new URL(urlNameString);
+			// 打开和URL之间的连接
+			URLConnection connection = realUrl.openConnection();
+			// 设置通用的请求属性
+			connection.setRequestProperty("accept", "*/*");
+			connection.setRequestProperty("connection", "Keep-Alive");
+			connection.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+			// 建立实际的连接
+			connection.connect();
+			// 获取所有响应头字段
+			/*Map<String, List<String>> map = connection.getHeaderFields();
+			// 遍历所有的响应头字段
+			for (String key : map.keySet()) {
+			System.out.println(key + "--->" + map.get(key));
+			}*/
+			// 定义 BufferedReader输入流来读取URL的响应
+			in = new BufferedReader(new InputStreamReader(
+			connection.getInputStream(),"GBK"));
+			String line;
+			while ((line = in.readLine()) != null) {
+				result += line;
+			}
+		} catch (Exception e) {
+			System.out.println("发送GET请求出现异常！" + e);
+			e.printStackTrace();
+		}
+		// 使用finally块来关闭输入流
+		finally {
+			try {
+			    if (in != null) {
+			        in.close();
+			    }
+			} catch (Exception e2) {
+			    e2.printStackTrace();
+			}
+		}
+		result = result.substring(result.indexOf("theTableData")+13, result.length()-1);
+		JSONArray rsArr = JSONArray.fromObject(result);
+		JSONObject rsObject = (JSONObject) rsArr.get(0);
+		JSONArray items = (JSONArray) rsObject.get("items");
+		Iterator<JSONArray> itemIt = items.iterator();
+		while (itemIt.hasNext()) {
+			JSONArray item = itemIt.next();
+			Iterator<JSONArray> propertyIt = item.iterator();
+			int i=0;
+			Map<String, String> data = new HashMap<String, String>();
+			while (propertyIt.hasNext()) {
+				Object property = propertyIt.next();
+				data.put(keys[i], property.toString());
+				i++;
+			}
+			dataList.add(data);
+		}
+			return dataList;
+	}
 }
