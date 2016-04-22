@@ -101,11 +101,11 @@
 		<artifactId>jdic</artifactId>
 		<version>1.0</version>
 	</dependency> -->
-	<!-- <dependency>
+	<dependency>
 		<groupId>net.sourceforge.htmlunit</groupId>
 		<artifactId>htmlunit</artifactId>
 		<version>2.15</version>
-	</dependency> -->
+	</dependency>
 	<dependency>
 		<groupId>net.sf.json-lib</groupId>
 		<artifactId>json-lib</artifactId>
