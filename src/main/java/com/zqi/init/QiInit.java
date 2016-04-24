@@ -53,7 +53,8 @@ public class QiInit {
 		int i=0,daytableIndex = 1;
 		for(int page=0;page<50;page++){
 			String hs_aKeyUrl = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22hq%22,%22hs_a%22,%22%22,0,"+page+",60]]&callback=FDC_DC.theTableData";
-			List<Map<String, String>>  hs_aDataList = getHttpUrlMap(hs_aKey,hs_aKeyUrl,null);
+			Map<String, String> titleMap = new HashMap<String, String>();
+			List<Map<String, String>>  hs_aDataList = getHttpUrlMap(hs_aKey,hs_aKeyUrl,titleMap);
 			try {
 				DBHelper dicDb = new DBHelper();
 				String dicSql= "select count(*) from information_schema.TABLES where table_name = 'd_gpdic' and TABLE_SCHEMA = 'zqi'";
@@ -70,11 +71,19 @@ public class QiInit {
 				}
 				
 				DBHelper dayTableDb = new DBHelper();
+				String period = titleMap.get("day");
+				//String total = titleMap.get("count");
 				for(Map<String, String> gpData : hs_aDataList){
 					daytableIndex = i/50+1;
 					String symbol = gpData.get("symbol");
 					String code = gpData.get("code");
 					String name = gpData.get("name");
+					String open = gpData.get("open");
+                    String high = gpData.get("high");
+                    String low = gpData.get("low");
+                    String close = gpData.get("trade");
+                    String volume = gpData.get("volume");
+                    String amount = gpData.get("amount");
 					dicSql= "select * from d_gpDic where symbol='"+symbol+"'";
 					dicDb.prepareStatementSql(dicSql);
 					rs = dicDb.pst.executeQuery();
@@ -97,15 +106,18 @@ public class QiInit {
 					while(rs.next()){
 						count = rs.getInt(1);
 						if(count==0){
-							dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),name varchar(20),open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),turnover decimal(20,2));";
+							dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),name varchar(20),open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),amount decimal(20,2));";
 							dicDb.prepareStatementSql(dicSql);
 							dicDb.pst.execute();
 							//dayTableDb.addBatchSql(dicSql);
 						}
+                        //System.out.println(period+":"+price.length);
+                        dicSql= "insert into daytable"+daytableIndex+"(period,code,name,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
+                        dayTableDb.addBatchSql(dicSql);
 					}
 					i++;
 				}
-				//dayTableDb.st.executeBatch();
+				dayTableDb.st.executeBatch();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -578,6 +590,10 @@ public class QiInit {
 		JSONArray rsArr = JSONArray.fromObject(result);
 		JSONObject rsObject = (JSONObject) rsArr.get(0);
 		if(titleMap!=null){
+			Object dayObject = rsObject.get("day");
+			if(dayObject!=null){
+				titleMap.put("day", dayObject.toString());
+			}
 			//titleMap.put("day", rsObject.getString("day"));
 			titleMap.put("count", rsObject.getString("count"));
 		}

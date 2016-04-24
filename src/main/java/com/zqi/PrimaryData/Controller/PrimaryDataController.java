@@ -1,11 +1,15 @@
 package com.zqi.PrimaryData.Controller;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,8 +28,14 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.zqi.PrimaryData.dao.IPrimaryDataDao;
 import com.zqi.unit.DBHelper;
+import com.zqi.unit.DateConverter;
 
 @Controller
 @RequestMapping("/primaryData")
@@ -64,7 +74,7 @@ public class PrimaryDataController{
 		}
 		Map<String, Object> r = new HashMap<String, Object>();
 		if(code!=null&&!"".equals(code)){
-			String findDayTableSql = "select daytable from d_gpDic where code='"+code+"'";
+			String findDayTableSql = "select daytable from d_gpDic where symbol='"+code+"'";
 			String tableName = "";
 			Map<String, Object> rs0 = iPrimaryDataDao.findFirst(findDayTableSql);
 			if(!rs0.isEmpty()){
@@ -82,8 +92,9 @@ public class PrimaryDataController{
 			row.put("firstname", "1");
 			row.put("email", "1");
 			result.add(row);*/
-			r.put("page_data", dayData);
-			r.put("total_rows", dayData.size());
+			r.put("page", "1");
+			r.put("rows", dayData);
+			r.put("total", dayData.size());
 		}
 		return r;
 	}
@@ -100,6 +111,128 @@ public class PrimaryDataController{
 	public String findBlockInfo(){
 		
 		return "";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/fillPrimaryData")
+	public String findHisDayData(String fillDate,String fillType){
+		DateConverter dateConverter = new DateConverter();
+		Date dateObj = (Date)dateConverter.convert(Date.class, fillDate);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(dateObj);
+		int year = calendar.get(Calendar.YEAR);
+		int season = 1;
+		int month = calendar.get(Calendar.MONTH);  
+        switch (month) {  
+        case Calendar.JANUARY:  
+        case Calendar.FEBRUARY:  
+        case Calendar.MARCH:  
+            season = 1;  
+            break;  
+        case Calendar.APRIL:  
+        case Calendar.MAY:  
+        case Calendar.JUNE:  
+            season = 2;  
+            break;  
+        case Calendar.JULY:  
+        case Calendar.AUGUST:  
+        case Calendar.SEPTEMBER:  
+            season = 3;  
+            break;  
+        case Calendar.OCTOBER:  
+        case Calendar.NOVEMBER:  
+        case Calendar.DECEMBER:  
+            season = 4;  
+            break;  
+        default:  
+            break;  
+        }  
+        String dicSql= "select * from d_gpDic order by symbol";
+        List<Map<String, Object>> dicList = iPrimaryDataDao.findAll(dicSql);
+        for(Map<String, Object> dicMap : dicList){
+        	String symbol = dicMap.get("symbol").toString();
+        	String name = dicMap.get("name").toString();
+        	String code = dicMap.get("code").toString();
+        	String daytable = dicMap.get("daytable").toString();
+        	List<String[]> dataList = findDayData(code,""+year,""+season);
+        	if(dataList==null||dataList.size()==0){
+        		continue;
+        	}
+        	List<String> dataSqlList = new ArrayList<String>();
+        	List<String> delDataSqlList = new ArrayList<String>();
+        	for(int row=2;row<dataList.size();row++){
+        		String[] rowData = dataList.get(row);
+        		String period = rowData[0];
+                String open = rowData[1];
+                String high = rowData[2];
+                String low = rowData[3];
+                String close = rowData[4];
+                String volume = rowData[5];
+                String amount = rowData[6];
+        		String dataSql= "insert into "+daytable+"(period,code,name,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
+        		String delDataSql = "delete from "+daytable+" where period='"+period+"' and code='"+symbol+"'";
+        		dataSqlList.add(dataSql);
+        		delDataSqlList.add(delDataSql);
+        	}
+        	String[] sqls = dataSqlList.toArray(new String[dataSqlList.size()]);
+        	String[] delSqls = delDataSqlList.toArray(new String[delDataSqlList.size()]);
+        	iPrimaryDataDao.bathUpdate(delSqls);
+        	iPrimaryDataDao.bathUpdate(sqls);
+        }
+		return "导入成功！";
+	}
+	
+	public List<String[]> findDayData(String code,String year,String jidu){
+		String str = "";
+		List<String[]> dayList = new ArrayList<String[]>();
+        //创建一个webclient
+        try {
+        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+
+        java.util.logging.Logger.getLogger("net.sourceforge.htmlunit").setLevel(java.util.logging.Level.OFF); 
+        //htmlunit 对css和javascript的支持不好，所以请关闭之
+        webClient.getOptions().setJavaScriptEnabled(false);
+        webClient.getOptions().setCssEnabled(false);
+        //webClient.waitForBackgroundJavaScript(600*1000);  
+        //webClient.setAjaxController(new NicelyResynchronizingAjaxController()); 
+        //获取页面
+        HtmlPage page;
+            page = webClient.getPage("http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/"+code+".phtml?year="+year+"&jidu="+jidu);
+        //webClient.waitForBackgroundJavaScript(1000*5); 
+        //webClient.setJavaScriptTimeout(5000);  
+//        //获取页面的TITLE
+//        str = page.getTitleText();
+//        System.out.println(str);
+//        //获取页面的XML代码
+//        str = page.asXml();
+//        System.out.println(str);
+//        //获取页面的文本
+//        str = page.asText();
+//        System.out.println(str);
+//        str = page.asXml();
+//        System.out.println(str);
+        DomElement domElement = page.getElementById("FundHoldSharesTable");
+        if(domElement!=null){
+        	str = domElement.asText();
+        	str = str.replaceAll("\r\n\t\r\n", " ").replaceAll("\r\n", "\t");
+        	String[] rowArr = str.split("\t");
+        	for(String row : rowArr){
+        		String[] colArr = row.split(" ");
+        		dayList.add(colArr);
+        	}
+        }
+        //System.out.println(domElement.asText());
+
+        //关闭webclient
+        webClient.closeAllWindows();
+        } catch (FailingHttpStatusCodeException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return dayList;
 	}
 	
 	public static void main(String[] args) {

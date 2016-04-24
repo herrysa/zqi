@@ -11,7 +11,7 @@ public class BaseController {
 
 	protected Map<String, Object> resultMap = new HashMap<String, Object>();
 	
-	private ZqiDao zqiDao; 
+	protected ZqiDao zqiDao; 
 	public ZqiDao getZqiDao() {
 		return zqiDao;
 	}

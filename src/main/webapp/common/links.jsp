@@ -15,3 +15,5 @@
 <script type="text/javascript" src="${ctx}/supcan/binary/dynaload.js"></script>
 <script type="text/javascript" src="${ctx}/scripts/supcan.js"></script>
 
+<script src="${ctx}/scripts/My97DatePicker/WdatePicker.js" type="text/javascript"></script>
+

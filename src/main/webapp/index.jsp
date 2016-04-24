@@ -4,6 +4,8 @@
 <%@ include file="/common/links.jsp"%>
 <%@ include file="/common/bootStrapLinks.jsp"%>
 <%@ include file="/common/bsgridLinks.jsp"%>
+<%@ include file="/common/bootstrap-tableLinks.jsp"%>
+<%@ include file="/common/GuriddoLinks.jsp"%>
 <%@ include file="/common/zqiLinks.jsp"%>
 <html>
 <head>
@@ -194,7 +196,7 @@
                             物料管理        
                         </a>
                         <ul id="primaryData" class="nav nav-list collapse secondmenu" style="height: 0px;">
-                        	<li><a href="javaScript:menuClick('primaryData/primaryDataList?gpCode=SH600000')"><i class="glyphicon glyphicon-user"></i>原始数据</a></li>
+                        	<li><a href="javaScript:menuClick('primaryData/primaryDataList?gpCode=sh600000')"><i class="glyphicon glyphicon-user"></i>原始数据</a></li>
                             <li><a href="javaScript:menuClick('hq/findHQ')"><i class="glyphicon glyphicon-th-list"></i>行情</a></li>
                         </ul>
                     </li>
@@ -206,7 +208,7 @@
                             <!-- <span class="label label-warning pull-right">5</span> -->
                         </a>
                         <ul id="dataAnalysis" class="nav nav-list collapse secondmenu" style="height: 0px;">
-                        	<li><a href="javaScript:menuClick('primaryData/primaryDataList?gpCode=SH600000')"><i class="glyphicon glyphicon-user"></i>赚钱效应</a></li>
+                        	<li><a href="javaScript:menuClick('marketTemper/main')"><i class="glyphicon glyphicon-user"></i>市场温度</a></li>
                         </ul>
                     </li>
  
