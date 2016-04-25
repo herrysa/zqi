@@ -151,6 +151,7 @@ public class PrimaryDataController{
         List<Map<String, Object>> dicList = iPrimaryDataDao.findAll(dicSql);
         for(Map<String, Object> dicMap : dicList){
         	String symbol = dicMap.get("symbol").toString();
+        	System.out.println("----------------"+symbol+"-----------------");
         	String name = dicMap.get("name").toString();
         	String code = dicMap.get("code").toString();
         	String daytable = dicMap.get("daytable").toString();
@@ -162,14 +163,20 @@ public class PrimaryDataController{
         	List<String> delDataSqlList = new ArrayList<String>();
         	for(int row=2;row<dataList.size();row++){
         		String[] rowData = dataList.get(row);
+        		String[] rowData2 = null;
+        		String settlement = "-1";
+        		if(row<dataList.size()-1){
+        			rowData2 = dataList.get(row+1);
+        			settlement = rowData2[3];
+        		}
         		String period = rowData[0];
                 String open = rowData[1];
                 String high = rowData[2];
-                String low = rowData[3];
-                String close = rowData[4];
+                String low = rowData[4];
+                String close = rowData[3];
                 String volume = rowData[5];
                 String amount = rowData[6];
-        		String dataSql= "insert into "+daytable+"(period,code,name,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
+        		String dataSql= "insert into "+daytable+"(period,code,name,settlement,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+settlement+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
         		String delDataSql = "delete from "+daytable+" where period='"+period+"' and code='"+symbol+"'";
         		dataSqlList.add(dataSql);
         		delDataSqlList.add(delDataSql);

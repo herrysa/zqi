@@ -106,18 +106,18 @@ public class QiInit {
 					while(rs.next()){
 						count = rs.getInt(1);
 						if(count==0){
-							dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),name varchar(20),open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),amount decimal(20,2));";
+							dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,2),open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),amount decimal(20,2));";
 							dicDb.prepareStatementSql(dicSql);
 							dicDb.pst.execute();
 							//dayTableDb.addBatchSql(dicSql);
 						}
                         //System.out.println(period+":"+price.length);
-                        dicSql= "insert into daytable"+daytableIndex+"(period,code,name,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
-                        dayTableDb.addBatchSql(dicSql);
+                        //dicSql= "insert into daytable"+daytableIndex+"(period,code,name,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
+                        //dayTableDb.addBatchSql(dicSql);
 					}
 					i++;
 				}
-				dayTableDb.st.executeBatch();
+				//dayTableDb.st.executeBatch();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
