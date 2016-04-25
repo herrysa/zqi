@@ -39,6 +39,7 @@ public class QiInit {
 		creatZqiTable();
 		creatGpInfo();
 		createGpCwInfo();
+		creatLogTable();
 		//insertDayData();
 		//findBkInfo();
 		//Calendar calendar = Calendar.getInstance();
@@ -180,6 +181,26 @@ public class QiInit {
 	    		dbHelper.prepareStatementSql(createql);
 	    		dbHelper.pst.execute();
 	    	}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void creatLogTable(){
+		try {
+			DBHelper dbHelper = new DBHelper();
+			String createql= "select count(*) from information_schema.TABLES where table_name = '_log' and TABLE_SCHEMA = 'zqi'";
+			dbHelper.prepareStatementSql(createql);
+			ResultSet rs;
+			rs = dbHelper.pst.executeQuery();
+			while(rs.next()){
+		    	int count = rs.getInt(1);
+		    	if(count==0){
+		    		createql= "create table _log(id varchar(32),type varchar(5),mainId varchar(50),assistId varchar(50),info varchar(100));";
+		    		dbHelper.prepareStatementSql(createql);
+		    		dbHelper.pst.execute();
+		    	}
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -586,31 +607,35 @@ public class QiInit {
 			    e2.printStackTrace();
 			}
 		}
-		result = result.substring(result.indexOf("theTableData")+13, result.length()-1);
-		JSONArray rsArr = JSONArray.fromObject(result);
-		JSONObject rsObject = (JSONObject) rsArr.get(0);
-		if(titleMap!=null){
-			Object dayObject = rsObject.get("day");
-			if(dayObject!=null){
-				titleMap.put("day", dayObject.toString());
+		if(result.contains("theTableData")){
+			result = result.substring(result.indexOf("theTableData")+13, result.length()-1);
+			JSONArray rsArr = JSONArray.fromObject(result);
+			JSONObject rsObject = (JSONObject) rsArr.get(0);
+			if(titleMap!=null){
+				Object dayObject = rsObject.get("day");
+				if(dayObject!=null){
+					titleMap.put("day", dayObject.toString());
+				}
+				//titleMap.put("day", rsObject.getString("day"));
+				titleMap.put("count", rsObject.getString("count"));
 			}
-			//titleMap.put("day", rsObject.getString("day"));
-			titleMap.put("count", rsObject.getString("count"));
-		}
-		JSONArray items = (JSONArray) rsObject.get("items");
-		Iterator<JSONArray> itemIt = items.iterator();
-		while (itemIt.hasNext()) {
-			JSONArray item = itemIt.next();
-			Iterator<JSONArray> propertyIt = item.iterator();
-			int i=0;
-			Map<String, String> data = new HashMap<String, String>();
-			while (propertyIt.hasNext()) {
-				Object property = propertyIt.next();
-				data.put(keys[i], property.toString());
-				i++;
+			JSONArray items = (JSONArray) rsObject.get("items");
+			Iterator<JSONArray> itemIt = items.iterator();
+			while (itemIt.hasNext()) {
+				JSONArray item = itemIt.next();
+				Iterator<JSONArray> propertyIt = item.iterator();
+				int i=0;
+				Map<String, String> data = new HashMap<String, String>();
+				while (propertyIt.hasNext()) {
+					Object property = propertyIt.next();
+					data.put(keys[i], property.toString());
+					i++;
+				}
+				dataList.add(data);
 			}
-			dataList.add(data);
+		}else{
+			System.out.println(url);
 		}
-			return dataList;
+		return dataList;
 	}
 }

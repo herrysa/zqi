@@ -34,8 +34,10 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.zqi.PrimaryData.dao.IPrimaryDataDao;
+import com.zqi.log.dao.ILogDao;
 import com.zqi.unit.DBHelper;
 import com.zqi.unit.DateConverter;
+import com.zqi.unit.UUIDGenerator;
 
 @Controller
 @RequestMapping("/primaryData")
@@ -43,6 +45,17 @@ public class PrimaryDataController{
 
 	private IPrimaryDataDao iPrimaryDataDao;
 	
+	private ILogDao iLogDao;
+	
+	public ILogDao getiLogDao() {
+		return iLogDao;
+	}
+
+	@Autowired
+	public void setiLogDao(ILogDao iLogDao) {
+		this.iLogDao = iLogDao;
+	}
+
 	public IPrimaryDataDao getiPrimaryDataDao() {
 		return iPrimaryDataDao;
 	}
@@ -192,21 +205,26 @@ public class PrimaryDataController{
 	public List<String[]> findDayData(String code,String year,String jidu){
 		String str = "";
 		List<String[]> dayList = new ArrayList<String[]>();
-        //创建一个webclient
-        try {
-        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
-
-        java.util.logging.Logger.getLogger("net.sourceforge.htmlunit").setLevel(java.util.logging.Level.OFF); 
-        //htmlunit 对css和javascript的支持不好，所以请关闭之
-        webClient.getOptions().setJavaScriptEnabled(false);
-        webClient.getOptions().setCssEnabled(false);
-        //webClient.waitForBackgroundJavaScript(600*1000);  
-        //webClient.setAjaxController(new NicelyResynchronizingAjaxController()); 
-        //获取页面
-        HtmlPage page;
-            page = webClient.getPage("http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/"+code+".phtml?year="+year+"&jidu="+jidu);
-        //webClient.waitForBackgroundJavaScript(1000*5); 
-        //webClient.setJavaScriptTimeout(5000);  
+		Map<String, Object> errorLog = new HashMap<String, Object>();
+    	errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
+    	errorLog.put("type", "findHisDayData");
+    	errorLog.put("mainId", year+jidu);
+    	errorLog.put("assistId", code);
+    	errorLog.put("info", "导入日数据错误！");
+		//创建一个webclient
+		try {
+			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+			java.util.logging.Logger.getLogger("net.sourceforge.htmlunit").setLevel(java.util.logging.Level.OFF); 
+			//htmlunit 对css和javascript的支持不好，所以请关闭之
+			webClient.getOptions().setJavaScriptEnabled(false);
+			webClient.getOptions().setCssEnabled(false);
+			//webClient.waitForBackgroundJavaScript(600*1000);  
+			//webClient.setAjaxController(new NicelyResynchronizingAjaxController()); 
+			//获取页面
+			HtmlPage page;
+			page = webClient.getPage("http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/"+code+".phtml?year="+year+"&jidu="+jidu);
+			//webClient.waitForBackgroundJavaScript(1000*5); 
+			//webClient.setJavaScriptTimeout(5000);  
 //        //获取页面的TITLE
 //        str = page.getTitleText();
 //        System.out.println(str);
@@ -218,25 +236,27 @@ public class PrimaryDataController{
 //        System.out.println(str);
 //        str = page.asXml();
 //        System.out.println(str);
-        DomElement domElement = page.getElementById("FundHoldSharesTable");
-        if(domElement!=null){
-        	str = domElement.asText();
-        	str = str.replaceAll("\r\n\t\r\n", " ").replaceAll("\r\n", "\t");
-        	String[] rowArr = str.split("\t");
-        	for(String row : rowArr){
-        		String[] colArr = row.split(" ");
-        		dayList.add(colArr);
-        	}
-        }
-        //System.out.println(domElement.asText());
-
-        //关闭webclient
-        webClient.closeAllWindows();
+			DomElement domElement = page.getElementById("FundHoldSharesTable");
+			if(domElement!=null){
+				str = domElement.asText();
+				str = str.replaceAll("\r\n\t\r\n", " ").replaceAll("\r\n", "\t");
+				String[] rowArr = str.split("\t");
+				for(String row : rowArr){
+				String[] colArr = row.split(" ");
+					dayList.add(colArr);
+				}
+			}
+			//System.out.println(domElement.asText());
+			//关闭webclient
+			webClient.closeAllWindows();
         } catch (FailingHttpStatusCodeException e) {
+        	iLogDao.addLog(errorLog);
             e.printStackTrace();
         } catch (MalformedURLException e) {
+        	iLogDao.addLog(errorLog);
             e.printStackTrace();
         } catch (IOException e) {
+        	iLogDao.addLog(errorLog);
             e.printStackTrace();
         }
         return dayList;

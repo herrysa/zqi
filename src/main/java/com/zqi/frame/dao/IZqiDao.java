@@ -54,4 +54,8 @@ public interface IZqiDao {
     public List findByFilter(BSPager bsPager,String tableName,List<PropertyFilter> filters);
     
     public int[] bathUpdate(String[] sqls);
+    
+    public int addList(List<Map<String, Object>> list);
+	
+	public int add(Map<String, Object> map);
 }

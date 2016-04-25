@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.KeyHolder;
 
 import com.zqi.frame.controller.filter.PropertyFilter;
@@ -16,6 +18,18 @@ import com.zqi.frame.dao.IZqiDao;
 public class ZqiDao implements IZqiDao{
 
 	JdbcTemplate jdbcTemplate;
+	DataSource dataSource;
+	
+	SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("EMPLOYEE");
+	
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+	@Autowired
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
 	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
 	}
@@ -83,6 +97,17 @@ public class ZqiDao implements IZqiDao{
 	@Override
 	public int[] bathUpdate(String[] sqls) {
 		return jdbcTemplate.batchUpdate(sqls);
+	}
+	@Override
+	public int addList(List<Map<String, Object>> list) {
+		for(Map<String, Object> log :list){
+			simpleJdbcInsert.execute(log);
+		}
+		return 0;
+	}
+	@Override
+	public int add(Map<String, Object> map) {
+		return simpleJdbcInsert.execute(map);
 	}
 	
 	
