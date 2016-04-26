@@ -64,6 +64,14 @@ $(function() {
             ]
         }
     });*/
+    $("#reloadDataGrid").click(function(){
+    	var gpCode = $("#gpName").val();
+    	var period = $("#fillDate").val();
+    	var url = "primaryData/primaryDataGridList?gpCode="+gpCode+"&period="+period;
+    	jQuery('#jqGrid').jqGrid('setGridParam', {
+			url : url
+		}).trigger("reloadGrid");
+    });
 	$("#importSeasonData").click(function(){
 		var fillDate = $("#fillDate").val();
 		$.ajax({
@@ -79,6 +87,25 @@ $(function() {
 			}
 		});
 	});
+    $("#hisDayDataBtn").show();
+	$("#hisCwDataBtn").hide();
+	$("#hisMxDataBtn").hide();
+    $("#showDataType").change(function(){
+    	var dataType = $(this).val();
+    	if(dataType=='day'){
+    		$("#hisDayDataBtn").show();
+    		$("#hisCwDataBtn").hide();
+    		$("#hisMxDataBtn").hide();
+    	}else if(dataType=='cw'){
+    		$("#hisDayDataBtn").hide();
+    		$("#hisCwDataBtn").show();
+    		$("#hisMxDataBtn").hide();
+    	}else if(dataType=='mx'){
+    		$("#hisDayDataBtn").hide();
+    		$("#hisCwDataBtn").hide();
+    		$("#hisMxDataBtn").show();
+    	}
+    });
 	
 }); 
 
@@ -89,23 +116,46 @@ $(function() {
 		<div class="pageContent">
 	<form:form id="searchForm" modelAttribute="article" action="primaryData/fillPrimaryData" method="post" class="breadcrumb form-search">
 		<div>
+			<label>数据类型：</label>
+			<select id="showDataType" style="width:100px">
+			<option value="day">日数据</option>
+			<option value="cw">财务数据</option>
+			<option value="mx">成交明细数据</option>
+			</select>
+			<label>股票：</label><input id="gpName" name="gpName" type="text"style="width:100px"/>
 			<label>日期：</label><input id="fillDate" name="fillDate" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
 				value="${paramMap.beginDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>
 			<%-- <label>结束日期：</label><input id="endDate" name="endDate" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
 				value="${paramMap.endDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>&nbsp;&nbsp; --%>
-			<input id="btnSubmit" class="btn btn-primary" type="submit" value="查询"/>
-			<div class="btn-group">
+			<button id="reloadDataGrid" type="button" class="btn btn-primary" >
+					查询
+			</button>
+			<div id="hisDayDataBtn" class="btn-group">
 				<button type="button" class="btn btn-primary dropdown-toggle" 
 					data-toggle="dropdown">
 					导入数据
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li><a href="#">导入当日数据</a></li>
-					<li><a href="#">导入日期10天前数据</a></li>
+					<li><a id="importTodayData">导入当日数据</a></li>
+					<li><a id="importTenDayData">导入日期10天前数据</a></li>
 					<li><a id="importSeasonData" href="javaScript:">导入日期季度数据</a></li>
 				</ul>
 			</div>
+			<div id="hisCwDataBtn" class="btn-group">
+				<button type="button" class="btn btn-primary dropdown-toggle" 
+					data-toggle="dropdown">
+					导入财务数据
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a id="importCwData" href="javaScript:">导入财务数据</a></li>
+					<li><a id="importHisFhData" href="javaScript:">导入历史分红数据</a></li>
+				</ul>
+			</div>
+			<button id="hisMxDataBtn" type="button" class="btn btn-primary" >
+					导入日期明细数据
+			</button>
 		</div>
 	</form:form>
 	<div style="margin-left:20px">
@@ -118,6 +168,7 @@ $(function() {
             $("#jqGrid").jqGrid({
                 url: 'primaryData/primaryDataGridList?gpCode=${gpCode}&period=${period}',
                 mtype: "GET",
+                styleUI : 'Bootstrap',
                 datatype: "json",
                 colModel: [
                     { label: 'period', name: 'period', key: true, width: 75 },
@@ -127,12 +178,6 @@ $(function() {
                 width: 780,
                 height: 250,
                 rowNum: 20,
-                regional : 'cn',
-				scrollPopUp:true,
-				scrollLeftOffset: "83%",
-				viewrecords: true,
-                scroll: 1, // set the scroll property to 1 to enable paging with scrollbar - virtual loading of records
-                emptyrecords: 'Scroll to bottom to retrieve new page', // the message will be displayed at the bottom 
                 pager: "#jqGridPager"
             });
         });

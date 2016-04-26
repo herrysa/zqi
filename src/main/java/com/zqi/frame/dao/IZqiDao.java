@@ -3,10 +3,9 @@ package com.zqi.frame.dao;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.jdbc.support.KeyHolder;
-
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.BSPager;
+import com.zqi.frame.controller.pagers.JQueryPager;
 
 public interface IZqiDao {
 
@@ -17,18 +16,13 @@ public interface IZqiDao {
     public void createTableBySQL(String sql);  
     
     /**  
-     * 插入记录并返回自动生成的主键Id  
-     * @param ps  
-     * @return  
-     */  
-    public KeyHolder insertActor(Map entity);  
-    
-    /**  
      * 插入/更新/删除数据  
      * @param sql 有参数语句  
      * @param obj 参数值数组  
      */  
-    public int operateActor(String sql,Object[] obj);   
+    public int update(String sql,Object[] obj);   
+    
+    public void excute(String sql);
     
     /**  
      * 根据SQL查询记录总数  
@@ -55,7 +49,9 @@ public interface IZqiDao {
     
     public int[] bathUpdate(String[] sqls);
     
-    public int addList(List<Map<String, Object>> list);
+    public int addList(List<Map<String, Object>> list,String table);
 	
-	public int add(Map<String, Object> map);
+	public int add(Map<String, Object> map,String table);
+	
+	public JQueryPager findWithFilter(JQueryPager paginatedList,String sql,List<PropertyFilter> filters);
 }

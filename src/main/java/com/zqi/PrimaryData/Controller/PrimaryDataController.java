@@ -1,9 +1,7 @@
 package com.zqi.PrimaryData.Controller;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
@@ -22,49 +20,26 @@ import javax.servlet.http.HttpServletRequest;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.zqi.PrimaryData.dao.IPrimaryDataDao;
-import com.zqi.log.dao.ILogDao;
+import com.zqi.frame.controller.BaseController;
+import com.zqi.frame.controller.filter.PropertyFilter;
+import com.zqi.frame.controller.pagers.JQueryPager;
+import com.zqi.frame.controller.pagers.PagerFactory;
 import com.zqi.unit.DBHelper;
 import com.zqi.unit.DateConverter;
 import com.zqi.unit.UUIDGenerator;
 
 @Controller
 @RequestMapping("/primaryData")
-public class PrimaryDataController{
-
-	private IPrimaryDataDao iPrimaryDataDao;
-	
-	private ILogDao iLogDao;
-	
-	public ILogDao getiLogDao() {
-		return iLogDao;
-	}
-
-	@Autowired
-	public void setiLogDao(ILogDao iLogDao) {
-		this.iLogDao = iLogDao;
-	}
-
-	public IPrimaryDataDao getiPrimaryDataDao() {
-		return iPrimaryDataDao;
-	}
-
-	@Autowired
-	public void setiPrimaryDataDao(IPrimaryDataDao iPrimaryDataDao) {
-		this.iPrimaryDataDao = iPrimaryDataDao;
-	}
-
+public class PrimaryDataController extends BaseController{
 
 	@ResponseBody
 	@RequestMapping("/primaryDataGridList")
@@ -89,7 +64,7 @@ public class PrimaryDataController{
 		if(code!=null&&!"".equals(code)){
 			String findDayTableSql = "select daytable from d_gpDic where symbol='"+code+"'";
 			String tableName = "";
-			Map<String, Object> rs0 = iPrimaryDataDao.findFirst(findDayTableSql);
+			Map<String, Object> rs0 = zqiDao.findFirst(findDayTableSql);
 			if(!rs0.isEmpty()){
 				tableName = rs0.get("daytable").toString();
 			}
@@ -97,7 +72,12 @@ public class PrimaryDataController{
 			if(period!=null&&!"".equals(period)){
 				dayDataSql += " and period='"+period+"'";
 			}
-			List<Map<String, Object>> dayData = iPrimaryDataDao.findAll(dayDataSql);
+			List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+			JQueryPager pagedRequests = null;
+			pagedRequests = (JQueryPager) pagerFactory.getPager(
+					PagerFactory.JQUERYTYPE, request);
+			pagedRequests = zqiDao.findWithFilter(pagedRequests, dayDataSql, filters);
+			List<Map<String, Object>> dayData = pagedRequests.getList();
 			/*List<Map<String, String>> result = new ArrayList<Map<String,String>>();
 			Map<String, String> row = new HashMap<String, String>();
 			row.put("customer_id", "1");
@@ -105,9 +85,10 @@ public class PrimaryDataController{
 			row.put("firstname", "1");
 			row.put("email", "1");
 			result.add(row);*/
-			r.put("page", "1");
-			r.put("rows", dayData);
-			r.put("total", dayData.size());
+			r.put("page", pagedRequests.getPageNumber());
+			r.put("records", pagedRequests.getTotalNumberOfRows());
+			r.put("rows", pagedRequests.getList());
+			r.put("total", pagedRequests.getTotalNumberOfPages());
 		}
 		return r;
 	}
@@ -160,57 +141,85 @@ public class PrimaryDataController{
         default:  
             break;  
         }  
+        String lastFillSql = "select assistId from _log where mainId='findJiduDataSuccess'";
+        Map<String, Object> lastFill = zqiDao.findFirst(lastFillSql);
+        String lastSymbol = "";
         String dicSql= "select * from d_gpDic order by symbol";
-        List<Map<String, Object>> dicList = iPrimaryDataDao.findAll(dicSql);
+        if(lastFill!=null&&!lastFill.isEmpty()){
+        	lastSymbol = lastFill.get("assistId").toString();
+        	dicSql= "select * from d_gpDic where symbol>'"+lastSymbol+"' order by symbol";
+        }
+        List<Map<String, Object>> dicList = zqiDao.findAll(dicSql);
         for(Map<String, Object> dicMap : dicList){
         	String symbol = dicMap.get("symbol").toString();
         	System.out.println("----------------"+symbol+"-----------------");
-        	String name = dicMap.get("name").toString();
-        	String code = dicMap.get("code").toString();
-        	String daytable = dicMap.get("daytable").toString();
-        	List<String[]> dataList = findDayData(code,""+year,""+season);
-        	if(dataList==null||dataList.size()==0){
-        		continue;
-        	}
-        	List<String> dataSqlList = new ArrayList<String>();
-        	List<String> delDataSqlList = new ArrayList<String>();
-        	for(int row=2;row<dataList.size();row++){
-        		String[] rowData = dataList.get(row);
-        		String[] rowData2 = null;
-        		String settlement = "-1";
-        		if(row<dataList.size()-1){
-        			rowData2 = dataList.get(row+1);
-        			settlement = rowData2[3];
-        		}
-        		String period = rowData[0];
-                String open = rowData[1];
-                String high = rowData[2];
-                String low = rowData[4];
-                String close = rowData[3];
-                String volume = rowData[5];
-                String amount = rowData[6];
-        		String dataSql= "insert into "+daytable+"(period,code,name,settlement,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+settlement+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
-        		String delDataSql = "delete from "+daytable+" where period='"+period+"' and code='"+symbol+"'";
-        		dataSqlList.add(dataSql);
-        		delDataSqlList.add(delDataSql);
-        	}
-        	String[] sqls = dataSqlList.toArray(new String[dataSqlList.size()]);
-        	String[] delSqls = delDataSqlList.toArray(new String[delDataSqlList.size()]);
-        	iPrimaryDataDao.bathUpdate(delSqls);
-        	iPrimaryDataDao.bathUpdate(sqls);
+        	try {
+            	String name = dicMap.get("name").toString();
+            	String code = dicMap.get("code").toString();
+            	String daytable = dicMap.get("daytable").toString();
+            	List<String[]> dataList = findDayData(symbol,code,""+year,""+season);
+            	if(dataList==null||dataList.size()==0){
+            		continue;
+            	}
+            	List<String> dataSqlList = new ArrayList<String>();
+            	List<String> delDataSqlList = new ArrayList<String>();
+            	for(int row=2;row<dataList.size();row++){
+            		String[] rowData = dataList.get(row);
+            		String[] rowData2 = null;
+            		String settlement = "-1";
+            		if(row<dataList.size()-1){
+            			rowData2 = dataList.get(row+1);
+            			settlement = rowData2[3];
+            		}
+            		String period = rowData[0];
+                    String open = rowData[1];
+                    String high = rowData[2];
+                    String low = rowData[4];
+                    String close = rowData[3];
+                    String volume = rowData[5];
+                    String amount = rowData[6];
+            		String dataSql= "insert into "+daytable+"(period,code,name,settlement,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+settlement+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
+            		String delDataSql = "delete from "+daytable+" where period='"+period+"' and code='"+symbol+"'";
+            		dataSqlList.add(dataSql);
+            		delDataSqlList.add(delDataSql);
+            	}
+            	String[] sqls = dataSqlList.toArray(new String[dataSqlList.size()]);
+            	String[] delSqls = delDataSqlList.toArray(new String[delDataSqlList.size()]);
+            	zqiDao.bathUpdate(delSqls);
+            	zqiDao.bathUpdate(sqls);
+            	zqiDao.excute("delete from _log where mainId='findJiduDataSuccess'");
+            	Map<String, Object> successLog = new HashMap<String, Object>();
+            	successLog.put("id", UUIDGenerator.getInstance().getNextValue());
+            	successLog.put("type", "findHisDayData");
+            	successLog.put("mainId", "findJiduDataSuccess");
+            	successLog.put("assistId", symbol);
+		    	successLog.put("info", "导入成功！");
+		    	zqiDao.add(successLog,"_log");
+			} catch (Exception e) {
+				Map<String, Object> errorLog = new HashMap<String, Object>();
+		    	errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
+		    	errorLog.put("type", "findHisDayData");
+		    	errorLog.put("mainId", "findJiduDataError");
+		    	errorLog.put("assistId", symbol);
+		    	errorLog.put("info", year+season+"导入日数据错误！");
+		    	zqiDao.add(errorLog,"_log");
+				e.printStackTrace();
+			}
+        	
+        	
         }
 		return "导入成功！";
 	}
 	
-	public List<String[]> findDayData(String code,String year,String jidu){
+	public List<String[]> findDayData(String symbol,String code,String year,String jidu){
 		String str = "";
 		List<String[]> dayList = new ArrayList<String[]>();
 		Map<String, Object> errorLog = new HashMap<String, Object>();
     	errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
     	errorLog.put("type", "findHisDayData");
-    	errorLog.put("mainId", year+jidu);
-    	errorLog.put("assistId", code);
-    	errorLog.put("info", "导入日数据错误！");
+    	errorLog.put("mainId", "findJiduDataError");
+    	errorLog.put("assistId", symbol);
+    	errorLog.put("info", year+jidu+"导入日数据错误！");
 		//创建一个webclient
 		try {
 			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
@@ -249,16 +258,16 @@ public class PrimaryDataController{
 			//System.out.println(domElement.asText());
 			//关闭webclient
 			webClient.closeAllWindows();
-        } catch (FailingHttpStatusCodeException e) {
-        	iLogDao.addLog(errorLog);
+		} catch (Exception e) {
+        	zqiDao.add(errorLog,"_log");
+        	try {
+				wait(1000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
             e.printStackTrace();
-        } catch (MalformedURLException e) {
-        	iLogDao.addLog(errorLog);
-            e.printStackTrace();
-        } catch (IOException e) {
-        	iLogDao.addLog(errorLog);
-            e.printStackTrace();
-        }
+		}
         return dayList;
 	}
 	

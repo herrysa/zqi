@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.zqi.frame.controller.pagers.PagerFactory;
 import com.zqi.frame.dao.impl.ZqiDao;
 
 public class BaseController {
@@ -12,6 +13,16 @@ public class BaseController {
 	protected Map<String, Object> resultMap = new HashMap<String, Object>();
 	
 	protected ZqiDao zqiDao; 
+	protected PagerFactory pagerFactory;
+	public PagerFactory getPagerFactory() {
+		return pagerFactory;
+	}
+
+	@Autowired
+	public void setPagerFactory(PagerFactory pagerFactory) {
+		this.pagerFactory = pagerFactory;
+	}
+
 	public ZqiDao getZqiDao() {
 		return zqiDao;
 	}

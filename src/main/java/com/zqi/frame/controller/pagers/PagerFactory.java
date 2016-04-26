@@ -2,10 +2,13 @@ package com.zqi.frame.controller.pagers;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.stereotype.Repository;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
+@Repository("pagerFactory")
 public class PagerFactory {
 
     public static final String JQUERYTYPE = "JQUERY";

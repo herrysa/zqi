@@ -2,10 +2,10 @@
 <%@page contentType="text/html; charset=UTF-8"%>
 <%@ include file="/common/taglibs.jsp"%>
 <%@ include file="/common/links.jsp"%>
+<%@ include file="/common/GuriddoLinks.jsp"%>
 <%@ include file="/common/bootStrapLinks.jsp"%>
 <%@ include file="/common/bsgridLinks.jsp"%>
 <%@ include file="/common/bootstrap-tableLinks.jsp"%>
-<%@ include file="/common/GuriddoLinks.jsp"%>
 <%@ include file="/common/zqiLinks.jsp"%>
 <html>
 <head>

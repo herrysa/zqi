@@ -196,7 +196,7 @@ public class QiInit {
 			while(rs.next()){
 		    	int count = rs.getInt(1);
 		    	if(count==0){
-		    		createql= "create table _log(id varchar(32),type varchar(5),mainId varchar(50),assistId varchar(50),info varchar(100));";
+		    		createql= "create table _log(id varchar(32),type varchar(5),mainId varchar(50),assistId varchar(50),info varchar(100),logDate datetime);";
 		    		dbHelper.prepareStatementSql(createql);
 		    		dbHelper.pst.execute();
 		    	}
