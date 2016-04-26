@@ -64,8 +64,45 @@ $(function() {
             ]
         }
     });*/
+	$( "#gpName" ).autocomplete({
+	      source: function( request, response ) {
+	        $.ajax({
+	          url: "util/autocomplete",
+	          dataType: "json",
+	          data: {
+	            featureClass: "P",
+	            style: "full",
+	            maxRows: 12,
+	            name_startsWith: request.term,
+	            sql:"SELECT symbol id,name from d_gpdic where symbol like '%q%' or name like '%q%'"
+	          },
+	          success: function( data ) {
+	            response( $.map( data.result, function( item ) {
+	              return {
+	                label: item.showValue,
+	                value: item.id
+	              }
+	            }));
+	          }
+	        });
+	      },
+	      minLength: 1,
+	      select: function( event, ui ) {
+	        $("#gpCode").val(ui.item.value);
+	        var gpName = ui.item.label.replace(ui.item.value+",","");
+	        setTimeout(function(){
+		    	$("#gpName").val(gpName);
+	        },200);
+	      },
+	      open: function() {
+	        $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+	      },
+	      close: function() {
+	        $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+	      }
+	    });
     $("#reloadDataGrid").click(function(){
-    	var gpCode = $("#gpName").val();
+    	var gpCode = $("#gpCode").val();
     	var period = $("#fillDate").val();
     	var url = "primaryData/primaryDataGridList?gpCode="+gpCode+"&period="+period;
     	jQuery('#jqGrid').jqGrid('setGridParam', {
@@ -122,7 +159,7 @@ $(function() {
 			<option value="cw">财务数据</option>
 			<option value="mx">成交明细数据</option>
 			</select>
-			<label>股票：</label><input id="gpName" name="gpName" type="text"style="width:100px"/>
+			<label>股票：</label><input id="gpCode" name="gpCode" type="hidden"style="width:100px"/><input id="gpName" name="gpName" type="text"style="width:100px"/>
 			<label>日期：</label><input id="fillDate" name="fillDate" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
 				value="${paramMap.beginDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>
 			<%-- <label>结束日期：</label><input id="endDate" name="endDate" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
