@@ -5,8 +5,6 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,8 +12,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,13 +26,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.controller.pagers.PagerFactory;
 import com.zqi.frame.util.Tools;
-import com.zqi.unit.DBHelper;
 import com.zqi.unit.DateConverter;
 import com.zqi.unit.DateUtil;
 import com.zqi.unit.UUIDGenerator;
@@ -87,7 +83,7 @@ public class PrimaryDataController extends BaseController{
 			for(Map<String, Object> data : dayData){
 				String settlement = data.get("settlement").toString();
 				String close = data.get("close").toString();
-				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);;
+				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);;
 				data.put("changepercent", changePercent.toString());
 			}
 			/*List<Map<String, String>> result = new ArrayList<Map<String,String>>();
@@ -124,7 +120,7 @@ public class PrimaryDataController extends BaseController{
 			for(Map<String, Object> data : rsList){
 				String settlement = data.get("settlement").toString();
 				String close = data.get("close").toString();
-				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);;
+				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);;
 				data.put("changepercent", changePercent.toString());
 			}
 			pagedRequests.setTotalNumberOfRows(gpList.size());
@@ -210,7 +206,7 @@ public class PrimaryDataController extends BaseController{
 		for(int page=1;page<=50;page++){
 			String hs_aKeyUrl = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22hq%22,%22hs_a%22,%22%22,0,"+page+",60]]&callback=FDC_DC.theTableData";
 			Map<String, String> titleMap = new HashMap<String, String>();
-			List<Map<String, String>>  hs_aDataList = Tools.getHttpUrlMap(hs_aKey,hs_aKeyUrl,titleMap);
+			List<Map<String, String>>  hs_aDataList = Tools.getHttpUrlMapSina(hs_aKey,hs_aKeyUrl,titleMap);
 			findNum += hs_aDataList.size();
 			String period = DateUtil.getDateNow();
 			//String total = titleMap.get("count");
@@ -230,19 +226,20 @@ public class PrimaryDataController extends BaseController{
                     todayMap.put("period", period);
                     todayMap.put("code", symbol);
                     todayMap.put("name", name);
-                    todayMap.put("settlement", settlement);
-                    todayMap.put("open", open);
-                    todayMap.put("high", high);
-                    todayMap.put("low", low);
-                    todayMap.put("close", close);
-                    todayMap.put("volume", volume);
-                    todayMap.put("amount", amount);
+                    todayMap.put("settlement", new BigDecimal(settlement));
+                    todayMap.put("open", new BigDecimal(open));
+                    todayMap.put("high", new BigDecimal(high));
+                    todayMap.put("low", new BigDecimal(low));
+                    todayMap.put("close", new BigDecimal(close));
+                    todayMap.put("volume", new BigDecimal(volume));
+                    todayMap.put("amount", new BigDecimal(amount));
                     String dicSql = "select daytable from d_gpdic where symbol='"+symbol+"'";
                     Map<String, Object> gpDic = zqiDao.findFirst(dicSql);
                     String daytable = "";
                     if(gpDic!=null){
                     	daytable = gpDic.get("daytable").toString();
                     	String delSql = "delete from "+daytable+" where code='"+symbol+"'";
+                    	zqiDao.excute(delSql);
                     	zqiDao.add(todayMap, daytable);
                     }
 				} catch (Exception e) {
@@ -284,11 +281,9 @@ public class PrimaryDataController extends BaseController{
             	List<String> dataSqlList = new ArrayList<String>();
             	List<String> delDataSqlList = new ArrayList<String>();
             	if(days==-1){
-            		days = dataList.size();
-            	}else{
-            		days += 2;
+            		days = dataList.size()-2;
             	}
-            	for(int row=2;row<days;row++){
+            	for(int row=2;row<days+2;row++){
             		String[] rowData = dataList.get(row);
             		String[] rowData2 = null;
             		String settlement = "-1";
@@ -355,8 +350,12 @@ public class PrimaryDataController extends BaseController{
 			//webClient.waitForBackgroundJavaScript(600*1000);  
 			//webClient.setAjaxController(new NicelyResynchronizingAjaxController()); 
 			//获取页面
+			String url = Tools.getResource("dayHisDataUrl");
+			url = url.replace("%code%", code);
+			url = url.replace("%year%", year);
+			url = url.replace("%jidu%", jidu);
 			HtmlPage page;
-			page = webClient.getPage("http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/"+code+".phtml?year="+year+"&jidu="+jidu);
+			page = webClient.getPage(url);
 			//webClient.waitForBackgroundJavaScript(1000*5); 
 			//webClient.setJavaScriptTimeout(5000);  
 //        //获取页面的TITLE
@@ -370,7 +369,23 @@ public class PrimaryDataController extends BaseController{
 //        System.out.println(str);
 //        str = page.asXml();
 //        System.out.println(str);
-			DomElement domElement = page.getElementById("FundHoldSharesTable");
+			DomElement domElement = null;
+			String elementId = Tools.getResource("dayHisTableId");
+			if(elementId==null||"".equals(elementId)){
+				String elementClass = Tools.getResource("dayHisTableClass");
+				DomNodeList<DomElement> domList= page.getElementsByTagName("table");
+				for(DomElement dom : domList){
+					String domHtml = dom.asXml();
+					if(domHtml.contains(elementClass)){
+						domElement = dom;
+						break;
+					}
+				}
+				
+			}else{
+				domElement = page.getElementById("FundHoldSharesTable");
+			}
+			
 			if(domElement!=null){
 				str = domElement.asText();
 				str = str.replaceAll("\r\n\t\r\n", " ").replaceAll("\r\n", "\t");
@@ -386,6 +401,7 @@ public class PrimaryDataController extends BaseController{
 		} catch (Exception e) {
         	zqiDao.add(errorLog,"_log");
         	try {
+        		System.out.println("wait to log");
 				wait(1000);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
@@ -398,7 +414,7 @@ public class PrimaryDataController extends BaseController{
 	
 	public static void main(String[] args) {
 		
-		String[] gnbkKey = {"name","code","number","count","volume","amount","trade","changeprice","changepercent","symbol","sname","strade","schangeprice","schangepercent"};
+		/*String[] gnbkKey = {"name","code","number","count","volume","amount","trade","changeprice","changepercent","symbol","sname","strade","schangeprice","schangepercent"};
 		String url = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22bknode%22,%22gainianbankuai%22,%22%22,0]]&callback=FDC_DC.theTableData";
 		List<Map<String, String>>  gnbkDataList = getHttpUrlMap(gnbkKey,url);
 		DBHelper dicDb = new DBHelper();
@@ -422,6 +438,94 @@ public class PrimaryDataController extends BaseController{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}*/
+		/*PrimaryDataController primaryDataController = new PrimaryDataController();
+		String sql = "http://quotes.money.163.com/trade/lsjysj_600000.html#06f01";
+		primaryDataController.findDayData("600000","600000","2016","01");*/
+		Calendar calendar = Calendar.getInstance();
+		Long ttt = calendar.getTimeInMillis();
+		String url = "http://query.sse.com.cn/security/stock/getStockListData2.do?&jsonCallBack=jsonpCallback66615&isPagination=true&stockCode=&csrcCode=&areaName=&stockType=1&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize=25&pageHelp.pageNo=1&_="+ttt;
+		String result = "";
+		BufferedReader in = null;
+		try {
+			String urlNameString = url;
+			URL realUrl = new URL(urlNameString);
+			// 打开和URL之间的连接
+			URLConnection connection = realUrl.openConnection();
+			// 设置通用的请求属性
+			connection.setRequestProperty("Host","query.sse.com.cn");
+			connection.setRequestProperty("Referer"," http://www.sse.com.cn/assortment/stock/list/share/");
+			connection.setRequestProperty("accept", "*/*");
+			connection.setRequestProperty("connection", "Keep-Alive");
+			connection.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+			// 建立实际的连接
+			connection.connect();
+			// 获取所有响应头字段
+			/*Map<String, List<String>> map = connection.getHeaderFields();
+			// 遍历所有的响应头字段
+			for (String key : map.keySet()) {
+			System.out.println(key + "--->" + map.get(key));
+			}*/
+			// 定义 BufferedReader输入流来读取URL的响应
+			in = new BufferedReader(new InputStreamReader(
+			connection.getInputStream(),"UTF-8"));
+			String line;
+			while ((line = in.readLine()) != null) {
+				result += line;
+			}
+			System.out.println();
+		} catch (Exception e) {
+			System.out.println("发送GET请求出现异常！" + e);
+			e.printStackTrace();
+		}
+		// 使用finally块来关闭输入流
+		finally {
+			try {
+			    if (in != null) {
+			        in.close();
+			    }
+			} catch (Exception e2) {
+			    e2.printStackTrace();
+			}
+		}
+		try {
+			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+			java.util.logging.Logger.getLogger("net.sourceforge.htmlunit").setLevel(java.util.logging.Level.OFF); 
+			//htmlunit 对css和javascript的支持不好，所以请关闭之
+			webClient.getOptions().setJavaScriptEnabled(false);
+			webClient.getOptions().setCssEnabled(false);
+			//webClient.waitForBackgroundJavaScript(600*1000);  
+			//webClient.setAjaxController(new NicelyResynchronizingAjaxController()); 
+			//获取页面
+			url = Tools.getResource("dayHisDataUrl");
+			HtmlPage page;
+			page = webClient.getPage(url);
+			//webClient.waitForBackgroundJavaScript(1000*5); 
+			//webClient.setJavaScriptTimeout(5000);  
+//        //获取页面的TITLE
+//        str = page.getTitleText();
+//        System.out.println(str);
+//        //获取页面的XML代码
+//        str = page.asXml();
+//        System.out.println(str);
+//        //获取页面的文本
+//        str = page.asText();
+//        System.out.println(str);
+//        str = page.asXml();
+//        System.out.println(str);
+			DomElement domElement = null;
+				domElement = page.getElementById("REPORTID_tab1");
+			
+			if(domElement!=null){
+				String str = domElement.asText();
+				str = str.replaceAll("\r\n\t\r\n", " ").replaceAll("\r\n", "\t");
+				String[] rowArr = str.split("\t");
+			}
+			//System.out.println(domElement.asText());
+			//关闭webclient
+			webClient.closeAllWindows();
+		} catch (Exception e) {
+            e.printStackTrace();
 		}
 	}
 	

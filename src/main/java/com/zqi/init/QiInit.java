@@ -91,7 +91,7 @@ public class QiInit {
 					dicSql= "select * from d_gpDic where symbol='"+symbol+"'";
 					dicDb.prepareStatementSql(dicSql);
 					rs = dicDb.pst.executeQuery();
-					if(true){
+					if(!rs.next()){
 						dicSql= "insert into d_gpDic (symbol,code,name,pinyinCode,daytable) values('"+symbol+"','"+code+"','"+name+"','"+pinyinCode+"','daytable"+daytableIndex+"');";
 						dicDb.prepareStatementSql(dicSql);
 						dicDb.pst.execute();
@@ -110,7 +110,87 @@ public class QiInit {
 					while(rs.next()){
 						count = rs.getInt(1);
 						if(count==0){
-							dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,2),open decimal(10,2),high decimal(10,2),low decimal(10,2),close decimal(10,2),volume decimal(20,2),amount decimal(20,2));";
+							dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3)),mfsum decimal(10,3),mfratio2 decimal(20,3)),mfratio10 decimal(20,3));";
+							dicDb.prepareStatementSql(dicSql);
+							dicDb.pst.execute();
+							//dayTableDb.addBatchSql(dicSql);
+						}
+                        //System.out.println(period+":"+price.length);
+                        //dicSql= "insert into daytable"+daytableIndex+"(period,code,name,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
+                        //dayTableDb.addBatchSql(dicSql);
+					}
+					i++;
+				}
+				//dayTableDb.st.executeBatch();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void creatZqiTableWy(){
+		System.out.println("---------------creatZqiTable网易---------------");
+		String[] hs_aKey = {"symbol","code","name","trade","pricechange","changepercent","buy","sell","settlement","open","high","low","volume","amount","ticktime","per","per_d","nta","pb","mktcap","nmc","turnoverratio","favor","guba"};
+		int i=0,daytableIndex = 1;
+		for(int page=1;page<=50;page++){
+			String hs_aKeyUrl = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22hq%22,%22hs_a%22,%22%22,0,"+page+",60]]&callback=FDC_DC.theTableData";
+			Map<String, String> titleMap = new HashMap<String, String>();
+			List<Map<String, String>>  hs_aDataList = getHttpUrlMap(hs_aKey,hs_aKeyUrl,titleMap);
+			System.out.println((page)*hs_aDataList.size());
+			try {
+				DBHelper dicDb = new DBHelper();
+				String dicSql= "select count(*) from information_schema.TABLES where table_name = 'd_gpdic' and TABLE_SCHEMA = 'zqi'";
+				dicDb.prepareStatementSql(dicSql);
+				ResultSet rs = dicDb.pst.executeQuery();
+				int count = 0;
+				while(rs.next()){
+					count = rs.getInt(1);
+					if(count==0){
+						dicSql= "create table d_gpdic(symbol varchar(20),code varchar(20),name varchar(20),pinyinCode varchar(10),daytable varchar(20));";
+						dicDb.prepareStatementSql(dicSql);
+						dicDb.pst.execute();
+					}
+				}
+				
+				DBHelper dayTableDb = new DBHelper();
+				String period = titleMap.get("day");
+				//String total = titleMap.get("count");
+				for(Map<String, String> gpData : hs_aDataList){
+					daytableIndex = i/50+1;
+					String symbol = gpData.get("symbol");
+					String code = gpData.get("code");
+					String name = gpData.get("name");
+					String pinyinCode = Tools.getPYIndexStr(name, true);
+					String open = gpData.get("open");
+                    String high = gpData.get("high");
+                    String low = gpData.get("low");
+                    String close = gpData.get("trade");
+                    String volume = gpData.get("volume");
+                    String amount = gpData.get("amount");
+					dicSql= "select * from d_gpDic where symbol='"+symbol+"'";
+					dicDb.prepareStatementSql(dicSql);
+					rs = dicDb.pst.executeQuery();
+					if(!rs.next()){
+						dicSql= "insert into d_gpDic (symbol,code,name,pinyinCode,daytable) values('"+symbol+"','"+code+"','"+name+"','"+pinyinCode+"','daytable"+daytableIndex+"');";
+						dicDb.prepareStatementSql(dicSql);
+						dicDb.pst.execute();
+					}else{
+						String dbName = rs.getString("name");
+						if(!dbName.equals(name)){
+							dicSql= "update d_gpDic set name='"+name+"',pinyinCode='"+pinyinCode+"' where symbol='"+symbol+"';";
+							dicDb.prepareStatementSql(dicSql);
+							dicDb.pst.execute();
+						}
+					}
+					dicSql= "select count(*) from information_schema.TABLES where table_name = 'daytable"+daytableIndex+"' and TABLE_SCHEMA = 'zqi'";
+					//dicDb = new DBHelper();
+					dicDb.prepareStatementSql(dicSql);
+					rs = dicDb.pst.executeQuery();
+					while(rs.next()){
+						count = rs.getInt(1);
+						if(count==0){
+							dicSql= "create table daytable"+daytableIndex+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3)),mfsum decimal(10,3),mfratio2 decimal(20,3)),mfratio10 decimal(20,3));";
 							dicDb.prepareStatementSql(dicSql);
 							dicDb.pst.execute();
 							//dayTableDb.addBatchSql(dicSql);

@@ -10,12 +10,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class Tools {
 
+	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("zqi");
+	
+	public static String getResource(String key){
+		return resourceBundle.getString(key);
+	}
 	/**
 	* 返回首字母
 	* @param strChinese
@@ -130,10 +137,92 @@ public class Tools {
 	       return result;
 	   }
 	   
-	   @SuppressWarnings("unchecked")
-		public static List<Map<String,String>> getHttpUrlMap(String[] keys,String url,Map<String, String> titleMap){
-			List<Map<String,String>> dataList = new ArrayList<Map<String,String>>();
-			String result = "";
+	   public static List<Map<String,String>> getHttpUrlMapSina(String[] keys,String url,Map<String, String> titleMap){
+		   String result = getByHttpUrl(url);
+		   List<Map<String,String>> dataList = new ArrayList<Map<String,String>>();
+		   if(result.contains("theTableData")){
+				result = result.substring(result.indexOf("theTableData")+13, result.length()-1);
+				JSONArray rsArr = JSONArray.fromObject(result);
+				JSONObject rsObject = (JSONObject) rsArr.get(0);
+				if(titleMap!=null){
+					Object dayObject = rsObject.get("day");
+					if(dayObject!=null){
+						titleMap.put("day", dayObject.toString());
+					}
+					//titleMap.put("day", rsObject.getString("day"));
+					titleMap.put("count", rsObject.getString("count"));
+				}
+				JSONArray items = (JSONArray) rsObject.get("items");
+				Iterator<JSONArray> itemIt = items.iterator();
+				while (itemIt.hasNext()) {
+					JSONArray item = itemIt.next();
+					Iterator<JSONArray> propertyIt = item.iterator();
+					int i=0;
+					Map<String, String> data = new HashMap<String, String>();
+					while (propertyIt.hasNext()) {
+						Object property = propertyIt.next();
+						data.put(keys[i], property.toString());
+						i++;
+					}
+					dataList.add(data);
+				}
+			}else{
+				System.out.println(url);
+			}
+			return dataList;
+	   }
+	   public static List<Map<String,String>> getHttpUrlMap163(String url,Map<String, String> titleMap){
+		   String result = getByHttpUrl(url);
+		   List<Map<String,String>> dataList = new ArrayList<Map<String,String>>();
+		   if(result!=null&&!"".equals(result)){
+				JSONArray rsArr = JSONArray.fromObject(result);
+				JSONObject rsObject = (JSONObject) rsArr.get(0);
+				if(titleMap!=null){
+					Object dayObject = rsObject.get("time");
+					if(dayObject!=null){
+						String day = dayObject.toString().substring(0, 10);
+						titleMap.put("day", day);
+					}
+					titleMap.put("count", rsObject.getString("total"));
+				}
+				JSONArray items = (JSONArray) rsObject.get("list");
+				Iterator<JSONObject> itemIt = items.iterator();
+				while (itemIt.hasNext()) {
+					JSONObject item = itemIt.next();
+					Set<String> keySet = item.keySet();
+					int i=0;
+					Map<String, String> data = new HashMap<String, String>();
+					for(String key : keySet){
+						Object value = item.get(key);
+						String v = "";
+						if(value!=null){
+							if(value instanceof JSONObject){
+								JSONObject subValue = (JSONObject)value;
+								Set<String> keySet2 = subValue.keySet();
+								for(String key2 : keySet2){
+									Object value2 = subValue.get(key2);
+									String v2 = "";
+									if(value2!=null){
+										v2 = value2.toString();
+										data.put(key+"."+key2, v2);
+									}
+								}
+							}else{
+								v = value.toString();
+								data.put(key, v);
+							}
+						}
+					}
+					dataList.add(data);
+				}
+			}else{
+				System.out.println(url);
+			}
+			return dataList;
+	   }
+	   
+	   public static String getByHttpUrl(String url){
+		   String result = "";
 			BufferedReader in = null;
 			try {
 				String urlNameString = url;
@@ -173,35 +262,6 @@ public class Tools {
 				    e2.printStackTrace();
 				}
 			}
-			if(result.contains("theTableData")){
-				result = result.substring(result.indexOf("theTableData")+13, result.length()-1);
-				JSONArray rsArr = JSONArray.fromObject(result);
-				JSONObject rsObject = (JSONObject) rsArr.get(0);
-				if(titleMap!=null){
-					Object dayObject = rsObject.get("day");
-					if(dayObject!=null){
-						titleMap.put("day", dayObject.toString());
-					}
-					//titleMap.put("day", rsObject.getString("day"));
-					titleMap.put("count", rsObject.getString("count"));
-				}
-				JSONArray items = (JSONArray) rsObject.get("items");
-				Iterator<JSONArray> itemIt = items.iterator();
-				while (itemIt.hasNext()) {
-					JSONArray item = itemIt.next();
-					Iterator<JSONArray> propertyIt = item.iterator();
-					int i=0;
-					Map<String, String> data = new HashMap<String, String>();
-					while (propertyIt.hasNext()) {
-						Object property = propertyIt.next();
-						data.put(keys[i], property.toString());
-						i++;
-					}
-					dataList.add(data);
-				}
-			}else{
-				System.out.println(url);
-			}
-			return dataList;
-		}
+			return result;
+	   }
 }
