@@ -74,7 +74,7 @@ $(function() {
 	            style: "full",
 	            maxRows: 12,
 	            name_startsWith: request.term,
-	            sql:"SELECT symbol id,name from d_gpdic where symbol like '%q%' or name like '%q%'"
+	            sql:"SELECT symbol id,name,pinyinCode from d_gpdic where symbol like '%q%' or name like '%q%' or pinyinCode like '%q%'"
 	          },
 	          success: function( data ) {
 	            response( $.map( data.result, function( item ) {
@@ -109,10 +109,56 @@ $(function() {
 			url : url
 		}).trigger("reloadGrid");
     });
+    
+    $("#importTodayData").click(function(){
+		var fillDate = $("#fillDate").val();
+		$.ajax({
+			url: 'primaryData/fillPrimaryData?fillType=today&fillDate='+fillDate,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data);
+			}
+		});
+	});
+    $("#importTenDayData").click(function(){
+		var fillDate = $("#fillDate").val();
+		$.ajax({
+			url: 'primaryData/fillPrimaryData?fillType=10&fillDate='+fillDate,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data);
+			}
+		});
+	});
+    $("#importHisDayData").click(function(){
+		var fillDate = $("#fillDate").val();
+		$.ajax({
+			url: 'primaryData/fillPrimaryData?fillType=1&fillDate='+fillDate,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data);
+			}
+		});
+	});
 	$("#importSeasonData").click(function(){
 		var fillDate = $("#fillDate").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillDate='+fillDate,
+			url: 'primaryData/fillPrimaryData?fillType=jidu&fillDate='+fillDate,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -175,6 +221,7 @@ $(function() {
 				</button>
 				<ul class="dropdown-menu">
 					<li><a id="importTodayData">导入当日数据</a></li>
+					<li><a id="importHisDayData">导入日期数据</a></li>
 					<li><a id="importTenDayData">导入日期10天前数据</a></li>
 					<li><a id="importSeasonData" href="javaScript:">导入日期季度数据</a></li>
 				</ul>
@@ -208,12 +255,21 @@ $(function() {
                 styleUI : 'Bootstrap',
                 datatype: "json",
                 colModel: [
-                    { label: 'period', name: 'period', key: true, width: 75 },
-                    { label: 'code', name: 'code', width: 150 }
+                    { name: 'period', label: '日期', key: true, width: 75 },
+                    { name: 'code', label: '编码', width: 100 },
+                    { name: 'name', label: '名称', width: 100 },
+                    { name: 'changepercent', label: '涨幅', width: 100 },
+                    { name: 'settlement', label: '昨收价', width: 100 },
+                    { name: 'open', label: '开盘价', width: 100 },
+                    { name: 'close', label: '收盘价', width: 100 },
+                    { name: 'high', label: '最高价', width: 100 },
+                    { name: 'low', label: '最低价', width: 100 },
+                    { name: 'volume', label: '成交量', width: 100 },
+                    { name: 'amount', label: '成交额', width: 100 }
                 ],
 				page: 1,
-                width: 780,
-                height: 250,
+                autowidth:false,
+                height: '100%',
                 rowNum: 20,
                 pager: "#jqGridPager"
             });

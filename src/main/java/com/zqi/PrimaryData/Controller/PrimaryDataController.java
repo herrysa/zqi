@@ -2,8 +2,10 @@ package com.zqi.PrimaryData.Controller;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,8 +35,10 @@ import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.controller.pagers.PagerFactory;
+import com.zqi.frame.util.Tools;
 import com.zqi.unit.DBHelper;
 import com.zqi.unit.DateConverter;
+import com.zqi.unit.DateUtil;
 import com.zqi.unit.UUIDGenerator;
 
 @Controller
@@ -43,12 +47,15 @@ public class PrimaryDataController extends BaseController{
 
 	@ResponseBody
 	@RequestMapping("/primaryDataGridList")
-	public Map<String, Object> primaryDataGridList(HttpServletRequest request,String gpCode){
+	public Map<String, Object> primaryDataGridList(HttpServletRequest request){
 		String code = request.getParameter("gpCode");
 		String period = request.getParameter("period");
-		String[] columns = request.getParameterValues("columns");
-		Object q = request.getAttribute("columns");
-		Map columns1 = request.getParameterMap();
+		if(code==null||"".equals(code)){
+			if(period==null||"".equals(period)){
+				period = DateUtil.getDateNow();
+			}
+		}
+		/*Map columns1 = request.getParameterMap();
 		Set<Entry<String, Object>> pp = columns1.entrySet();
 		Set<String> keys = columns1.keySet();
 		for(Entry<String, Object> p : pp){
@@ -59,8 +66,7 @@ public class PrimaryDataController extends BaseController{
 				String[] vArr = (String[])v;
 				System.out.println(p.getKey()+":"+vArr[0]);
 			}
-		}
-		Map<String, Object> r = new HashMap<String, Object>();
+		}*/
 		if(code!=null&&!"".equals(code)){
 			String findDayTableSql = "select daytable from d_gpDic where symbol='"+code+"'";
 			String tableName = "";
@@ -78,6 +84,12 @@ public class PrimaryDataController extends BaseController{
 					PagerFactory.JQUERYTYPE, request);
 			pagedRequests = zqiDao.findWithFilter(pagedRequests, dayDataSql, filters);
 			List<Map<String, Object>> dayData = pagedRequests.getList();
+			for(Map<String, Object> data : dayData){
+				String settlement = data.get("settlement").toString();
+				String close = data.get("close").toString();
+				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);;
+				data.put("changepercent", changePercent.toString());
+			}
 			/*List<Map<String, String>> result = new ArrayList<Map<String,String>>();
 			Map<String, String> row = new HashMap<String, String>();
 			row.put("customer_id", "1");
@@ -85,12 +97,43 @@ public class PrimaryDataController extends BaseController{
 			row.put("firstname", "1");
 			row.put("email", "1");
 			result.add(row);*/
-			r.put("page", pagedRequests.getPageNumber());
-			r.put("records", pagedRequests.getTotalNumberOfRows());
-			r.put("rows", pagedRequests.getList());
-			r.put("total", pagedRequests.getTotalNumberOfPages());
+			resultMap.put("page", pagedRequests.getPageNumber());
+			resultMap.put("records", pagedRequests.getTotalNumberOfRows());
+			resultMap.put("rows", pagedRequests.getList());
+			resultMap.put("total", pagedRequests.getTotalNumberOfPages());
+		}else{
+			List<Map<String, Object>> rsList = new ArrayList<Map<String,Object>>();
+			String dicSql = "select * from d_gpdic order by symbol asc";
+			List<Map<String, Object>> gpList = zqiDao.findAll(dicSql);
+			JQueryPager pagedRequests = null;
+			pagedRequests = (JQueryPager) pagerFactory.getPager(
+					PagerFactory.JQUERYTYPE, request);
+			int start = pagedRequests.getStart() , end = pagedRequests.getEnd();
+			int gpIndex=start;
+			for(;gpIndex<=end;gpIndex++){
+				Map<String, Object> gp = gpList.get(gpIndex);
+				String tableName = "" , symbol = "";
+				tableName = gp.get("daytable").toString();
+				symbol = gp.get("symbol").toString();
+				String dayDataSql = "select * from "+tableName+" where code='"+symbol+"' and period='"+period+"'";
+				Map<String, Object> rs0 = zqiDao.findFirst(dayDataSql);
+				if(!rs0.isEmpty()){
+					rsList.add(rs0);
+				}
+			}
+			for(Map<String, Object> data : rsList){
+				String settlement = data.get("settlement").toString();
+				String close = data.get("close").toString();
+				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);;
+				data.put("changepercent", changePercent.toString());
+			}
+			pagedRequests.setTotalNumberOfRows(gpList.size());
+			resultMap.put("page", pagedRequests.getPageNumber());
+			resultMap.put("records", pagedRequests.getTotalNumberOfRows());
+			resultMap.put("rows", rsList);
+			resultMap.put("total", pagedRequests.getTotalNumberOfPages());
 		}
-		return r;
+		return resultMap;
 	}
 	
 	@RequestMapping("/primaryDataList")
@@ -110,10 +153,13 @@ public class PrimaryDataController extends BaseController{
 	@ResponseBody
 	@RequestMapping("/fillPrimaryData")
 	public String findHisDayData(String fillDate,String fillType){
-		DateConverter dateConverter = new DateConverter();
-		Date dateObj = (Date)dateConverter.convert(Date.class, fillDate);
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(dateObj);
+		if(fillDate!=null&&!"".equals(fillDate)){
+			DateConverter dateConverter = new DateConverter();
+			Date dateObj = (Date)dateConverter.convert(Date.class, fillDate);
+			calendar.setTime(dateObj);
+		}
+		
 		int year = calendar.get(Calendar.YEAR);
 		int season = 1;
 		int month = calendar.get(Calendar.MONTH);  
@@ -141,7 +187,81 @@ public class PrimaryDataController extends BaseController{
         default:  
             break;  
         }  
-        String lastFillSql = "select assistId from _log where mainId='findJiduDataSuccess'";
+        if("today".equals(fillType)){
+        	findTodayData();
+		}else if("jidu".equals(fillType)){
+			findHisDayDataByJidu(""+year,""+season,-1);
+		}else{
+			int days = -1;
+			try {
+				days = Integer.parseInt(fillType);
+			} catch (Exception e) {
+				days = 3;
+			}
+			findHisDayDataByJidu(""+year,""+season,days);
+		}
+		return "导入成功！";
+	}
+	
+	
+	public void findTodayData(){
+		String[] hs_aKey = {"symbol","code","name","trade","pricechange","changepercent","buy","sell","settlement","open","high","low","volume","amount","ticktime","per","per_d","nta","pb","mktcap","nmc","turnoverratio","favor","guba"};
+		int findNum=0;
+		for(int page=1;page<=50;page++){
+			String hs_aKeyUrl = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22hq%22,%22hs_a%22,%22%22,0,"+page+",60]]&callback=FDC_DC.theTableData";
+			Map<String, String> titleMap = new HashMap<String, String>();
+			List<Map<String, String>>  hs_aDataList = Tools.getHttpUrlMap(hs_aKey,hs_aKeyUrl,titleMap);
+			findNum += hs_aDataList.size();
+			String period = DateUtil.getDateNow();
+			//String total = titleMap.get("count");
+			for(Map<String, String> gpData : hs_aDataList){
+				String symbol = gpData.get("symbol");
+				try {
+					String code = gpData.get("code");
+					String name = gpData.get("name");
+					String settlement = gpData.get("settlement");
+					String open = gpData.get("open");
+                    String high = gpData.get("high");
+                    String low = gpData.get("low");
+                    String close = gpData.get("trade");
+                    String volume = gpData.get("volume");
+                    String amount = gpData.get("amount");
+                    Map<String, Object> todayMap = new HashMap<String, Object>();
+                    todayMap.put("period", period);
+                    todayMap.put("code", symbol);
+                    todayMap.put("name", name);
+                    todayMap.put("settlement", settlement);
+                    todayMap.put("open", open);
+                    todayMap.put("high", high);
+                    todayMap.put("low", low);
+                    todayMap.put("close", close);
+                    todayMap.put("volume", volume);
+                    todayMap.put("amount", amount);
+                    String dicSql = "select daytable from d_gpdic where symbol='"+symbol+"'";
+                    Map<String, Object> gpDic = zqiDao.findFirst(dicSql);
+                    String daytable = "";
+                    if(gpDic!=null){
+                    	daytable = gpDic.get("daytable").toString();
+                    	String delSql = "delete from "+daytable+" where code='"+symbol+"'";
+                    	zqiDao.add(todayMap, daytable);
+                    }
+				} catch (Exception e) {
+					Map<String, Object> errorLog = new HashMap<String, Object>();
+					errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
+					errorLog.put("type", "findHisDayData");
+					errorLog.put("mainId", "findTodayDataError");
+					errorLog.put("assistId", symbol);
+					errorLog.put("info", period+"导入日数据错误！");
+					errorLog.put("logDate", DateUtil.getDateTimeNow());
+					zqiDao.add(errorLog,"_log");
+					e.printStackTrace();
+				}
+			}
+			System.out.println(findNum);
+		}
+	}
+	public void findHisDayDataByJidu(String year,String jidu,int days){
+		String lastFillSql = "select assistId from _log where mainId='findJiduDataSuccess'";
         Map<String, Object> lastFill = zqiDao.findFirst(lastFillSql);
         String lastSymbol = "";
         String dicSql= "select * from d_gpDic order by symbol";
@@ -157,13 +277,18 @@ public class PrimaryDataController extends BaseController{
             	String name = dicMap.get("name").toString();
             	String code = dicMap.get("code").toString();
             	String daytable = dicMap.get("daytable").toString();
-            	List<String[]> dataList = findDayData(symbol,code,""+year,""+season);
+            	List<String[]> dataList = findDayData(symbol,code,""+year,""+jidu);
             	if(dataList==null||dataList.size()==0){
             		continue;
             	}
             	List<String> dataSqlList = new ArrayList<String>();
             	List<String> delDataSqlList = new ArrayList<String>();
-            	for(int row=2;row<dataList.size();row++){
+            	if(days==-1){
+            		days = dataList.size();
+            	}else{
+            		days += 2;
+            	}
+            	for(int row=2;row<days;row++){
             		String[] rowData = dataList.get(row);
             		String[] rowData2 = null;
             		String settlement = "-1";
@@ -194,6 +319,7 @@ public class PrimaryDataController extends BaseController{
             	successLog.put("mainId", "findJiduDataSuccess");
             	successLog.put("assistId", symbol);
 		    	successLog.put("info", "导入成功！");
+		    	successLog.put("logDate", DateUtil.getDateTimeNow());
 		    	zqiDao.add(successLog,"_log");
 			} catch (Exception e) {
 				Map<String, Object> errorLog = new HashMap<String, Object>();
@@ -201,14 +327,12 @@ public class PrimaryDataController extends BaseController{
 		    	errorLog.put("type", "findHisDayData");
 		    	errorLog.put("mainId", "findJiduDataError");
 		    	errorLog.put("assistId", symbol);
-		    	errorLog.put("info", year+season+"导入日数据错误！");
+		    	errorLog.put("info", year+jidu+"导入日数据错误！");
+		    	errorLog.put("logDate", DateUtil.getDateTimeNow());
 		    	zqiDao.add(errorLog,"_log");
 				e.printStackTrace();
 			}
-        	
-        	
         }
-		return "导入成功！";
 	}
 	
 	public List<String[]> findDayData(String symbol,String code,String year,String jidu){
@@ -220,6 +344,7 @@ public class PrimaryDataController extends BaseController{
     	errorLog.put("mainId", "findJiduDataError");
     	errorLog.put("assistId", symbol);
     	errorLog.put("info", year+jidu+"导入日数据错误！");
+    	errorLog.put("logDate", DateUtil.getDateTimeNow());
 		//创建一个webclient
 		try {
 			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);

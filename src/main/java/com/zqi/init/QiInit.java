@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.zqi.frame.util.Tools;
 import com.zqi.unit.DBHelper;
 
 public class QiInit {
@@ -52,10 +53,11 @@ public class QiInit {
 		System.out.println("---------------creatZqiTable---------------");
 		String[] hs_aKey = {"symbol","code","name","trade","pricechange","changepercent","buy","sell","settlement","open","high","low","volume","amount","ticktime","per","per_d","nta","pb","mktcap","nmc","turnoverratio","favor","guba"};
 		int i=0,daytableIndex = 1;
-		for(int page=0;page<50;page++){
+		for(int page=1;page<=50;page++){
 			String hs_aKeyUrl = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22hq%22,%22hs_a%22,%22%22,0,"+page+",60]]&callback=FDC_DC.theTableData";
 			Map<String, String> titleMap = new HashMap<String, String>();
 			List<Map<String, String>>  hs_aDataList = getHttpUrlMap(hs_aKey,hs_aKeyUrl,titleMap);
+			System.out.println((page)*hs_aDataList.size());
 			try {
 				DBHelper dicDb = new DBHelper();
 				String dicSql= "select count(*) from information_schema.TABLES where table_name = 'd_gpdic' and TABLE_SCHEMA = 'zqi'";
@@ -65,7 +67,7 @@ public class QiInit {
 				while(rs.next()){
 					count = rs.getInt(1);
 					if(count==0){
-						dicSql= "create table d_gpdic(symbol varchar(20),code varchar(20),name varchar(20),daytable varchar(20));";
+						dicSql= "create table d_gpdic(symbol varchar(20),code varchar(20),name varchar(20),pinyinCode varchar(10),daytable varchar(20));";
 						dicDb.prepareStatementSql(dicSql);
 						dicDb.pst.execute();
 					}
@@ -79,6 +81,7 @@ public class QiInit {
 					String symbol = gpData.get("symbol");
 					String code = gpData.get("code");
 					String name = gpData.get("name");
+					String pinyinCode = Tools.getPYIndexStr(name, true);
 					String open = gpData.get("open");
                     String high = gpData.get("high");
                     String low = gpData.get("low");
@@ -88,14 +91,14 @@ public class QiInit {
 					dicSql= "select * from d_gpDic where symbol='"+symbol+"'";
 					dicDb.prepareStatementSql(dicSql);
 					rs = dicDb.pst.executeQuery();
-					if(!rs.next()){
-						dicSql= "insert into d_gpDic (symbol,code,name,daytable) values('"+symbol+"','"+code+"','"+name+"','daytable"+daytableIndex+"');";
+					if(true){
+						dicSql= "insert into d_gpDic (symbol,code,name,pinyinCode,daytable) values('"+symbol+"','"+code+"','"+name+"','"+pinyinCode+"','daytable"+daytableIndex+"');";
 						dicDb.prepareStatementSql(dicSql);
 						dicDb.pst.execute();
 					}else{
 						String dbName = rs.getString("name");
 						if(!dbName.equals(name)){
-							dicSql= "update d_gpDic set name='"+name+"' where symbol='"+symbol+"';";
+							dicSql= "update d_gpDic set name='"+name+"',pinyinCode='"+pinyinCode+"' where symbol='"+symbol+"';";
 							dicDb.prepareStatementSql(dicSql);
 							dicDb.pst.execute();
 						}
@@ -196,7 +199,7 @@ public class QiInit {
 			while(rs.next()){
 		    	int count = rs.getInt(1);
 		    	if(count==0){
-		    		createql= "create table _log(id varchar(32),type varchar(5),mainId varchar(50),assistId varchar(50),info varchar(100),logDate datetime);";
+		    		createql= "create table _log(id varchar(32),type varchar(20),mainId varchar(50),assistId varchar(50),info varchar(100),logDate varchar(20));";
 		    		dbHelper.prepareStatementSql(createql);
 		    		dbHelper.pst.execute();
 		    	}
