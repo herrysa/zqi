@@ -91,16 +91,17 @@
 		<artifactId>htmlparser</artifactId>
 		<version>2.1</version>
 	</dependency>
-	<dependency>
-		<groupId>org.jsoup</groupId>
-		<artifactId>jsoup</artifactId>
-		<version>1.9.1</version>
-	</dependency> -->
+	-->
 	<!-- <dependency>
 		<groupId>jdic</groupId>
 		<artifactId>jdic</artifactId>
 		<version>1.0</version>
 	</dependency> -->
+	<dependency>
+		<groupId>org.jsoup</groupId>
+		<artifactId>jsoup</artifactId>
+		<version>1.9.1</version>
+	</dependency> 
 	<dependency>
 		<groupId>net.sourceforge.htmlunit</groupId>
 		<artifactId>htmlunit</artifactId>
@@ -117,7 +118,13 @@
 	<groupId>org.expressme</groupId>
 	<artifactId>SimpleJdbc</artifactId>
 	<version>1.1</version>
+	
 </dependency>
+<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.14</version>
+		</dependency>
 	<!-- spring -->
 	<dependency>
 		<groupId>org.springframework</groupId>
