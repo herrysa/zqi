@@ -28,10 +28,13 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.zqi.dataFinder.Finder163RToday;
+import com.zqi.dataFinder.IFinderRToday;
 import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.controller.pagers.PagerFactory;
+import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
 import com.zqi.unit.DateConverter;
 import com.zqi.unit.DateUtil;
@@ -201,6 +204,51 @@ public class PrimaryDataController extends BaseController{
 	
 	
 	public void findTodayData(){
+		String code = "",period = "";
+		TestTimer importTodayDataTime = new TestTimer("导入今日数据");
+		importTodayDataTime.begin();
+		try {
+			IFinderRToday iFinderRToday = new Finder163RToday();
+			List<Map<String, Object>> tadayList = iFinderRToday.findRToday();
+			Map<String, Map<String, Object>> gpmap = findAGpDicMap();
+			int count = 0;
+			for(Map<String, Object> dayData :tadayList){
+				code = dayData.get("code").toString();
+				period = dayData.get("period").toString();
+				//String close = dayData.get("close").toString();
+				Map<String, Object> gpdic = gpmap.get(code);
+				if(gpdic!=null){
+					String daytable = gpdic.get("daytable").toString();
+					zqiDao.excute("delete from "+daytable+" where code='"+code+"' and period='"+period+"'");
+					zqiDao.add(dayData, daytable);
+					count++;
+				}
+			}
+			long msTime = importTodayDataTime.doner();
+			Map<String, Object> errorLog = new HashMap<String, Object>();
+			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
+			errorLog.put("type", "findTodayData");
+			errorLog.put("mainId", "findTodayDataSuccess");
+			errorLog.put("assistId", count+":"+msTime);
+			errorLog.put("info", period+"导入今日数据成功！");
+			errorLog.put("logDate", DateUtil.getDateTimeNow());
+			zqiDao.add(errorLog,"_log");
+			System.out.println("---------------"+period+":"+count+"------------------");
+		} catch (Exception e) {
+			Map<String, Object> errorLog = new HashMap<String, Object>();
+			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
+			errorLog.put("type", "findTodayData");
+			errorLog.put("mainId", "findTodayDataError");
+			errorLog.put("assistId", code);
+			errorLog.put("info", period+"导入今日数据错误！");
+			errorLog.put("logDate", DateUtil.getDateTimeNow());
+			zqiDao.add(errorLog,"_log");
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void findTodayDataSina(){
 		String[] hs_aKey = {"symbol","code","name","trade","pricechange","changepercent","buy","sell","settlement","open","high","low","volume","amount","ticktime","per","per_d","nta","pb","mktcap","nmc","turnoverratio","favor","guba"};
 		int findNum=0;
 		for(int page=1;page<=50;page++){
@@ -442,91 +490,9 @@ public class PrimaryDataController extends BaseController{
 		/*PrimaryDataController primaryDataController = new PrimaryDataController();
 		String sql = "http://quotes.money.163.com/trade/lsjysj_600000.html#06f01";
 		primaryDataController.findDayData("600000","600000","2016","01");*/
-		Calendar calendar = Calendar.getInstance();
-		Long ttt = calendar.getTimeInMillis();
-		String url = "http://query.sse.com.cn/security/stock/getStockListData2.do?&jsonCallBack=jsonpCallback66615&isPagination=true&stockCode=&csrcCode=&areaName=&stockType=2&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize=25&pageHelp.pageNo=1&_="+ttt;
-		String result = "";
-		BufferedReader in = null;
-		try {
-			String urlNameString = url;
-			URL realUrl = new URL(urlNameString);
-			// 打开和URL之间的连接
-			URLConnection connection = realUrl.openConnection();
-			// 设置通用的请求属性
-			connection.setRequestProperty("Host","query.sse.com.cn");
-			connection.setRequestProperty("Referer"," http://www.sse.com.cn/assortment/stock/list/share/");
-			connection.setRequestProperty("accept", "*/*");
-			connection.setRequestProperty("connection", "Keep-Alive");
-			connection.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
-			// 建立实际的连接
-			connection.connect();
-			// 获取所有响应头字段
-			/*Map<String, List<String>> map = connection.getHeaderFields();
-			// 遍历所有的响应头字段
-			for (String key : map.keySet()) {
-			System.out.println(key + "--->" + map.get(key));
-			}*/
-			// 定义 BufferedReader输入流来读取URL的响应
-			in = new BufferedReader(new InputStreamReader(
-			connection.getInputStream(),"UTF-8"));
-			String line;
-			while ((line = in.readLine()) != null) {
-				result += line;
-			}
-			System.out.println(result);
-		} catch (Exception e) {
-			System.out.println("发送GET请求出现异常！" + e);
-			e.printStackTrace();
-		}
-		// 使用finally块来关闭输入流
-		finally {
-			try {
-			    if (in != null) {
-			        in.close();
-			    }
-			} catch (Exception e2) {
-			    e2.printStackTrace();
-			}
-		}
-		try {
-			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
-			java.util.logging.Logger.getLogger("net.sourceforge.htmlunit").setLevel(java.util.logging.Level.OFF); 
-			//htmlunit 对css和javascript的支持不好，所以请关闭之
-			webClient.getOptions().setJavaScriptEnabled(false);
-			webClient.getOptions().setCssEnabled(false);
-			//webClient.waitForBackgroundJavaScript(600*1000);  
-			//webClient.setAjaxController(new NicelyResynchronizingAjaxController()); 
-			//获取页面
-			url = Tools.getResource("dayHisDataUrl");
-			HtmlPage page;
-			page = webClient.getPage(url);
-			//webClient.waitForBackgroundJavaScript(1000*5); 
-			//webClient.setJavaScriptTimeout(5000);  
-//        //获取页面的TITLE
-//        str = page.getTitleText();
-//        System.out.println(str);
-//        //获取页面的XML代码
-//        str = page.asXml();
-//        System.out.println(str);
-//        //获取页面的文本
-//        str = page.asText();
-//        System.out.println(str);
-//        str = page.asXml();
-//        System.out.println(str);
-			DomElement domElement = null;
-				domElement = page.getElementById("REPORTID_tab1");
-			
-			if(domElement!=null){
-				String str = domElement.asText();
-				str = str.replaceAll("\r\n\t\r\n", " ").replaceAll("\r\n", "\t");
-				String[] rowArr = str.split("\t");
-			}
-			//System.out.println(domElement.asText());
-			//关闭webclient
-			webClient.closeAllWindows();
-		} catch (Exception e) {
-            e.printStackTrace();
-		}
+		String url = "http://quotes.money.163.com/service/chddata.html?code=1300141&start=20160112&end=20160428&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP";
+		String a = Tools.getByHttpUrl(url);
+		System.out.println(a);
 	}
 	
 	@SuppressWarnings("unchecked")

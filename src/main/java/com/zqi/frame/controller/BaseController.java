@@ -1,6 +1,7 @@
 package com.zqi.frame.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,22 @@ public class BaseController {
 
 	public BaseController() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	public Map<String, Map<String, Object>> findAGpDicMap(){
+		Map<String, Map<String, Object>> gpMap = new HashMap<String, Map<String,Object>>();
+		String dicSql = "select * from d_gpdic order by code asc";
+		List<Map<String, Object>> gpList = zqiDao.findAll(dicSql);
+		for(Map<String, Object> gp :gpList){
+			gpMap.put(gp.get("code").toString(), gp);
+		}
+		return gpMap;
+	}
+	
+	public List<Map<String, Object>> findAGpDicList(){
+		String dicSql = "select * from d_gpdic order by code asc";
+		List<Map<String, Object>> gpList = zqiDao.findAll(dicSql);
+		return gpList;
 	}
 
 }
