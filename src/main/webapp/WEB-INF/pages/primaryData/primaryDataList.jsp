@@ -170,6 +170,20 @@ $(function() {
 			}
 		});
 	});
+	$("#createTable").click(function(){
+		$.ajax({
+			url: 'init/createTable',
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data);
+			}
+		});
+	});
     $("#hisDayDataBtn").show();
 	$("#hisCwDataBtn").hide();
 	$("#hisMxDataBtn").hide();
@@ -224,6 +238,7 @@ $(function() {
 					<li><a id="importHisDayData">导入日期数据</a></li>
 					<li><a id="importTenDayData">导入日期10天前数据</a></li>
 					<li><a id="importSeasonData" href="javaScript:">导入日期季度数据</a></li>
+					<li><a id="createTable" href="javaScript:">建表</a></li>
 				</ul>
 			</div>
 			<div id="hisCwDataBtn" class="btn-group">

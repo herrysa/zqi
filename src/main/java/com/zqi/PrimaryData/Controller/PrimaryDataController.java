@@ -444,7 +444,7 @@ public class PrimaryDataController extends BaseController{
 		primaryDataController.findDayData("600000","600000","2016","01");*/
 		Calendar calendar = Calendar.getInstance();
 		Long ttt = calendar.getTimeInMillis();
-		String url = "http://query.sse.com.cn/security/stock/getStockListData2.do?&jsonCallBack=jsonpCallback66615&isPagination=true&stockCode=&csrcCode=&areaName=&stockType=1&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize=25&pageHelp.pageNo=1&_="+ttt;
+		String url = "http://query.sse.com.cn/security/stock/getStockListData2.do?&jsonCallBack=jsonpCallback66615&isPagination=true&stockCode=&csrcCode=&areaName=&stockType=2&pageHelp.cacheSize=1&pageHelp.beginPage=1&pageHelp.pageSize=25&pageHelp.pageNo=1&_="+ttt;
 		String result = "";
 		BufferedReader in = null;
 		try {
@@ -473,7 +473,7 @@ public class PrimaryDataController extends BaseController{
 			while ((line = in.readLine()) != null) {
 				result += line;
 			}
-			System.out.println();
+			System.out.println(result);
 		} catch (Exception e) {
 			System.out.println("发送GET请求出现异常！" + e);
 			e.printStackTrace();

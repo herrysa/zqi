@@ -101,9 +101,11 @@ public class ZqiDao implements IZqiDao{
 	@Override
 	public int addList(List<Map<String, Object>> list,String table) {
 		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(dataSource).withTableName(table);
-		for(Map<String, Object> log :list){
+		/*for(Map<String, Object> log :list){
 			simpleJdbcInsert.execute(log);
-		}
+		}*/
+		Map<String, Object>[] addArr = list.toArray(new Map[list.size()]);
+		simpleJdbcInsert.executeBatch(addArr);
 		return 0;
 	}
 	@Override

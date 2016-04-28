@@ -11,6 +11,7 @@ import com.zqi.frame.dao.impl.ZqiDao;
 public class BaseController {
 
 	protected Map<String, Object> resultMap = new HashMap<String, Object>();
+	protected String message = "";
 	
 	protected ZqiDao zqiDao; 
 	protected PagerFactory pagerFactory;

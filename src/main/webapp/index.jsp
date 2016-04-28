@@ -196,6 +196,7 @@
                             物料管理        
                         </a>
                         <ul id="primaryData" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        	<li><a href="javaScript:menuClick('init/initpage')"><i class="glyphicon glyphicon-user"></i>初始化</a></li>
                         	<li><a href="javaScript:menuClick('primaryData/primaryDataList')"><i class="glyphicon glyphicon-user"></i>原始数据</a></li>
                             <li><a href="javaScript:menuClick('hq/findHQ')"><i class="glyphicon glyphicon-th-list"></i>行情</a></li>
                         </ul>
