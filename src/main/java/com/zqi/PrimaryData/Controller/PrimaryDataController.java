@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.zqi.dataFinder.Finder163RHis;
 import com.zqi.dataFinder.Finder163RToday;
 import com.zqi.dataFinder.IFinderRToday;
 import com.zqi.frame.controller.BaseController;
@@ -151,11 +152,11 @@ public class PrimaryDataController extends BaseController{
 	
 	@ResponseBody
 	@RequestMapping("/fillPrimaryData")
-	public String findHisDayData(String fillDate,String fillType){
+	public String findHisDayData(String dateFrom,String dateTo,String fillType){
 		Calendar calendar = Calendar.getInstance();
-		if(fillDate!=null&&!"".equals(fillDate)){
+		if(dateTo!=null&&!"".equals(dateTo)){
 			DateConverter dateConverter = new DateConverter();
-			Date dateObj = (Date)dateConverter.convert(Date.class, fillDate);
+			Date dateObj = (Date)dateConverter.convert(Date.class, dateTo);
 			calendar.setTime(dateObj);
 		}
 		
@@ -190,6 +191,8 @@ public class PrimaryDataController extends BaseController{
         	findTodayData();
 		}else if("jidu".equals(fillType)){
 			findHisDayDataByJidu(""+year,""+season,-1);
+		}else if("date".equals(fillType)){
+			findRHisData(dateFrom,dateTo);
 		}else{
 			int days = -1;
 			try {
@@ -229,7 +232,7 @@ public class PrimaryDataController extends BaseController{
 			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
 			errorLog.put("type", "findTodayData");
 			errorLog.put("mainId", "findTodayDataSuccess");
-			errorLog.put("assistId", count+":"+msTime);
+			errorLog.put("assistId", count+":"+Math.floor(msTime/1000));
 			errorLog.put("info", period+"导入今日数据成功！");
 			errorLog.put("logDate", DateUtil.getDateTimeNow());
 			zqiDao.add(errorLog,"_log");
@@ -246,6 +249,46 @@ public class PrimaryDataController extends BaseController{
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public void findRHisData(String dateFrom, String dateTo){
+		String code = "";
+		TestTimer importRHisDataTime = new TestTimer("导入今日数据");
+		importRHisDataTime.begin();
+		try {
+			List<Map<String, Object>> gpList = findAGpDicList();
+			Finder163RHis finder163rHis = new Finder163RHis();
+			int count = 0;
+			for(Map<String, Object> gp : gpList){
+				code = gp.get("code").toString();
+				String daytable = gp.get("daytable").toString();
+				List<Map<String,Object>> dataList = finder163rHis.findRHis(gp, dateFrom, dateTo);
+				String deleteSql = "delete from "+daytable+" where code='"+code+"' and period between '"+dateFrom+"' and '"+dateTo+"'";
+				zqiDao.excute(deleteSql);
+				zqiDao.addList(dataList, daytable);
+				count += dataList.size();
+			}
+			long msTime = importRHisDataTime.doner();
+			Map<String, Object> errorLog = new HashMap<String, Object>();
+			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
+			errorLog.put("type", "findRHisData");
+			errorLog.put("mainId", "findRHisDataSuccess");
+			errorLog.put("assistId", count+":"+Math.floor(msTime/1000));
+			errorLog.put("info", dateFrom+" to "+dateTo+"导入历史日数据成功！");
+			errorLog.put("logDate", DateUtil.getDateTimeNow());
+			zqiDao.add(errorLog,"_log");
+			System.out.println("---------------"+dateFrom+" to "+dateTo+":"+count+"------------------");
+		} catch (Exception e) {
+			Map<String, Object> errorLog = new HashMap<String, Object>();
+			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
+			errorLog.put("type", "findRHisData");
+			errorLog.put("mainId", "findRHisDataError");
+			errorLog.put("assistId", code);
+			errorLog.put("info", dateFrom+" to "+dateTo+"导入历史日数据错误！");
+			errorLog.put("logDate", DateUtil.getDateTimeNow());
+			zqiDao.add(errorLog,"_log");
+			e.printStackTrace();
+		}
 	}
 	
 	public void findTodayDataSina(){

@@ -103,7 +103,7 @@ $(function() {
 	    });
     $("#reloadDataGrid").click(function(){
     	var gpCode = $("#gpCode").val();
-    	var period = $("#fillDate").val();
+    	var period = $("#dateFrom").val();
     	var url = "primaryData/primaryDataGridList?gpCode="+gpCode+"&period="+period;
     	jQuery('#jqGrid').jqGrid('setGridParam', {
 			url : url
@@ -111,9 +111,9 @@ $(function() {
     });
     
     $("#importTodayData").click(function(){
-		var fillDate = $("#fillDate").val();
+		var dateFrom = $("#dateFrom").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=today&fillDate='+fillDate,
+			url: 'primaryData/fillPrimaryData?fillType=today&dateFrom='+dateFrom,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -126,9 +126,9 @@ $(function() {
 		});
 	});
     $("#importTenDayData").click(function(){
-		var fillDate = $("#fillDate").val();
+		var dateFrom = $("#dateFrom").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=10&fillDate='+fillDate,
+			url: 'primaryData/fillPrimaryData?fillType=10&dateFrom='+dateFrom,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -141,9 +141,10 @@ $(function() {
 		});
 	});
     $("#importHisDayData").click(function(){
-		var fillDate = $("#fillDate").val();
+		var dateFrom = $("#dateFrom").val();
+		var dateTo = $("#dateTo").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=1&fillDate='+fillDate,
+			url: 'primaryData/fillPrimaryData?fillType=date&dateFrom='+dateFrom+'&dateTo='+dateTo,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -156,9 +157,9 @@ $(function() {
 		});
 	});
 	$("#importSeasonData").click(function(){
-		var fillDate = $("#fillDate").val();
+		var dateFrom = $("#dateFrom").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=jidu&fillDate='+fillDate,
+			url: 'primaryData/fillPrimaryData?fillType=jidu&dateFrom='+dateFrom,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -220,10 +221,10 @@ $(function() {
 			<option value="mx">成交明细数据</option>
 			</select>
 			<label>股票：</label><input id="gpCode" name="gpCode" type="hidden"style="width:100px"/><input id="gpName" name="gpName" type="text"style="width:100px"/>
-			<label>日期：</label><input id="fillDate" name="fillDate" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
+			<label>日期：</label><input id="dateFrom" name="dateFrom" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
 				value="${paramMap.beginDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>
-			<%-- <label>结束日期：</label><input id="endDate" name="endDate" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
-				value="${paramMap.endDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>&nbsp;&nbsp; --%>
+			<label>结束日期：</label><input id="dateTo" name="dateTo" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
+				value="${paramMap.endDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>
 			<button id="reloadDataGrid" type="button" class="btn btn-primary" >
 					查询
 			</button>
@@ -236,9 +237,9 @@ $(function() {
 				<ul class="dropdown-menu">
 					<li><a id="importTodayData">导入当日数据</a></li>
 					<li><a id="importHisDayData">导入日期数据</a></li>
-					<li><a id="importTenDayData">导入日期10天前数据</a></li>
+					<!-- <li><a id="importTenDayData">导入日期10天前数据</a></li>
 					<li><a id="importSeasonData" href="javaScript:">导入日期季度数据</a></li>
-					<li><a id="createTable" href="javaScript:">建表</a></li>
+					<li><a id="createTable" href="javaScript:">建表</a></li> -->
 				</ul>
 			</div>
 			<div id="hisCwDataBtn" class="btn-group">
