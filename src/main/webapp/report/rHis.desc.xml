@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?">
+<cols>
+<col name="deptId" datatype="string">部门ID</col>
+<col name="name" datatype="string">部门名称</col>
+</cols> 

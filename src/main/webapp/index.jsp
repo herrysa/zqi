@@ -203,12 +203,13 @@
                     </li>
  
                     <li>
-                        <a href="#dataAnalysis" class="nav-header collapsed" data-toggle="collapse">
+                        <a href="#report" class="nav-header collapsed" data-toggle="collapse">
                             <i class="glyphicon glyphicon-globe"></i>
-             数据分析
+							 报表系统
                             <!-- <span class="label label-warning pull-right">5</span> -->
                         </a>
-                        <ul id="dataAnalysis" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        <ul id="report" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                        	<li><a href="javaScript:menuClick('report/reportMain')"><i class="glyphicon glyphicon-user"></i>报表定义</a></li>
                         	<li><a href="javaScript:menuClick('marketTemper/main')"><i class="glyphicon glyphicon-user"></i>市场温度</a></li>
                         </ul>
                     </li>

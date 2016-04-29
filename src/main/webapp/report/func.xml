@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+	<functions>
+		<category name="自定义函数">
+			<function name="sourcepayinSum" >
+				<para>起始期间</para>
+				<para>结束期间</para>
+				<para>科室ID</para>
+				<para>项目类别，可选</para>
+				<returnDatatype>double</returnDatatype> 
+			</function>
+		</category>
+	</functions>
+</root>

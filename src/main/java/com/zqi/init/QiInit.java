@@ -37,10 +37,11 @@ public class QiInit {
     String[] col = {};
     static Map<String, String> priceMap = new HashMap<String, String>();
 	public static void main(String[] args) { 
-		creatZqiTable();
-		creatGpInfo();
-		createGpCwInfo();
-		creatLogTable();
+		//creatZqiTable();
+		//creatGpInfo();
+		//createGpCwInfo();
+		creatReportTable();
+		//creatLogTable();
 		//insertDayData();
 		//findBkInfo();
 		//Calendar calendar = Calendar.getInstance();
@@ -264,6 +265,26 @@ public class QiInit {
 	    		dbHelper.prepareStatementSql(createql);
 	    		dbHelper.pst.execute();
 	    	}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void creatReportTable(){
+		try {
+			DBHelper dbHelper = new DBHelper();
+			String createql= "select count(*) from information_schema.TABLES where table_name = 'r_report' and TABLE_SCHEMA = 'zqi'";
+			dbHelper.prepareStatementSql(createql);
+			ResultSet rs;
+			rs = dbHelper.pst.executeQuery();
+			while(rs.next()){
+		    	int count = rs.getInt(1);
+		    	if(count==0){
+		    		createql= "create table r_report(code varchar(20),name varchar(20),type varchar(20),remark varchar(50));";
+		    		dbHelper.prepareStatementSql(createql);
+		    		dbHelper.pst.execute();
+		    	}
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

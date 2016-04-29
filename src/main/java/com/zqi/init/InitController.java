@@ -29,6 +29,7 @@ public class InitController extends BaseController{
 			createGpInfoTable();
 			createGpCwInfoTable();
 			createGpFhInfoTable();
+			creatReportTable();
 			creatLogTable();
 			message = "建表成功！";
 		} catch (Exception e) {
@@ -74,6 +75,12 @@ public class InitController extends BaseController{
 		String createql= "create table i_gpFh(period varchar(10),code varchar(20),name varchar(20),ssrq varchar(10),info varchar(100));";
 		zqiDao.excute(createql);
 		System.out.println("--------------股票分红信息表建立完毕-----------------");
+	}
+	
+	private void creatReportTable(){
+		String createql= "create table r_report(code varchar(20),name varchar(20),type varchar(20),remark varchar(50));";
+		zqiDao.excute(createql);
+		System.out.println("--------------报表表建立完毕-----------------");
 	}
 	
 	private void creatLogTable(){

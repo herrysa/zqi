@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.controller.pagers.PagerFactory;
 import com.zqi.frame.dao.impl.ZqiDao;
 
@@ -44,6 +45,13 @@ public class BaseController {
 
 	public BaseController() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	protected void makeResultMap(JQueryPager pagedRequests){
+		resultMap.put("page", pagedRequests.getPageNumber());
+		resultMap.put("records", pagedRequests.getTotalNumberOfRows());
+		resultMap.put("rows", pagedRequests.getList());
+		resultMap.put("total", pagedRequests.getTotalNumberOfPages());
 	}
 	
 	public Map<String, Map<String, Object>> findAGpDicMap(){
