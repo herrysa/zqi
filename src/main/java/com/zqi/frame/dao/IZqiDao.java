@@ -6,6 +6,7 @@ import java.util.Map;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.BSPager;
 import com.zqi.frame.controller.pagers.JQueryPager;
+import com.zqi.frame.util.SQLUtil;
 
 public interface IZqiDao {
 
@@ -20,7 +21,9 @@ public interface IZqiDao {
      * @param sql 有参数语句  
      * @param obj 参数值数组  
      */  
-    public int update(String sql,Object[] obj);   
+    public int update(String sql);
+    
+    //public int update(SQLUtil sqlUtil, String id);
     
     public void excute(String sql);
     

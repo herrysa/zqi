@@ -25,7 +25,7 @@ $(function() {
 			<script type="text/javascript"> 
 			$(document).ready(function () {
 				$("#report_gridtable").jqGrid({
-					url: 'report/reportList',
+					url: 'report/reportGridList',
 					mtype: "GET",
 					styleUI : 'Bootstrap',
 					datatype: "json",
@@ -38,6 +38,10 @@ $(function() {
 					autowidth:false,
 					height: 400,
 					rowNum: 20,
+					ondblClickRow:function(rowid, iRow, iCol, e){
+						$(".modal-body","#myModal").load("report/show");
+						$('#myModal').modal('show');
+					},
 					pager: "#report_gridpager"
 				});
 			});

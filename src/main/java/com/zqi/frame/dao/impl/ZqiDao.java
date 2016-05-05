@@ -1,6 +1,5 @@
 package com.zqi.frame.dao.impl;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,7 +9,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -20,6 +18,7 @@ import com.zqi.frame.controller.filter.PropertyFilter.MatchType;
 import com.zqi.frame.controller.pagers.BSPager;
 import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.dao.IZqiDao;
+import com.zqi.frame.util.SQLUtil;
 
 @Repository("zqiDao")
 public class ZqiDao implements IZqiDao{
@@ -55,10 +54,11 @@ public class ZqiDao implements IZqiDao{
 
 
 	@Override
-	public int update(String sql, Object[] obj) {
-		return jdbcTemplate.update(sql, obj);
+	public int update(String sql) {
+		return jdbcTemplate.update(sql);
 	}
-
+	
+	
 	@Override
 	public int findRowCountBySQL(String sql) {
 		// TODO Auto-generated method stub
@@ -193,7 +193,5 @@ public class ZqiDao implements IZqiDao{
 		paginatedList.setList(rs);
 		return paginatedList;
 	}
-	
-	
 
 }

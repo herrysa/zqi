@@ -60,4 +60,58 @@
     <bean id = "jdbcTemplate"	class = "org.springframework.jdbc.core.JdbcTemplate">    
          <property name = "dataSource" ref="dataSource"/>    
     </bean> 
+    
+    <!-- MyBatis begin -->
+    <!-- <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="com.zqi"/>
+        	<property name="typeAliasesSuperType" value="com.thinkgem.jeesite.common.persistence.BaseEntity"/> 
+        <property name="mapperLocations" value="classpath:/mappings/**/*.xml"/>
+		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+    </bean>-->
+    
+    <!-- 扫描basePackage下所有以@MyBatisDao注解的接口 -->
+    <!-- <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <property name="basePackage" value="com.zqi"/>
+        <property name="annotationClass" value="com.zqi.frame.dao.annotation.MyBatisDao"/>
+    </bean>-->
+    
+    <!-- 定义事务 -->
+	<!-- <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean> -->
+	
+	<!-- 配置 Annotation 驱动，扫描@Transactional注解的类定义事务  -->
+	<!-- <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>-->
+	
+	<!-- <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>-->
+    <!-- MyBatis end -->
+    
+    <!-- hibernate begin -->
+    <!-- Hibernate SessionFactory -->
+    <!-- <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name ="packagesToScan" value= "com.zqi" />
+        <property name="hibernateProperties">
+            <value>
+                hibernate.dialect=${hibernate.dialect}
+                hibernate.query.substitutions=true 'Y', false 'N'
+                hibernate.cache.use_second_level_cache=true
+                hibernate.cache.provider_class=org.hibernate.cache.EhCacheProvider
+                hibernate.cache.use_query_cache=false 
+                hibernate.jdbc.fetch_size 50
+                hibernate.jdbc.batch_size 30
+                hibernate.show_sql=false
+                hibernate.format_sql=true
+ 
+            </value>
+        </property>
+    </bean>
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean> -->
+    
 </beans>
