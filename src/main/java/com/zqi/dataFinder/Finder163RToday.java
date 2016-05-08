@@ -44,7 +44,8 @@ public class Finder163RToday implements IFinderRToday{
 					for(int i=0;i<rDayColumn.length;i++){
 						String key = rDayColumn[i];
 						if(key.equals("period")){
-							data.put(key, day);
+							//data.put(key, day);
+							data.put(key, "2016-05-06");
 						}else{
 							String dataKey = rDayColumn163[i];
 							String dataType = rDayColumnType[i];
@@ -56,12 +57,13 @@ public class Finder163RToday implements IFinderRToday{
 								String v = "";
 								if(value2!=null){
 									v = value2.toString();
-									if("decimal".equals(dataType)){
-										data.put(key, new BigDecimal(v));
-									}else{
-										data.put(key, v);
+									if(!"".equals(v)&&!"null".equals(v)){
+										if("decimal".equals(dataType)){
+											data.put(key, new BigDecimal(v));
+										}else{
+											data.put(key, v);
+										}
 									}
-									
 								}
 							}else{
 								Object value = item.get(dataKey);
@@ -69,7 +71,17 @@ public class Finder163RToday implements IFinderRToday{
 								if(value!=null){
 									v = value.toString();
 									if("decimal".equals(dataType)){
-										data.put(key, new BigDecimal(v));
+										if(!"".equals(v)&&!"null".equals(v)){
+											if("changepercent".equals(key)){
+												data.put(key, new BigDecimal(v).multiply(new BigDecimal(100)));
+											}else if("turnoverrate".equals(key)){
+												data.put(key, new BigDecimal(v).multiply(new BigDecimal(100)));
+											}else if("fiveminute".equals(key)){
+												data.put(key, new BigDecimal(v).multiply(new BigDecimal(100)));
+											}else{
+												data.put(key, new BigDecimal(v));
+											}
+										}
 									}else{
 										data.put(key, v);
 									}

@@ -29,6 +29,7 @@ public class UtilController extends BaseController{
 			List result = new ArrayList<Map<String,String>>();
 			String q = request.getParameter( "name_startsWith" );
 			q = URLDecoder.decode( q, "UTF-8" );
+			q = q.replace("'", "");
 			String sql = request.getParameter( "sql" );
 			sql = sql.replaceAll("&#039;", "'");
 			sql = sql.replaceAll("%q%", "%"+q+"%");

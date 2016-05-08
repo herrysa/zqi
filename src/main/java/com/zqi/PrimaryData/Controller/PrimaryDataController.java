@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -35,6 +37,7 @@ import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.controller.pagers.PagerFactory;
+import com.zqi.frame.controller.pagers.SortOrderEnum;
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
 import com.zqi.unit.DateConverter;
@@ -105,32 +108,61 @@ public class PrimaryDataController extends BaseController{
 			List<Map<String, Object>> rsList = new ArrayList<Map<String,Object>>();
 			String dicSql = "select * from d_gpdic order by symbol asc";
 			List<Map<String, Object>> gpList = zqiDao.findAll(dicSql);
+			List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 			JQueryPager pagedRequests = null;
 			pagedRequests = (JQueryPager) pagerFactory.getPager(
 					PagerFactory.JQUERYTYPE, request);
 			int start = pagedRequests.getStart() , end = pagedRequests.getEnd();
-			int gpIndex=start;
-			for(;gpIndex<=end;gpIndex++){
+			int gpIndex=0;
+			String dayDataSql = "";
+			Set<String> daytableSet = new HashSet<String>();
+			for(;gpIndex<=gpList.size()-1;gpIndex++){
 				Map<String, Object> gp = gpList.get(gpIndex);
 				String tableName = "" , symbol = "";
 				tableName = gp.get("daytable").toString();
 				symbol = gp.get("symbol").toString();
-				String dayDataSql = "select * from "+tableName+" where code='"+symbol+"' and period='"+period+"'";
-				Map<String, Object> rs0 = zqiDao.findFirst(dayDataSql);
+				//dayDataSql += "select * from "+tableName+" where code='"+symbol+"' and period='"+period+"' union ";
+				daytableSet.add(tableName);
+				/*Map<String, Object> rs0 = zqiDao.findFirst(dayDataSql);
 				if(!rs0.isEmpty()){
 					rsList.add(rs0);
+				}*/
+			}
+			String tableStr1 = "" , tableStr2 = "" ;
+			int i = 0;
+			for(String table : daytableSet){
+				if(i<daytableSet.size()/2){
+					tableStr1 += table+",";
+				}else{
+					tableStr2 += table+",";
 				}
+				i++;
 			}
-			for(Map<String, Object> data : rsList){
-				String settlement = data.get("settlement").toString();
-				String close = data.get("close").toString();
-				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);;
-				data.put("changepercent", changePercent.toString());
+			if(!"".equals(tableStr1)){
+				tableStr1 = tableStr1.substring(0, tableStr1.length()-1);
+				tableStr2 = tableStr2.substring(0, tableStr2.length()-1);
+				dayDataSql = "select * from (select * from "+tableStr1;
+				dayDataSql += " union select * from "+tableStr2+") u "+" where u.period='"+period+"'";
 			}
-			pagedRequests.setTotalNumberOfRows(gpList.size());
+			dayDataSql = "select * from daytable_all where period='"+period+"'";
+			String orderName = pagedRequests.getSortCriterion();
+			if(orderName==null){
+				pagedRequests.setSortCriterion("changepercent");
+				pagedRequests.setSortDirection(SortOrderEnum.DESCENDING);
+			}else{
+				pagedRequests.setSortCriterion(""+orderName);
+			}
+			pagedRequests = zqiDao.findWithFilter(pagedRequests, dayDataSql, filters);
+//			for(Map<String, Object> data : rsList){
+//				String settlement = data.get("settlement").toString();
+//				String close = data.get("close").toString();
+//				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);;
+//				data.put("changepercent", changePercent.toString());
+//			}
+			//pagedRequests.setTotalNumberOfRows(rsList.size());
 			resultMap.put("page", pagedRequests.getPageNumber());
 			resultMap.put("records", pagedRequests.getTotalNumberOfRows());
-			resultMap.put("rows", rsList);
+			resultMap.put("rows", pagedRequests.getList());
 			resultMap.put("total", pagedRequests.getTotalNumberOfPages());
 		}
 		return resultMap;

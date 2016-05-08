@@ -7,63 +7,6 @@
 </head>
 <script>
 $(function() {
-	$('#table').bootstrapTable({
-    });
-	function queryParams() {
-	    return {
-	        type: 'owner',
-	        sort: 'updated',
-	        direction: 'desc',
-	        per_page: 100,
-	        page: 1
-	    };
-	}
-    /* $("#demo_grid1").bs_grid({
- 
-        ajaxFetchDataURL: "${ctx}/primaryData/primaryDataGridList?gpCode=${gpCode}&period=${period}",
-        row_primary_key: "period",
- 
-        columns: [
-            {field: "period", header: "日期"},
-            {field: "code", header: "编码"},
-            {field: "name", header: "名称"},
-            {field: "open", header: "开盘价"},
-            {field: "close", header: "收盘价"},
-            {field: "high", header: "最高价"}
-        ],
- 
-        sorting: [
-            {sortingName: "period", field: "period", order: "descending"},
-            {sortingName: "code", field: "code", order: "ascending"},
-            {sortingName: "open", field: "open", order: "none"},
-            {sortingName: "close", field: "close", order: "none"}
-        ],
- 
-        filterOptions: {
-            filters: [
-                {
-                    filterName: "period", "filterType": "text", field: "period", filterLabel: "日期",
-                    excluded_operators: [],
-                    filter_interface: [
-                        {
-                            filter_element: "input",
-                            filter_element_attributes: {"type": "text"}
-                        }
-                    ]
-                },
-                {
-                    filterName: "code", "filterType": "text", field: "code", filterLabel: "编码",
-                    excluded_operators: ["equal", "less_or_equal"],
-                    filter_interface: [
-                        {
-                            filter_element: "input",
-                            filter_element_attributes: {"type": "text"}
-                        }
-                    ]
-                }
-            ]
-        }
-    });*/
 	$( "#gpName" ).autocomplete({
 	      source: function( request, response ) {
 	        $.ajax({
@@ -205,6 +148,12 @@ $(function() {
     	}
     });
 	
+    var searchFormHeight = $("#primaryDataSearchForm").height();
+    var contentHeight = $("#mainContent").height();
+    var contentWidth = $("#mainContent").width();
+    gridWidth = contentWidth-5;
+    gridHeight = contentHeight-searchFormHeight-10;
+    $("#jqGrid_div").height(gridHeight);
 }); 
 
 </script>
@@ -212,7 +161,7 @@ $(function() {
 <body>
 	<div class="page">
 		<div class="pageContent">
-	<form:form id="searchForm" modelAttribute="article" action="primaryData/fillPrimaryData" method="post" class="breadcrumb form-search">
+	<form id="primaryDataSearchForm" action="primaryData/fillPrimaryData" method="post" class="breadcrumb form-search">
 		<div>
 			<label>数据类型：</label>
 			<select id="showDataType" style="width:100px">
@@ -257,8 +206,8 @@ $(function() {
 					导入日期明细数据
 			</button>
 		</div>
-	</form:form>
-	<div style="margin-left:20px">
+	</form>
+	<div id="jqGrid_div" style="margin:2px;">
     <table id="jqGrid"></table>
     <div id="jqGridPager"></div>
 	</div>
@@ -271,7 +220,7 @@ $(function() {
                 styleUI : 'Bootstrap',
                 datatype: "json",
                 colModel: [
-                    { name: 'period', label: '日期', key: true, width: 75 },
+                    { name: 'period', label: '日期', width: 75 },
                     { name: 'code', label: '编码', width: 100 },
                     { name: 'name', label: '名称', width: 100 },
                     { name: 'changepercent', label: '涨幅',align:'right', formatter:'number',width: 100 },
@@ -280,14 +229,43 @@ $(function() {
                     { name: 'close', label: '收盘价',align:'right', formatter:'number', width: 80 },
                     { name: 'high', label: '最高价',align:'right', formatter:'number', width: 80 },
                     { name: 'low', label: '最低价',align:'right', formatter:'number', width: 80 },
-                    { name: 'volume', label: '成交量',align:'right', formatter:'number', width: 130 },
-                    { name: 'amount', label: '成交额',align:'right', formatter:'number', width: 130 }
+                    { name: 'volume', label: '成交量(万)',align:'right', formatter:'number', width: 130 },
+                    { name: 'amount', label: '成交额(万)',align:'right', formatter:'number', width: 130 },
+                    { name: 'turnoverrate', label: '换手率',align:'right', formatter:'number', width: 130 },
+                    { name: 'fiveminute', label: '5分钟涨幅',align:'right', formatter:'number', width: 130 },
+                    { name: 'lb', label: '量比',align:'right', formatter:'number', width: 130 },
+                    { name: 'pe', label: '市盈率',align:'right', formatter:'number', width: 130 },
+                    { name: 'mcap', label: '流通市值',align:'right', formatter:'number', width: 130 },
+                    { name: 'mfsum', label: '每股收益',align:'right', formatter:'number', width: 130 },
+                    { name: 'mfratio2', label: '净利润',align:'right', formatter:'number', width: 130 }
                 ],
 				page: 1,
+				rownumbers :true,
                 autowidth:false,
                 height: '100%',
                 rowNum: 20,
-                pager: "#jqGridPager"
+                pager: "#jqGridPager",
+                gridComplete:function(){
+                	//alert(gridHeight);
+                	$(this).setGridWidth(gridWidth);
+                	$(this).setGridHeight(gridHeight-85);
+                	var rowIds = $(this).getDataIDs();
+               		var ret = $(this).jqGrid('getRowData');
+                	var rowNum = rowIds.length;
+                	for (i=0;i<rowNum;i++){
+                		var id = rowIds[i];
+	     		    	var data = ret[i];
+	     		    	if(data.changepercent>0){
+	     		    		$(this).setCell(id,'changepercent','',{color:'red','font-weight':700});
+	     		    	}else if(data.changepercent<0){
+	     		    		$(this).setCell(id,'changepercent','',{color:'green','font-weight':700});
+	     		    	}
+	     		    	$(this).setCell(id,'volume',data.volume/10000);
+	     		    	$(this).setCell(id,'amount',data.volume/10000);
+	     		    	//data.volume=data.volume/100/10000;
+	     		    	//data.amount=data.amount/10000/10000;
+                	}
+                }
             });
         });
 

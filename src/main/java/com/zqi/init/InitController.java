@@ -1,8 +1,10 @@
 package com.zqi.init;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +41,33 @@ public class InitController extends BaseController{
 		return message;
 	}
 	
+	@ResponseBody
+	@RequestMapping("/checkDic")
+	public String checkDic(){
+		try {
+			IFinderGpDic iFinderGpDicSse = new FinderGpDicSe();
+			List<Map<String, Object>> gpDiList = iFinderGpDicSse.findGpDic();
+			zqiDao.addList(gpDiList, "d_gpdic");
+			System.out.println("--------------股票字典添加完毕-----------------");
+			List<String> createDaytableSqls = new ArrayList<String>();
+			for(Map<String, Object> gp : gpDiList){
+				String daytble = gp.get("daytable").toString();
+				String createSql = "create table "+daytble+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3));";
+				if(!createDaytableSqls.contains(createSql)){
+					createDaytableSqls.add(createSql);
+				}
+			}
+			String[] sqls =  createDaytableSqls.toArray(new String[createDaytableSqls.size()]);
+			zqiDao.bathUpdate(sqls);
+			System.out.println("--------------日数据表建立完毕-----------------");
+			message = "建表成功！";
+		} catch (Exception e) {
+			message = "建表失败！";
+			e.printStackTrace();
+		}
+		return message;
+	}
+	
 	private void createDicAndDayTable(){
 		String dicSql= "create table d_gpdic(code varchar(20),symbol varchar(20),name varchar(20),symbolName varchar(20),listDate varchar(10),totalShares varchar(20),totalFlowShares varchar(20),endDate varchar(10),pinyinCode varchar(10),daytable varchar(20),remark varchar(50));";
 		zqiDao.excute(dicSql);
@@ -47,12 +76,23 @@ public class InitController extends BaseController{
 		zqiDao.addList(gpDiList, "d_gpdic");
 		System.out.println("--------------股票字典添加完毕-----------------");
 		List<String> createDaytableSqls = new ArrayList<String>();
+		String daytableUnion = "";
+		Set<String> daytableSet = new HashSet<String>();
 		for(Map<String, Object> gp : gpDiList){
 			String daytble = gp.get("daytable").toString();
-			String createSql = "create table "+daytble+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3));";
+			daytableSet.add(daytble);
+			String createSql = "create table "+daytble+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3))ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 			if(!createDaytableSqls.contains(createSql)){
 				createDaytableSqls.add(createSql);
 			}
+		}
+		for(String daytable : daytableSet){
+			daytableUnion += daytable+",";
+		}
+		if(!"".equals(daytableUnion)){
+			daytableUnion = daytableUnion.substring(0, daytableUnion.length()-1);
+			String createSql = "create table daytable_all (period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3))ENGINE=MRG_MyISAM DEFAULT CHARSET=utf8 INSERT_METHOD=LAST UNION=("+daytableUnion+");";
+			zqiDao.createTableBySQL(createSql);
 		}
 		String[] sqls =  createDaytableSqls.toArray(new String[createDaytableSqls.size()]);
 		zqiDao.bathUpdate(sqls);

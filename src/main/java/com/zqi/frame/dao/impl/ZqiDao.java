@@ -17,8 +17,8 @@ import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.filter.PropertyFilter.MatchType;
 import com.zqi.frame.controller.pagers.BSPager;
 import com.zqi.frame.controller.pagers.JQueryPager;
+import com.zqi.frame.controller.pagers.SortOrderEnum;
 import com.zqi.frame.dao.IZqiDao;
-import com.zqi.frame.util.SQLUtil;
 
 @Repository("zqiDao")
 public class ZqiDao implements IZqiDao{
@@ -119,6 +119,17 @@ public class ZqiDao implements IZqiDao{
 	}
 	@Override
 	public JQueryPager findWithFilter(JQueryPager paginatedList,String sql,List<PropertyFilter> filters) {
+		String orderBy = "";
+		String orderName = paginatedList.getSortCriterion();
+		if(orderName!=null){
+			SortOrderEnum direction = paginatedList.getSortDirection();
+			if(direction==SortOrderEnum.ASCENDING){
+				orderBy += "order by " + orderName + " asc";
+			}else{
+				orderBy += "order by " + orderName + " desc";
+			}
+			
+		}
 		Iterator itr = filters.iterator();
 		List rs = null;
 		try {
@@ -174,6 +185,9 @@ public class ZqiDao implements IZqiDao{
                 }
                 sql += " and "+fieldName+operator+v;
 	        }
+            if(!"".equals(orderBy)){
+            	sql += " "+orderBy;
+            }
             String listSql = sql+" limit "+paginatedList.getStart()+","+paginatedList.getEnd();
             rs = jdbcTemplate.queryForList(listSql);
             int fromIndex = sql.indexOf("from");
