@@ -1,6 +1,7 @@
 package com.zqi.init;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +46,48 @@ public class InitController extends BaseController{
 	@RequestMapping("/checkDic")
 	public String checkDic(){
 		try {
+			String dicSql = "select * from d_gpdic";
+			List<Map<String, Object>> dicList = zqiDao.findAll(dicSql);
+			Map<String, Map<String, Object>> dicMap = new HashMap<String, Map<String,Object>>();
+			for(Map<String, Object> gpDic : dicList){
+				String code = gpDic.get("code").toString();
+				dicMap.put(code, gpDic);
+			}
 			IFinderGpDic iFinderGpDicSse = new FinderGpDicSe();
 			List<Map<String, Object>> gpDiList = iFinderGpDicSse.findGpDic();
-			zqiDao.addList(gpDiList, "d_gpdic");
-			System.out.println("--------------股票字典添加完毕-----------------");
+			List<Map<String, Object>> addGpList = new ArrayList<Map<String,Object>>();
+			List<String> deleteList = new ArrayList<String>();
+			for(Map<String, Object> gpNew : gpDiList){
+				String code = gpNew.get("code").toString();
+				Map<String, Object> gpDic = dicMap.get(code);
+				boolean addFlag = false;
+				if(gpDic!=null){
+					String oldName = gpDic.get("name").toString();
+					String newName = gpNew.get("name").toString();
+					if(!oldName.equals(newName)){
+						addFlag = true;
+						deleteList.add("delete from d_gpdic where code='"+code+"'");
+					}
+				}else{
+					addFlag = true;
+				}
+				if(addFlag){
+					addGpList.add(gpNew);
+				}
+			}
+			String[] delSqls = deleteList.toArray(new String[deleteList.size()]);
+			zqiDao.bathUpdate(delSqls);
+			zqiDao.addList(addGpList, "d_gpdic");
+			System.out.println("--------------股票字典更新完毕-----------------");
 			List<String> createDaytableSqls = new ArrayList<String>();
-			for(Map<String, Object> gp : gpDiList){
+			for(Map<String, Object> gp : addGpList){
 				String daytble = gp.get("daytable").toString();
+				String findDaytable = "select count(*) count from information_schema.TABLES where table_name = '"+daytble+"' and TABLE_SCHEMA = 'zqi'";
+				Map<String, Object> dayTableCount = zqiDao.findFirst(findDaytable);
+				boolean exist = true;
+				if(dayTableCount!=null){
+					String xxxxxxxxxxxxxxxxxxxxxxx = dayTableCount.get("count").toString();
+				}
 				String createSql = "create table "+daytble+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3));";
 				if(!createDaytableSqls.contains(createSql)){
 					createDaytableSqls.add(createSql);
@@ -59,7 +95,7 @@ public class InitController extends BaseController{
 			}
 			String[] sqls =  createDaytableSqls.toArray(new String[createDaytableSqls.size()]);
 			zqiDao.bathUpdate(sqls);
-			System.out.println("--------------日数据表建立完毕-----------------");
+			System.out.println("--------------日数据表更新完毕-----------------");
 			message = "建表成功！";
 		} catch (Exception e) {
 			message = "建表失败！";

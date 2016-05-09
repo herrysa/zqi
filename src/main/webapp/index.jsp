@@ -66,6 +66,15 @@
 		.form-search{
 			margin-bottom :0
 		}
+		.modal-full {
+			width: 100%;
+			height:100%;
+			margin:0
+		}
+		#modalDialog .modal-content{
+			height:100%;
+			margin:0
+		}
     </style>
 </head>
 <body>
@@ -93,7 +102,7 @@
 						<ul class="nav nav-pills nav-stacked">
 							<li><a href="javaScript:menuClick('init/initpage')">初始化</a></li>
 							<li><a href="javaScript:menuClick('primaryData/primaryDataList')">原始数据</a></li>
-							<li><a href="javaScript:menuClick('chart/showChart')">图形</a></li>
+							<li><a href="javaScript:menuClick('chart/kChart?code=600847')">图形</a></li>
 							<li><a href="javaScript:menuClick('hq/findHQ')">行情</a></li>
 						</ul>
 				      </div>
@@ -129,5 +138,22 @@
 			foot
 		</div>
 	</div>
+	<div class="modal fade" id="modalDialog" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-full" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				  
+				</div>
+				<div class="modal-body">
+					1111111111
+				</div>
+      <!-- <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Send message</button>
+      </div> -->
+    </div>
+  </div>
+</div>
 </body>
 </html>

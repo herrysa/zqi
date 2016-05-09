@@ -20,5 +20,5 @@
 <link rel="Stylesheet" href="${ctx}/scripts/jerichotab/css/jquery.jerichotab.css" />
 <script type="text/javascript" src="${ctx}/scripts/jerichotab/js/jquery.jerichotab.js"></script>
 
-<script type="text/javascript" src="${ctx}/scripts/echarts/echarts-all.js"></script>
+<script type="text/javascript" src="${ctx}/scripts/echarts/echarts.min.js"></script>
 

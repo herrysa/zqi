@@ -245,6 +245,13 @@ $(function() {
                 height: '100%',
                 rowNum: 20,
                 pager: "#jqGridPager",
+                ondblClickRow:function(rowid,iRow,iCol, e){
+                	var rowData = $(this).jqGrid('getRowData',rowid);
+                	var code = rowData.code;
+                	$('.modal-body','#modalDialog').html("");
+                	$('.modal-body','#modalDialog').load("chart/kChart?code="+code);
+                	$('#modalDialog').modal('show');
+                },
                 gridComplete:function(){
                 	//alert(gridHeight);
                 	$(this).setGridWidth(gridWidth);
