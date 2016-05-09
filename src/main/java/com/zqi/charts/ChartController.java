@@ -29,10 +29,11 @@ public class ChartController extends BaseController{
 	@RequestMapping("/kChart")
 	public String kChart(HttpServletRequest request,ModelMap model){
 		String code = request.getParameter("code");
+		String name = request.getParameter("name");
 		String dayDataSql = "select * from daytable_all where code='"+code+"' order by period asc limit 0,50";
 		List<Map<String, Object>> dataList = zqiDao.findAll(dayDataSql);
 		Map<String, String> optionMap = new HashMap<String, String>();
-		optionMap.put("name", "ee");
+		optionMap.put("name", name);
 		String kChartOption  = ChartsUtil.getKCahrtOption(optionMap, dataList);
 		//获取数据
 

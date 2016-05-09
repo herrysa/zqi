@@ -248,8 +248,9 @@ $(function() {
                 ondblClickRow:function(rowid,iRow,iCol, e){
                 	var rowData = $(this).jqGrid('getRowData',rowid);
                 	var code = rowData.code;
+                	var name = rowData.name;
                 	$('.modal-body','#modalDialog').html("");
-                	$('.modal-body','#modalDialog').load("chart/kChart?code="+code);
+                	$('.modal-body','#modalDialog').load("chart/kChart?code="+code+"&name="+name);
                 	$('#modalDialog').modal('show');
                 },
                 gridComplete:function(){

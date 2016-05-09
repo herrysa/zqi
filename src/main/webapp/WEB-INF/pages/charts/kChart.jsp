@@ -184,7 +184,6 @@ $(function() {
 		        	};
 
 		        // 为echarts对象加载数据 
-		        alert();
 		        kChart.setOption(option1); 
 </script>
 		</div>
