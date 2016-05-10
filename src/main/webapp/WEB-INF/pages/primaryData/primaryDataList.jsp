@@ -246,12 +246,15 @@ $(function() {
                 rowNum: 20,
                 pager: "#jqGridPager",
                 ondblClickRow:function(rowid,iRow,iCol, e){
-                	var rowData = $(this).jqGrid('getRowData',rowid);
-                	var code = rowData.code;
-                	var name = rowData.name;
-                	$('.modal-body','#modalDialog').html("");
-                	$('.modal-body','#modalDialog').load("chart/kChart?code="+code+"&name="+name);
+                   	$('.modal-body','#modalDialog').html("");
                 	$('#modalDialog').modal('show');
+                	var _thisGrid = $(this);
+                	setTimeout(function(){
+                		var rowData = _thisGrid.jqGrid('getRowData',rowid);
+                    	var code = rowData.code;
+                    	var name = rowData.name;
+                    	$('.modal-body','#modalDialog').load("chart/kChart?code="+code+"&name="+name);
+                	},500);
                 },
                 gridComplete:function(){
                 	//alert(gridHeight);

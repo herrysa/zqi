@@ -19,11 +19,14 @@ public class Finder163RHis implements IFinderRHis{
 		dateFrom = dateFrom.replace("-", "");
 		dateTo = dateTo.replace("-", "");
 		String code = gp.get("code").toString();
+		String type = gp.get("type").toString();
 		String code163 = "";
-		if(code.startsWith("6")){
+		if("0".equals(type)){
 			code163 = "0"+code;
-		}else{
+		}else if("1".equals(type)){
 			code163 = "1"+code;
+		}else{
+			code163 = code;
 		}
 		String urlTemp = url;
 		urlTemp = urlTemp.replace("%code%", code163);
@@ -50,9 +53,20 @@ public class Finder163RHis implements IFinderRHis{
 				}
 				String datatype = rDayColumnType[c];
 				int dataIndex = Integer.parseInt(datakey);
+				if(dataIndex>col.length-1){
+					continue;
+				}
 				String v = col[dataIndex];
+				if(v==null||"".equals(v)){
+					continue;
+				}
 				if("code".equals(key)){
 					v = v.substring(1);
+					if("2".equals(type)){
+						v = "0"+v;
+					}else if("3".equals(type)){
+						v = "1"+v;
+					}
 				}
 				if("name".equals(key)){
 					v = v.replaceAll(" ", "");
@@ -61,11 +75,13 @@ public class Finder163RHis implements IFinderRHis{
 					if("None".equals(v)){
 						v = "0";
 					}
+					//System.out.println(v);
 					data.put(key, new BigDecimal(v));
 				}else{
 					data.put(key, v);
 				}
 			}
+			data.put("type", type);
 			dataList.add(data);
 		}
 		return dataList;

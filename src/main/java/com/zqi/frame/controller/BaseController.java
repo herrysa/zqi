@@ -59,7 +59,7 @@ public class BaseController {
 		String dicSql = "select * from d_gpdic order by code asc";
 		List<Map<String, Object>> gpList = zqiDao.findAll(dicSql);
 		for(Map<String, Object> gp :gpList){
-			gpMap.put(gp.get("code").toString(), gp);
+			gpMap.put(gp.get("symbol").toString(), gp);
 		}
 		return gpMap;
 	}

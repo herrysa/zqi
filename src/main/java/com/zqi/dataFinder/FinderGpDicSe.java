@@ -69,11 +69,13 @@ public class FinderGpDicSe implements IFinderGpDic{
 								daytable += codeValue.substring(0,1)+"_";
 								Long codeNum = Long.parseLong(codeValue.substring(1));
 								daytable += ""+(codeNum/50+1);
+								v = "sh"+v;
 							}
 							data.put(key, v);
 						}
 					}
 				}
+				data.put("type", "0");
 				dataList.add(data);
 			}
 			System.out.println("---------------上交所A:"+dataList.size()+"---------------");
@@ -170,12 +172,14 @@ public class FinderGpDicSe implements IFinderGpDic{
 								daytable += codeValue.substring(0,1)+"_";
 								Long codeNum = Long.parseLong(codeValue.substring(1));
 								daytable += ""+(codeNum/50+1);
+								v = "sz"+v;
 							}
 							data.put(key, v);
 						}
 					}
 				}
 				if(addFlag){
+					data.put("type", "1");
 					dataList.add(data);
 				}
 			}

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.zqi.dataFinder.FinderGpDic163Zhishu;
 import com.zqi.dataFinder.FinderGpDicSe;
 import com.zqi.dataFinder.IFinderGpDic;
 import com.zqi.frame.controller.BaseController;
@@ -33,6 +34,7 @@ public class InitController extends BaseController{
 			createGpCwInfoTable();
 			createGpFhInfoTable();
 			creatReportTable();
+			creatIndicatorTable();
 			creatLogTable();
 			message = "建表成功！";
 		} catch (Exception e) {
@@ -54,10 +56,10 @@ public class InitController extends BaseController{
 				dicMap.put(code, gpDic);
 			}
 			IFinderGpDic iFinderGpDicSse = new FinderGpDicSe();
-			List<Map<String, Object>> gpDiList = iFinderGpDicSse.findGpDic();
+			List<Map<String, Object>> gpDicList = iFinderGpDicSse.findGpDic();
 			List<Map<String, Object>> addGpList = new ArrayList<Map<String,Object>>();
 			List<String> deleteList = new ArrayList<String>();
-			for(Map<String, Object> gpNew : gpDiList){
+			for(Map<String, Object> gpNew : gpDicList){
 				String code = gpNew.get("code").toString();
 				Map<String, Object> gpDic = dicMap.get(code);
 				boolean addFlag = false;
@@ -105,10 +107,12 @@ public class InitController extends BaseController{
 	}
 	
 	private void createDicAndDayTable(){
-		String dicSql= "create table d_gpdic(code varchar(20),symbol varchar(20),name varchar(20),symbolName varchar(20),listDate varchar(10),totalShares varchar(20),totalFlowShares varchar(20),endDate varchar(10),pinyinCode varchar(10),daytable varchar(20),remark varchar(50));";
+		String dicSql= "create table d_gpdic(code varchar(20),symbol varchar(20),name varchar(20),symbolName varchar(20),listDate varchar(10),totalShares varchar(20),totalFlowShares varchar(20),endDate varchar(10),pinyinCode varchar(10),type varchar(2),daytable varchar(20),remark varchar(50));";
 		zqiDao.excute(dicSql);
 		IFinderGpDic iFinderGpDicSse = new FinderGpDicSe();
 		List<Map<String, Object>> gpDiList = iFinderGpDicSse.findGpDic();
+		IFinderGpDic iFinderGpDicZishu = new FinderGpDic163Zhishu();
+		gpDiList.addAll(iFinderGpDicZishu.findGpDic());
 		zqiDao.addList(gpDiList, "d_gpdic");
 		System.out.println("--------------股票字典添加完毕-----------------");
 		List<String> createDaytableSqls = new ArrayList<String>();
@@ -117,7 +121,7 @@ public class InitController extends BaseController{
 		for(Map<String, Object> gp : gpDiList){
 			String daytble = gp.get("daytable").toString();
 			daytableSet.add(daytble);
-			String createSql = "create table "+daytble+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3))ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+			String createSql = "create table "+daytble+"(period varchar(10) not null,code varchar(20),name varchar(20),type varchar(2),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3))ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 			if(!createDaytableSqls.contains(createSql)){
 				createDaytableSqls.add(createSql);
 			}
@@ -127,7 +131,7 @@ public class InitController extends BaseController{
 		}
 		if(!"".equals(daytableUnion)){
 			daytableUnion = daytableUnion.substring(0, daytableUnion.length()-1);
-			String createSql = "create table daytable_all (period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3))ENGINE=MRG_MyISAM DEFAULT CHARSET=utf8 INSERT_METHOD=LAST UNION=("+daytableUnion+");";
+			String createSql = "create table daytable_all (period varchar(10) not null,code varchar(20),name varchar(20),type varchar(2),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3))ENGINE=MRG_MyISAM DEFAULT CHARSET=utf8 INSERT_METHOD=LAST UNION=("+daytableUnion+");";
 			zqiDao.createTableBySQL(createSql);
 		}
 		String[] sqls =  createDaytableSqls.toArray(new String[createDaytableSqls.size()]);
@@ -157,6 +161,12 @@ public class InitController extends BaseController{
 		String createql= "create table r_report(code varchar(20),name varchar(20),type varchar(20),remark varchar(50));";
 		zqiDao.excute(createql);
 		System.out.println("--------------报表表建立完毕-----------------");
+	}
+	
+	private void creatIndicatorTable(){
+		String createql= "create table i_indicator(code varchar(20),formula varchar(1000),type varchar(2),remark varchar(50));";
+		zqiDao.excute(createql);
+		System.out.println("--------------指标表建立完毕-----------------");
 	}
 	
 	private void creatLogTable(){

@@ -32,6 +32,7 @@ import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.zqi.dataFinder.Finder163RHis;
 import com.zqi.dataFinder.Finder163RToday;
+import com.zqi.dataFinder.Finder163ZhishuRToday;
 import com.zqi.dataFinder.IFinderRToday;
 import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
@@ -239,23 +240,53 @@ public class PrimaryDataController extends BaseController{
 	
 	
 	public void findTodayData(){
-		String code = "",period = "";
+		String code = "",symbol = "",period = "";
 		TestTimer importTodayDataTime = new TestTimer("导入今日数据");
 		importTodayDataTime.begin();
 		try {
 			IFinderRToday iFinderRToday = new Finder163RToday();
-			List<Map<String, Object>> tadayList = iFinderRToday.findRToday();
+			List<Map<String, Object>> todayList = iFinderRToday.findRToday();
+			IFinderRToday iFinderZhishuRToday = new Finder163ZhishuRToday();
+			List<Map<String, Object>> todayZhishuList = iFinderZhishuRToday.findRToday();
 			Map<String, Map<String, Object>> gpmap = findAGpDicMap();
 			int count = 0;
-			for(Map<String, Object> dayData :tadayList){
+			for(Map<String, Object> dayData :todayList){
 				code = dayData.get("code").toString();
 				period = dayData.get("period").toString();
 				//String close = dayData.get("close").toString();
-				Map<String, Object> gpdic = gpmap.get(code);
+				Map<String, Object> gpdic;
+				if(code.startsWith("6")){
+					symbol = "sh"+code;
+				}else{
+					symbol = "sz"+code;
+				}
+				gpdic = gpmap.get(symbol);
 				if(gpdic!=null){
 					String daytable = gpdic.get("daytable").toString();
-					zqiDao.excute("delete from "+daytable+" where code='"+code+"' and period='"+period+"'");
+					String type = gpdic.get("type").toString();
+					zqiDao.excute("delete from "+daytable+" where code='"+code+"' and period='"+period+"' and type in ('0','1')");
+					dayData.put("type", type);
 					zqiDao.add(dayData, daytable);
+					count++;
+				}
+			}
+			for(Map<String, Object> dayZhishuData :todayZhishuList){
+				code = dayZhishuData.get("code").toString();
+				period = dayZhishuData.get("period").toString();
+				//String close = dayData.get("close").toString();
+				Map<String, Object> gpdic;
+				if(code.startsWith("0")){
+					symbol = "sh"+code;
+				}else{
+					symbol = "sz"+code;
+				}
+				gpdic = gpmap.get(symbol);
+				if(gpdic!=null){
+					String type = gpdic.get("type").toString();
+					String daytable = gpdic.get("daytable").toString();
+					zqiDao.excute("delete from "+daytable+" where code='"+code+"' and period='"+period+"' and type in ('2','3')");
+					dayZhishuData.put("type", type);
+					zqiDao.add(dayZhishuData, daytable);
 					count++;
 				}
 			}
@@ -274,7 +305,7 @@ public class PrimaryDataController extends BaseController{
 			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
 			errorLog.put("type", "findTodayData");
 			errorLog.put("mainId", "findTodayDataError");
-			errorLog.put("assistId", code);
+			errorLog.put("assistId", symbol);
 			errorLog.put("info", period+"导入今日数据错误！");
 			errorLog.put("logDate", DateUtil.getDateTimeNow());
 			zqiDao.add(errorLog,"_log");
@@ -294,8 +325,9 @@ public class PrimaryDataController extends BaseController{
 			for(Map<String, Object> gp : gpList){
 				code = gp.get("code").toString();
 				String daytable = gp.get("daytable").toString();
+				String type = gp.get("type").toString();
 				List<Map<String,Object>> dataList = finder163rHis.findRHis(gp, dateFrom, dateTo);
-				String deleteSql = "delete from "+daytable+" where code='"+code+"' and period between '"+dateFrom+"' and '"+dateTo+"'";
+				String deleteSql = "delete from "+daytable+" where code='"+code+"' and period between '"+dateFrom+"' and '"+dateTo+"' and type='"+type+"'";
 				zqiDao.excute(deleteSql);
 				zqiDao.addList(dataList, daytable);
 				count += dataList.size();
