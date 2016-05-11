@@ -23,7 +23,8 @@ $(function() {
 	            response( $.map( data.result, function( item ) {
 	              return {
 	                label: item.showValue,
-	                value: item.id
+	                value: item.id,
+	                name: item.name
 	              }
 	            }));
 	          }
@@ -32,9 +33,9 @@ $(function() {
 	      minLength: 1,
 	      select: function( event, ui ) {
 	        $("#gpCode").val(ui.item.value);
-	        var gpName = ui.item.label.replace(ui.item.value+",","");
+	        //var gpName = ui.item.label.replace(ui.item.value+",","");
 	        setTimeout(function(){
-		    	$("#gpName").val(gpName);
+		    	$("#gpName").val(ui.item.name);
 	        },200);
 	      },
 	      open: function() {

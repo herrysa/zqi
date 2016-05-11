@@ -164,7 +164,7 @@ public class InitController extends BaseController{
 	}
 	
 	private void creatIndicatorTable(){
-		String createql= "create table i_indicator(code varchar(20),formula varchar(1000),type varchar(2),remark varchar(50));";
+		String createql= "create table i_indicator(code varchar(20),formula varchar(1000),type varchar(10),remark varchar(50));";
 		zqiDao.excute(createql);
 		System.out.println("--------------指标表建立完毕-----------------");
 	}

@@ -19,53 +19,25 @@ import com.github.abel533.echarts.style.LineStyle;
 
 public class ChartsUtil {
 
-	public static String getLineOption(Map<String, String> optionMap){
-		//创建Option对象
+	public static String getLineChartOption(Map<String, String> optionMap,List<Object> categoryList,List<Object> dataList){
 		GsonOption option = new GsonOption();
+		String name = optionMap.get("name");
+		option.title().text(name).x(X.left);
+		option.yAxis(new ValueAxis().scale(true));
 
-		//设置图表标题，并且居中显示
-		option.title().text("最近7天访问量图表").x(X.center);
-
-		//设置图例,居中底部显示，显示边框
-		option.legend().data("访问量").x(X.center).y(Y.bottom).borderWidth(1);
-
-		//设置y轴为值轴，并且不显示y轴，最大值设置400，最小值-100（OSC为什么要有-100呢？）
-		option.yAxis(new ValueAxis().name("IP")
-		        .axisLine(new AxisLine().show(true).lineStyle(new LineStyle().width(0)))
-		        .max(400).min(-100));
-
-		//创建类目轴，并且不显示竖着的分割线，onZero=false
 		CategoryAxis categoryAxis = new CategoryAxis()
-		        .splitLine(new SplitLine().show(false))
-		        .axisLine(new AxisLine().onZero(false));
+        .splitLine(new SplitLine().show(false))
+        .axisLine(new AxisLine().onZero(false));
 		
 		//创建Line数据
-		Line line = new Line("访问量").smooth(true);
+		Line line = new Line().smooth(true);
 
-		//根据获取的数据赋值
-		//for (AccessData data : datas) {
-		    //增加类目，值为日期
-		    categoryAxis.data("1");
-
-		    //日期对应的数据
-		    line.data("1");
-		    categoryAxis.data("2");
-
-		    //日期对应的数据
-		    line.data("2");
-		    categoryAxis.data("3");
-
-		    //日期对应的数据
-		    line.data("3");
-		//}
-
-		//设置x轴为类目轴
+		categoryAxis.setData(categoryList);
+		line.setData(dataList);
 		option.xAxis(categoryAxis);
-
-		//设置数据
 		option.series(line);
 		
-		return "";
+		return option.toString();
 	}
 	
 	public static String getKCahrtOption(Map<String, String> optionMap,List<Map<String, Object>> dataList){

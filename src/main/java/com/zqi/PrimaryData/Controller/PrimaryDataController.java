@@ -73,11 +73,19 @@ public class PrimaryDataController extends BaseController{
 		}*/
 		if(code!=null&&!"".equals(code)){
 			String findDayTableSql = "select daytable from d_gpDic where symbol='"+code+"'";
-			String tableName = "";
+			String tableName = "",type = "";
 			Map<String, Object> rs0 = zqiDao.findFirst(findDayTableSql);
 			if(!rs0.isEmpty()){
 				tableName = rs0.get("daytable").toString();
 			}
+			if("2".equals(type)||"3".equals(type)){
+				code = code.replace("sh", "0");
+				code = code.replace("sz", "1");
+			}else{
+				code = code.replace("sh", "");
+				code = code.replace("sz", "");
+			}
+			
 			String dayDataSql = "select * from "+tableName+" where code='"+code+"'";
 			if(period!=null&&!"".equals(period)){
 				dayDataSql += " and period='"+period+"'";
@@ -276,9 +284,9 @@ public class PrimaryDataController extends BaseController{
 				//String close = dayData.get("close").toString();
 				Map<String, Object> gpdic;
 				if(code.startsWith("0")){
-					symbol = "sh"+code;
+					symbol = "sh"+code.substring(1);
 				}else{
-					symbol = "sz"+code;
+					symbol = "sz"+code.substring(1);
 				}
 				gpdic = gpmap.get(symbol);
 				if(gpdic!=null){

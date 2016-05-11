@@ -14,7 +14,7 @@ import com.zqi.frame.util.Tools;
 
 public class Finder163ZhishuRToday implements IFinderRToday{
 
-	public static String[] rZhishuDayColumn163 = {"period","SYMBOL","NAME","YESTCLOSE","OPEN","HIGH","LOW","PRICE","VOLUME","TURNOVER","UPDOWN","PERCENT","zhenfu"};
+	public static String[] rZhishuDayColumn163 = {"period","CODE","NAME","YESTCLOSE","OPEN","HIGH","LOW","PRICE","VOLUME","TURNOVER","UPDOWN","PERCENT","zhenfu"};
 	
 	@Override
 	public List<Map<String,Object>> findRToday(){
