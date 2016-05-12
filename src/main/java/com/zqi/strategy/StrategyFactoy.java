@@ -3,15 +3,31 @@ package com.zqi.strategy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.zqi.frame.dao.impl.ZqiDao;
 import com.zqi.unit.FileUtil;
 
+@Component("strategyFactoy")
 public class StrategyFactoy {
+
+	ZqiDao zqiDao;
+	public ZqiDao getZqiDao() {
+		return zqiDao;
+	}
+
+	@Autowired
+	public void setZqiDao(ZqiDao zqiDao) {
+		this.zqiDao = zqiDao;
+	}
 
 	String basePath = "E:/git/zqi/src/main/webapp/strategy/";
 	String utilName = "util.js";
@@ -21,7 +37,11 @@ public class StrategyFactoy {
 	StrategyHead strategyHead;
 	Map<String, String> initMap;
 	
-	public StrategyFactoy(String fileName){
+	public StrategyFactoy(){
+		
+	}
+	
+	public void init(String fileName){
 		utilSript = FileUtil.readFile(basePath+utilName);
 		strategySript = FileUtil.readFile(basePath+fileName);
 		String[] strategyArr = strategySript.split("//init");
@@ -32,10 +52,10 @@ public class StrategyFactoy {
 		for(String param :initArr){
 			String[] paramArr = param.split("=");
 			if(paramArr.length>1){
-				initMap.put(paramArr[0], paramArr[1]);
+				initMap.put(paramArr[0].trim(), paramArr[1].trim());
 			}
 		}
-		strategyHead.start = initMap.get("start");
+		/*strategyHead.start = initMap.get("start");
 		initMap.remove("start");
 		strategyHead.end = initMap.get("end");
 		initMap.remove("end");
@@ -46,9 +66,13 @@ public class StrategyFactoy {
 		strategyHead.capital_base = initMap.get("capital_base");
 		initMap.remove("capital_base");
 		strategyHead.freq = initMap.get("freq");
-		initMap.remove("freq");
+		initMap.remove("freq");*/
 		
-		ZqiDao zqiDao = null;
+		
+	}
+	
+	public void parse(String code){
+		initMap.put("code", code);
 		try {
 			Class<?> StrategyFunc = Class.forName("com.zqi.strategy.StrategyFunc");
 			Constructor<?> strategyFuncConstructor = StrategyFunc.getConstructor(ZqiDao.class);
@@ -56,11 +80,31 @@ public class StrategyFactoy {
 			Set<Entry<String, String>> initSet = initMap.entrySet();
 			for(Entry<String, String> param : initSet){
 				String func = param.getValue();
-				String[] funcArr = func.split("(");
+				func = func.trim();
+				if(!func.startsWith("func_")){
+					continue;
+				}
+				String[] funcArr = func.split("\\(");
 				String funcName = funcArr[0];
-				String funcParam = funcArr[1].substring(0, 1);
-				Method method = StrategyFunc.getMethod(funcName);
-				Object result = method.invoke(strategyFunc,"");
+				String funcParam = funcArr[1].substring(0, funcArr[1].length()-1);
+				String[] funcParamArr = funcParam.split(",");
+				List<Class> paramTypeList = new ArrayList<Class>();
+				List<Object> paramList = new ArrayList<Object>();
+				Object[] paramObject = null;
+				Class[] paramTypeObject = null;
+				for(String p : funcParamArr){
+					String paramValue = initMap.get(p);
+					if(p.startsWith("'")){
+						paramList.add(p);
+					}else{
+						paramList.add(paramValue);
+					}
+					paramTypeList.add(String.class);
+				}
+				paramObject = paramList.toArray(new Object[paramList.size()]); 
+				paramTypeObject = paramTypeList.toArray(new Class[paramTypeList.size()]);
+				Method method = StrategyFunc.getMethod(funcName,paramTypeObject);
+				Object result = method.invoke(strategyFunc,paramObject);
 			}
 			
 		} catch (ClassNotFoundException e) {
@@ -85,11 +129,7 @@ public class StrategyFactoy {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
 	}
-	
-	
 	
 	public String getStrategyScript(){
 		return utilSript+"\n"+strategySript;

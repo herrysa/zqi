@@ -12,17 +12,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.github.abel533.echarts.axis.AxisLine;
-import com.github.abel533.echarts.axis.CategoryAxis;
-import com.github.abel533.echarts.axis.SplitLine;
-import com.github.abel533.echarts.axis.ValueAxis;
-import com.github.abel533.echarts.code.X;
-import com.github.abel533.echarts.code.Y;
-import com.github.abel533.echarts.json.GsonOption;
-import com.github.abel533.echarts.series.Line;
-import com.github.abel533.echarts.style.LineStyle;
 import com.zqi.frame.controller.BaseController;
-import com.zqi.frame.dao.impl.ZqiDao;
+import com.zqi.strategy.StrategyFactoy;
+import com.zqi.unit.SpringContextHelper;
 
 @Controller
 @RequestMapping("/chart")
@@ -71,6 +63,12 @@ public class ChartController extends BaseController{
 		model.put("optionK", kChartOption);
 		model.put("optionZRSI", zqsiChartOption);
 		//System.out.println(kChartOption);
+		
+		StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
+		strategyFactoy.init("indicator/ZRSI.js");
+		strategyFactoy.parse(code);
+		
+		
 		return "charts/kChart";
 	}
 }
