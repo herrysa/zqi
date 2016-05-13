@@ -5,8 +5,15 @@ function accDiv(arg1,arg2){
 	with(Math){  
 		r1=Number(arg1.toString().replace(".",""));  
 		r2=Number(arg2.toString().replace(".",""));  
-		return(r1/r2)*pow(10,t2-t1);  
+		var rs = (r1/r2)*pow(10,t2-t1);
+		return accRound(rs,3); 
 	}  
+}
+function accRound(v,e){
+	var t=1;
+	for(;e>0;t*=10,e--);
+	for(;e<0;t/=10,e++);
+	return Math.round(v*t)/t;
 }
 Number.prototype.div=function(arg){  
 	return accDiv(this,arg);  
