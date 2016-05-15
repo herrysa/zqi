@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -264,4 +266,45 @@ public class Tools {
 			}
 			return result;
 	   }
+	   
+	public static String findParentheses(String str){
+		String pattern = "\\(.*\\)";
+		String matcherStr = "";
+		Pattern p = Pattern.compile(pattern);
+		Matcher matcher = p.matcher(str);
+		//int matcherCount = 0;
+		while(matcher.find()){
+			matcherStr = matcher.group();
+			//matcherCount++;
+		}
+		return matcherStr;
+	}
+	
+	public static String findStr(String str,List<String> matcherList){
+		String pattern = "'.*'";
+		Pattern p = Pattern.compile(pattern);
+		Matcher matcher = p.matcher(str);
+		int matcherCount = 0;
+		while(matcher.find()){
+			String matcherStr = matcher.group();
+			matcherList.add(matcherStr);
+			str = str.replace(matcherStr, "STR_"+matcherCount);
+			matcherCount++;
+		}
+		return str;
+	}
+	
+	public static String findMethod(String str,List<String> matcherList){
+		String pattern = "@.*\\)";
+		Pattern p = Pattern.compile(pattern);
+		Matcher matcher = p.matcher(str);
+		int matcherCount = 0;
+		while(matcher.find()){
+			String matcherStr = matcher.group();
+			matcherList.add(matcherStr);
+			str = str.replace(matcherStr, "@_"+matcherCount);
+			matcherCount++;
+		}
+		return str;
+	}
 }

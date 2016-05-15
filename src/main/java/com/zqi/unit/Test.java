@@ -21,7 +21,7 @@ public class Test {
 		Bindings bindings  = engine.createBindings();
 		//bindings.put("aa", "{show:2}");
 		try {
-			engine.eval(new FileReader("E:\\git\\zqi\\src\\main\\webapp\\strategy\\indicator\\ZRSI.js"),bindings);
+			engine.eval(new FileReader("E:\\git\\zqi\\src\\main\\webapp\\strategy\\indicator\\xxx.js"),bindings);
 			System.out.println(bindings.get("result").toString());
 		} catch (ScriptException e) {
 			// TODO Auto-generated catch block

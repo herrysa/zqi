@@ -72,11 +72,12 @@ public class PrimaryDataController extends BaseController{
 			}
 		}*/
 		if(code!=null&&!"".equals(code)){
-			String findDayTableSql = "select daytable from d_gpDic where symbol='"+code+"'";
+			String findDayTableSql = "select type,daytable from d_gpDic where symbol='"+code+"'";
 			String tableName = "",type = "";
 			Map<String, Object> rs0 = zqiDao.findFirst(findDayTableSql);
 			if(!rs0.isEmpty()){
 				tableName = rs0.get("daytable").toString();
+				type = rs0.get("type").toString();
 			}
 			if("2".equals(type)||"3".equals(type)){
 				code = code.replace("sh", "0");

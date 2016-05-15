@@ -13,7 +13,7 @@ $(function() {
 <body>
 	<div class="page">
 		<div class="pageContent">
-			<div id="k_chart" style="height:200px"></div>
+			<div id="k_chart" style="height:400px"></div>
 			<script>
 			 var kChart = echarts.init(document.getElementById('k_chart')); 
 			var option1 = eval('(${optionK})');

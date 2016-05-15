@@ -18,6 +18,14 @@
 		$("#mainContent").width(contentWidth);
 		$("#content").height(contentHeight);
    		
+		jQuery("#modalDialog").width(documentWidth);
+		jQuery("#modalDialog").height(documentHeight);
+		var modalDialogWidth = jQuery("#modalDialog").width();
+		var modalDialogHeight = jQuery("#modalDialog").height();
+		//jQuery(".modal-content","#modalDialog").width(modalDialogWidth-10);
+		//jQuery(".modal-content","#modalDialog").height(modalDialogHeight-70);
+		jQuery(".modal-body","#modalDialog").width(modalDialogWidth);
+		jQuery(".modal-body","#modalDialog").height(modalDialogHeight-70);
    	});
    	function menuClick(url){
 			//alert(url);
@@ -67,12 +75,17 @@
 			margin-bottom :0
 		}
 		.modal-full {
-			width: 100%;
+			width:100%;
 			height:100%;
 			margin:0
 		}
 		#modalDialog .modal-content{
+			width:100%;
 			height:100%;
+			margin:0
+		}
+		#modalDialog .modal-body{
+			padding:0;
 			margin:0
 		}
     </style>
@@ -146,7 +159,7 @@
 				  
 				</div>
 				<div class="modal-body">
-					1111111111
+					
 				</div>
       <!-- <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
