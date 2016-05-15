@@ -96,6 +96,8 @@ public class ChartController extends BaseController{
 					line.setSmooth(true);
 					line.setName(lineName);
 					line.setData(values);
+					line.setxAxisIndex(1);
+					line.setyAxisIndex(1);
 				}else if("bar".equals(outType)){
 					
 				}
