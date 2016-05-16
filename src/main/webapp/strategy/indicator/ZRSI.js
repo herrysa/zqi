@@ -1,6 +1,6 @@
 
-start = '2016-05-01';
-end = '2016-05-11';
+start = '';
+end = '';
 code = '';
 contrast_code = '0000001';
 benchmark = '0000001';
@@ -17,7 +17,7 @@ result = {};
 //init
 
 indicator = new Array();
-if(xData){
+if(!xData){
 	xData = getPeriodArr(codeData);
 }
 for(var i in xData){
@@ -30,8 +30,7 @@ for(var i in xData){
 	indicator.push(zrsi);
 }
 
-result.zrsi = json2str(indicator);
+result.zrsi = indicator;
 result = json2str(result);
-
 
 

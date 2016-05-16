@@ -1,27 +1,37 @@
 package com.zqi.charts;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.github.abel533.echarts.AxisPointer;
+import com.github.abel533.echarts.DataZoom;
+import com.github.abel533.echarts.Grid;
+import com.github.abel533.echarts.Legend;
+import com.github.abel533.echarts.Tooltip;
+import com.github.abel533.echarts.axis.AxisLine;
+import com.github.abel533.echarts.axis.CategoryAxis;
+import com.github.abel533.echarts.axis.SplitArea;
+import com.github.abel533.echarts.axis.SplitLine;
+import com.github.abel533.echarts.axis.ValueAxis;
+import com.github.abel533.echarts.code.DataZoomType;
+import com.github.abel533.echarts.code.PointerType;
+import com.github.abel533.echarts.code.Trigger;
+import com.github.abel533.echarts.code.X;
+import com.github.abel533.echarts.json.GsonOption;
+import com.github.abel533.echarts.series.K;
 import com.github.abel533.echarts.series.Line;
 import com.github.abel533.echarts.series.Series;
+import com.github.abel533.echarts.style.TextStyle;
 import com.zqi.frame.controller.BaseController;
-import com.zqi.frame.util.TestTimer;
 import com.zqi.strategy.StrategyFactoy;
 import com.zqi.strategy.StrategyOut;
 import com.zqi.strategy.lib.Data;
@@ -35,9 +45,11 @@ public class ChartController extends BaseController{
 	public String kChart(HttpServletRequest request,ModelMap model){
 		String code = request.getParameter("code");
 		String name = request.getParameter("name");
+		name = name+"(日线)";
 		String dayDataSql = "select * from daytable_all where code='"+code+"' and close<>0 order by period";
 		
 		List<String> legendList = new ArrayList<String>();
+		List<Series> series = new ArrayList<Series>();
 		
 		//数据处理
 		List<Map<String, Object>> dataList = zqiDao.findAll(dayDataSql);
@@ -45,22 +57,25 @@ public class ChartController extends BaseController{
 		List<Object> categoryData = new ArrayList<Object>();
 		for(Map<String, Object> data : dataList){
 			String period = data.get("period").toString();
-			String open = data.get("open").toString();
-			String close = data.get("close").toString();
-			String min = data.get("low").toString();
-			String max = data.get("high").toString();
 			categoryData.add(period);
-			Object[] kData = new Object[]{open, close, min, max};
+			Object[] kData = new Object[]{data.get("open"), data.get("close"), data.get("low"), data.get("high")};
 			kDataList.add(kData);
 		}
 		legendList.add("日k");
+		K k = new K();
+		k.setName("日k");
+		k.setData(kDataList);
+		series.add(k);
+		
+		model.put("code", code);
+		HttpSession session = request.getSession();
+		session.setAttribute("categoryData", categoryData);
 		
 		//均线
 		String avgCol = "close";
 		String avgLine = "5,10,20,60";
 		String[] avgLineArr = avgLine.split(",");
 		Data.avg(dataList, "{close:["+avgLine+"]}");
-		List<Series> series = new ArrayList<Series>();
 		for(String l : avgLineArr){
 			String lineName = "MA"+l;
 			Line line = new Line();
@@ -77,8 +92,12 @@ public class ChartController extends BaseController{
 			legendList.add(lineName);
 		}
 		
+		GsonOption kOption = getKCahrtOption(name,legendList,categoryData);
+		kOption.series(series);
+		//System.out.println(kOption.toString());
+		model.put("kOption", kOption.toString());
 		//指标
-		String indicator = "zrsi";
+		/*String indicator = "ZRSI";
 		String[] indicatorArr = indicator.split(",");
 		for(String indi : indicatorArr){
 			legendList.add(indi);
@@ -102,14 +121,45 @@ public class ChartController extends BaseController{
 					
 				}
 			}
+		}*/
+		
+		
+		/*String indicator = "ZRSI";
+		String[] indicatorArr = indicator.split(",");
+		List<String> indiLegendList = new ArrayList<String>();
+		List<Series> indiSeries = new ArrayList<Series>();
+		for(String indi : indicatorArr){
+			StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
+			strategyFactoy.init("indicator/ZRSI.js");
+			strategyFactoy.setCode(code);
+			strategyFactoy.setxData(categoryData);
+			strategyFactoy.setStart(null);
+			strategyFactoy.setEnd(null);
+			strategyFactoy.eval();
+			List<StrategyOut> outList = strategyFactoy.getOutList();
+			for(StrategyOut strategyOut :outList){
+				String outNname = strategyOut.getName();
+				String outType = strategyOut.getType();
+				List<Object> values = strategyOut.getValues();
+				if("line".equals(outType)){
+					String lineName = outNname;
+					indiLegendList.add(lineName);
+					Line line = new Line();
+					line.setSmooth(true);
+					line.setName(lineName);
+					line.setData(values);
+					indiSeries.add(line);
+				}else if("bar".equals(outType)){
+					
+				}
+			}
 		}
-		
-		
-		Map<String, String> optionMap = new HashMap<String, String>();
-		optionMap.put("name", name);
-		String kChartOption  = ChartsUtil.getKCahrtOption(optionMap, dataList,series);
-		
-		String zsCode = "" ;
+		GsonOption indiOption = getKCahrtOption(indicator,indiLegendList,categoryData);
+		indiOption.series(indiSeries);
+		System.out.println(indiOption.toString());
+		model.put("indiOption", indiOption.toString());
+		*/
+		/*String zsCode = "" ;
 		if(code.startsWith("6")){
 			zsCode = "0000001";
 		}else if(code.startsWith("0")){
@@ -140,29 +190,153 @@ public class ChartController extends BaseController{
 		optionZRSIMap.put("name", "ZRSI");
 		String zqsiChartOption  = ChartsUtil.getLineChartOption(optionMap, zrsiCategoryList,zrsiDataList);
 		
-		model.put("optionK", kChartOption);
-		model.put("optionZRSI", zqsiChartOption);
+		model.put("optionZRSI", zqsiChartOption);*/
 		//System.out.println(kChartOption);
 		
-		TestTimer tt = new TestTimer("ss");
-		tt.begin();
-		StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
-		strategyFactoy.init("indicator/ZRSI.js");
-		strategyFactoy.parse(code);
-		String str = strategyFactoy.getStrategyScript();
-		ScriptEngineManager manager = new ScriptEngineManager();  
-		ScriptEngine engine = manager.getEngineByName("js");
-		Bindings bindings  = engine.createBindings();
-		//bindings.put("aa", "{show:2}");
-		try {
-			System.out.println(str);
-			engine.eval(str,bindings);
-			System.out.println(bindings.get("result").toString());
-		} catch (ScriptException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		tt.done();
+		
 		return "charts/kChart";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/indicator")
+	public Map<String, Object> indicator(HttpServletRequest request){
+		String code = request.getParameter("code");
+		String indicator = request.getParameter("indi");
+		List<Object> categoryData = new ArrayList<Object>();
+		HttpSession session = request.getSession();
+		categoryData = (List<Object>)session.getAttribute("categoryData");
+		String[] indicatorArr = indicator.split(",");
+		List<String> indiLegendList = new ArrayList<String>();
+		List<Series> indiSeries = new ArrayList<Series>();
+		for(String indi : indicatorArr){
+			StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
+			strategyFactoy.init("indicatorChart/"+indicator+".js");
+			strategyFactoy.setCode(code);
+			strategyFactoy.setxData(categoryData);
+			strategyFactoy.setStart(null);
+			strategyFactoy.setEnd(null);
+			strategyFactoy.eval();
+			List<StrategyOut> outList = strategyFactoy.getOutList();
+			for(StrategyOut strategyOut :outList){
+				String outNname = strategyOut.getName();
+				String outType = strategyOut.getType();
+				List<Object> values = strategyOut.getValues();
+				if("line".equals(outType)){
+					String lineName = outNname;
+ 					indiLegendList.add(lineName);
+					Line line = new Line();
+					line.setSmooth(true);
+					line.setName(lineName);
+					line.setData(values);
+					indiSeries.add(line);
+				}else if("bar".equals(outType)){
+					
+				}
+			}
+		}
+		GsonOption indiOption = getKCahrtOption(indicator,indiLegendList,categoryData);
+		indiOption.series(indiSeries);
+		resultMap.put("indiOption", indiOption.toString());
+		return resultMap;
+	}
+	
+	private GsonOption getKCahrtOption(String name,List<String> legendList,List<Object> categoryList){
+		GsonOption option = new GsonOption();
+		
+		option.title().text(name).x(X.left).left(0).setTextStyle(new TextStyle().fontSize(14));;
+		
+		Tooltip tooltip = option.tooltip();
+		AxisPointer axisPointer = tooltip.axisPointer();
+		axisPointer.setType(PointerType.line);
+		tooltip.setAxisPointer(axisPointer);
+		tooltip.setTrigger(Trigger.axis);
+		option.setTooltip(tooltip);
+		
+		Legend legend = option.legend();
+		legend.setData(legendList);
+		
+		Grid grid = option.grid();
+		grid.left("30").right("30").bottom("65");
+		
+		option.yAxis(new ValueAxis().scale(true).splitArea(new SplitArea().show(true)));
+		
+		CategoryAxis categoryAxis = new CategoryAxis()
+		.scale(true)
+		.boundaryGap(false)
+		.min("dataMin")
+		.max("dataMax")
+        .splitLine(new SplitLine().show(false))
+        .axisLine(new AxisLine().onZero(false));
+		
+		categoryAxis.setData(categoryList);
+		
+		option.xAxis(categoryAxis);
+		
+		List<DataZoom> dataZooms = new ArrayList<DataZoom>();
+		DataZoom dataZoomInside = new DataZoom();
+		dataZoomInside.setType(DataZoomType.inside);
+		dataZoomInside.start(50);
+		dataZoomInside.end(100);
+		dataZooms.add(dataZoomInside);
+		DataZoom dataZoomSlider = new DataZoom();
+		dataZoomSlider.show(true);
+		dataZoomSlider.setType(DataZoomType.slider);
+		dataZoomSlider.y("90%");
+		dataZoomSlider.start(50);
+		dataZoomSlider.end(100);
+		dataZooms.add(dataZoomSlider);
+		
+		option.setDataZoom(dataZooms);
+		return option;
+	}
+	
+	private GsonOption getIndiCahrtOption(String name,List<String> legendList,List<Object> categoryList){
+		GsonOption option = new GsonOption();
+		
+		option.title().text(name).x(X.left).left(0);
+		
+		Tooltip tooltip = option.tooltip();
+		AxisPointer axisPointer = tooltip.axisPointer();
+		axisPointer.setType(PointerType.line);
+		tooltip.setAxisPointer(axisPointer);
+		tooltip.setTrigger(Trigger.axis);
+		option.setTooltip(tooltip);
+		
+		Legend legend = option.legend();
+		legend.setData(legendList);
+		
+		Grid grid = option.grid();
+		grid.left("5%").right("5%").bottom("17%");
+		
+		option.yAxis(new ValueAxis().scale(true).splitArea(new SplitArea().show(true)));
+		
+		CategoryAxis categoryAxis = new CategoryAxis()
+		.scale(true)
+		.boundaryGap(false)
+		.min("dataMin")
+		.max("dataMax")
+        .splitLine(new SplitLine().show(false))
+        .axisLine(new AxisLine().onZero(false));
+		
+		categoryAxis.setData(categoryList);
+		
+		option.xAxis(categoryAxis);
+		
+		List<DataZoom> dataZooms = new ArrayList<DataZoom>();
+		DataZoom dataZoomInside = new DataZoom();
+		dataZoomInside.setType(DataZoomType.inside);
+		dataZoomInside.start(50);
+		dataZoomInside.end(100);
+		dataZooms.add(dataZoomInside);
+		DataZoom dataZoomSlider = new DataZoom();
+		dataZoomSlider.show(true);
+		dataZoomSlider.setType(DataZoomType.slider);
+		dataZoomSlider.y("90%");
+		dataZoomSlider.start(50);
+		dataZoomSlider.end(100);
+		dataZooms.add(dataZoomSlider);
+		
+		option.setDataZoom(dataZooms);
+		return option;
 	}
 }

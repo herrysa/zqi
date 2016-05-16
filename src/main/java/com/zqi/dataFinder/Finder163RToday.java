@@ -44,8 +44,8 @@ public class Finder163RToday implements IFinderRToday{
 					for(int i=0;i<rDayColumn.length;i++){
 						String key = rDayColumn[i];
 						if(key.equals("period")){
-							//data.put(key, day);
-							data.put(key, "2016-05-13");
+							data.put(key, day);
+							//data.put(key, "2016-05-13");
 						}else{
 							String dataKey = rDayColumn163[i];
 							String dataType = rDayColumnType[i];

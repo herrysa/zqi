@@ -43,7 +43,13 @@ public class StrategyFactoy {
 	//
 	private String code;
 	private List<Object> xData;
-
+	private String start;
+	private String end;
+	private String contrast_code;
+	private String benchmark;
+	private String capital_base;
+	private String freq;
+	
 	String basePath = "E:/git/zqi/src/main/webapp/strategy/";
 	String utilName = "util.js";
 	String utilSript;
@@ -99,6 +105,12 @@ public class StrategyFactoy {
 								outList.add(strategyOut);
 							}
 						}else{
+							if(value.contains("'")){
+								value = value.replaceAll("'", "");
+							}
+							if(value.contains("\"")){
+								value = value.replaceAll("\"", "");
+							}
 							StrategyOut strategyOut = new StrategyOut();
 							strategyOut.setName(value);
 							strategyOut.setType("line");
@@ -132,8 +144,8 @@ public class StrategyFactoy {
 			for(Entry<String, String> param : initSet){
 				String varName = param.getKey();
 				String func = param.getValue();
-				func = func.trim();
-				if(func.contains(".")){
+				if(func!=null&&func.contains(".")){
+					func = func.trim();
 					String parenthesesStr = Tools.findParentheses(func);
 					if(parenthesesStr!=null){
 						String funcName = func.replace(parenthesesStr, "");
@@ -191,7 +203,9 @@ public class StrategyFactoy {
 		for(Entry<String, String> param : initSet){
 			String varName = param.getKey();
 			String func = param.getValue();
-			func = func.trim();
+			if(func!=null){
+				func = func.trim();
+			}
 			String varLine = varName+"="+func+";";
 			explainedStrategyHead += varLine;
 		}
@@ -281,6 +295,56 @@ public class StrategyFactoy {
 		JSONArray xArr = JSONArray.fromObject(xData);
 		xDataStr = xArr.toString();
 		initMap.put("xData", xDataStr);
+	}
+	
+	public String getStart() {
+		return start;
+	}
+
+	public void setStart(String start) {
+		this.start = start;
+		initMap.put("start", start);
+	}
+
+	public String getEnd() {
+		return end;
+	}
+
+	public void setEnd(String end) {
+		this.end = end;
+		initMap.put("end", end);
+	}
+
+	public String getContrast_code() {
+		return contrast_code;
+	}
+
+	public void setContrast_code(String contrast_code) {
+		this.contrast_code = contrast_code;
+	}
+
+	public String getBenchmark() {
+		return benchmark;
+	}
+
+	public void setBenchmark(String benchmark) {
+		this.benchmark = benchmark;
+	}
+
+	public String getCapital_base() {
+		return capital_base;
+	}
+
+	public void setCapital_base(String capital_base) {
+		this.capital_base = capital_base;
+	}
+
+	public String getFreq() {
+		return freq;
+	}
+
+	public void setFreq(String freq) {
+		this.freq = freq;
 	}
 	
 	public List<StrategyOut> getOutList() {

@@ -30,7 +30,16 @@ public class Data extends BaseLib{
 		}
 		List<String> extendCol = new ArrayList<String>();
 		String dbCol = initCol(col,extendCol);
-		List<Map<String,Object>> codeList = zqiDao.findAll("select "+dbCol+" from daytable_all where code="+code+" and period between "+start+" and "+end+" order by period asc");
+		String findSql = "select "+dbCol+" from daytable_all where code="+code;
+		if(start!=null&&end!=null){
+			findSql += " and period between "+start+" and "+end;
+		}else if(start!=null){
+			findSql += " and period>='"+start+"'";
+		}else if(end!=null){
+			findSql += " and period<='"+end+"'";
+		}
+		findSql += " order by period asc";
+		List<Map<String,Object>> codeList = zqiDao.findAll(findSql);
 		Map<String, Map<String, Object>> dataMap = new HashMap<String, Map<String,Object>>();
 		getExendColData(codeList,extendCol);
 		for(Map<String,Object> data : codeList){
@@ -107,7 +116,7 @@ public class Data extends BaseLib{
 							valueQueue.offer(avgValue);
 						}else{
 							BigDecimal numSumValue = avgValue.add(data);
-							dataMap.put(col+num,numSumValue.divide(new BigDecimal(num),10,BigDecimal.ROUND_HALF_DOWN).setScale(3,BigDecimal.ROUND_HALF_UP).toString());
+							dataMap.put(col+num,numSumValue.divide(new BigDecimal(num),10,BigDecimal.ROUND_HALF_DOWN).setScale(3,BigDecimal.ROUND_HALF_UP));
 							avgValueMap.put(col+num, numSumValue.subtract(valueQueue.poll()));
 							valueQueue.offer(data);
 						}
@@ -141,6 +150,12 @@ public class Data extends BaseLib{
 			dbCol += "period";
 		}
 		return dbCol;
+	}
+	
+	public static void main(String[] args) {
+		String aa = "{a:1}";
+		JSONObject jsonObject = JSONObject.fromObject(aa);
+		System.out.println(jsonObject.toString());
 	}
 	
 

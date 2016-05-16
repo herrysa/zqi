@@ -100,8 +100,13 @@ public class PrimaryDataController extends BaseController{
 			for(Map<String, Object> data : dayData){
 				String settlement = data.get("settlement").toString();
 				String close = data.get("close").toString();
-				BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);;
-				data.put("changepercent", changePercent.toString());
+				BigDecimal closeNum = new BigDecimal(close);
+				if(closeNum.compareTo(new BigDecimal(0))==0){
+					data.put("changepercent", "0");
+				}else{
+					BigDecimal changePercent = new BigDecimal(close).subtract(new BigDecimal(settlement)).divide(new BigDecimal(close),10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);;
+					data.put("changepercent", changePercent.toString());
+				}
 			}
 			/*List<Map<String, String>> result = new ArrayList<Map<String,String>>();
 			Map<String, String> row = new HashMap<String, String>();
