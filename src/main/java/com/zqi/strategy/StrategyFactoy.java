@@ -1,5 +1,8 @@
 package com.zqi.strategy;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -40,15 +43,10 @@ public class StrategyFactoy {
 		this.zqiDao = zqiDao;
 	}
 	
-	//
+	private StrategyFactoy strategyFactoy;
+	
 	private String code;
 	private List<Object> xData;
-	private String start;
-	private String end;
-	private String contrast_code;
-	private String benchmark;
-	private String capital_base;
-	private String freq;
 	
 	String basePath = "E:/git/zqi/src/main/webapp/strategy/";
 	String utilName = "util.js";
@@ -56,25 +54,36 @@ public class StrategyFactoy {
 	String strategyHeadScript;
 	String strategyBodyScript;
 	String strategySript;
-	StrategyHead strategyHead;
 	Map<String, String> initMap;
 	String xDataStr;
 	List<StrategyOut> outList;
 	
 	public StrategyFactoy(){
-		
-	}
-	
-	public void init(String fileName){
 		utilSript = FileUtil.readFile(basePath+utilName);
 		utilSript = utilSript.replaceAll("\t", "");
 		utilSript = utilSript.replaceAll("\n", "");
+	}
+	
+	public StrategyFactoy getInstance(){
+		if(strategyFactoy==null){
+			strategyFactoy = new StrategyFactoy();
+		}
+		return strategyFactoy;
+	}
+	
+	public Strategy getStrategy(String fileName){
+		Strategy strategy = new Strategy();
+		List<String> contentList = readStrategyFile(basePath+fileName);
+		strategy.init(contentList);
+		return strategy;
+	}
+	
+	public void init(String fileName){
 		strategySript = FileUtil.readFile(basePath+fileName);
 		String[] strategyArr = strategySript.split("//init");
 		strategyHeadScript = strategyArr[0];
 		strategyBodyScript = strategyArr[1];
 		String[] initArr = strategyHeadScript.split(";");
-		strategyHead = new StrategyHead();
 		initMap = new HashMap<String, String>();
 		outList = new ArrayList<StrategyOut>();
 		for(String param :initArr){
@@ -262,6 +271,46 @@ public class StrategyFactoy {
 		//return 
 	}
 	
+	public List<String> readStrategyFile( String filePath ) {
+        File ds = null;
+        FileReader fr = null;
+        BufferedReader br = null;
+        //String fileContent = "";
+        List<String> contentList = new ArrayList<String>();
+        String temp = "";
+        try {
+            ds = new File( filePath );
+            if ( ds.exists() ) {
+                fr = new FileReader( ds );
+                br = new BufferedReader( fr );
+                temp = br.readLine();
+                while ( temp != null ) {
+                    //fileContent += temp;
+                    contentList.add(temp);
+                    temp = br.readLine();
+                }
+            }
+        }
+        catch ( Exception e ) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if ( br != null ) {
+                    br.close();
+                }
+                if ( fr != null ) {
+                    fr.close();
+                }
+            }
+            catch ( Exception e ) {
+                e.printStackTrace();
+            }
+
+        }
+        return contentList;
+    }
+	
 	public static void main(String[] args) {
 		try {
 			String str = "{a:[1,2,3]}";
@@ -295,56 +344,6 @@ public class StrategyFactoy {
 		JSONArray xArr = JSONArray.fromObject(xData);
 		xDataStr = xArr.toString();
 		initMap.put("xData", xDataStr);
-	}
-	
-	public String getStart() {
-		return start;
-	}
-
-	public void setStart(String start) {
-		this.start = start;
-		initMap.put("start", start);
-	}
-
-	public String getEnd() {
-		return end;
-	}
-
-	public void setEnd(String end) {
-		this.end = end;
-		initMap.put("end", end);
-	}
-
-	public String getContrast_code() {
-		return contrast_code;
-	}
-
-	public void setContrast_code(String contrast_code) {
-		this.contrast_code = contrast_code;
-	}
-
-	public String getBenchmark() {
-		return benchmark;
-	}
-
-	public void setBenchmark(String benchmark) {
-		this.benchmark = benchmark;
-	}
-
-	public String getCapital_base() {
-		return capital_base;
-	}
-
-	public void setCapital_base(String capital_base) {
-		this.capital_base = capital_base;
-	}
-
-	public String getFreq() {
-		return freq;
-	}
-
-	public void setFreq(String freq) {
-		this.freq = freq;
 	}
 	
 	public List<StrategyOut> getOutList() {
