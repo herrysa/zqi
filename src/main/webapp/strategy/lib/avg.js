@@ -25,7 +25,7 @@ for(var i in xData){
 		var period = xData[i - j];
 		var data = codeData[period];
 		var close = data.close;
-		sum = Number(sum).accAdd(Number(close));
+		sum = Number(sum).add(Number(close));
     }
 	var avg = Number(sum).div(num);
 	avgArray.push(avg);
@@ -33,3 +33,4 @@ for(var i in xData){
 
 result.avg = avgArray;
 result = json2str(result);
+println(result);

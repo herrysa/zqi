@@ -3,22 +3,11 @@ package com.zqi.strategy;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -27,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.zqi.frame.dao.impl.ZqiDao;
-import com.zqi.frame.util.Tools;
 import com.zqi.unit.FileUtil;
 
 @Component("strategyFactoy")
@@ -52,6 +40,9 @@ public class StrategyFactoy {
 		context = new HashMap<String, Object>();
 		context.put("basePath", basePath);
 		
+		String lib = "Data,indicator,lib";
+		context.put("lib", lib);
+		
 		String utilSript = FileUtil.readFile(basePath+utilName);
 		utilSript = utilSript.replaceAll("\t", "");
 		utilSript = utilSript.replaceAll("\n", "");
@@ -60,10 +51,10 @@ public class StrategyFactoy {
 		utilMap.put("util", utilSript);
 		context.put("util", utilMap);
 		
-		context.put("dao", zqiDao);
 	}
 	
 	public Strategy getStrategy(String fileName){
+		context.put("dao", zqiDao);
 		Strategy strategy = new Strategy();
 		strategy.init(context,fileName);
 		return strategy;

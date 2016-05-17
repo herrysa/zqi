@@ -17,13 +17,11 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import com.github.abel533.echarts.series.Line;
-import com.zqi.frame.dao.impl.ZqiDao;
-import com.zqi.frame.util.Tools;
-import com.zqi.unit.SpringContextHelper;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
+import com.zqi.frame.dao.impl.ZqiDao;
+import com.zqi.frame.util.Tools;
 
 public class Strategy {
 
@@ -35,6 +33,7 @@ public class Strategy {
 	
 	
 	private Map<String, Object> context;
+	Map<String, String> parentInitMap;
 
 
 	public Map<String, Object> getContext() {
@@ -95,23 +94,13 @@ public class Strategy {
 		this.context = context;
 		zqiDao = (ZqiDao)context.get("dao");
 		String basePath = context.get("basePath").toString();
+		String lib = context.get("lib").toString();
 		List<String> contentList = StrategyFactoy.readStrategyFile(basePath+filePath);
 		boolean titleEnd = false,initEnd = false;
 		title = new HashMap<String, String>();
 		body = "";
-		initMap = (Map<String, String>)context.get("initMap");
-		if(initMap==null){
-			initMap = new HashMap<String, String>();
-		}else{
-			Set<Entry<String, String>> initSet = initMap.entrySet();
-			for(Entry<String, String> init : initSet){
-				String key = init.getKey();
-				String value = init.getKey();
-				if(value.contains(".")){
-					initMap.remove(key);
-				}
-			}
-		}
+		parentInitMap = (Map<String, String>)context.get("initMap");
+		initMap = new HashMap<String, String>();
 		outList = new ArrayList<StrategyOut>();
 		for(String content : contentList){
 			if("".equals(content)){
@@ -141,6 +130,28 @@ public class Strategy {
 				if(!initEnd){
 					if(content.equals("//init")){
 						initEnd = true;
+						if(parentInitMap!=null){
+							Set<Entry<String, String>> initSet = parentInitMap.entrySet();
+							for(Entry<String, String> init : initSet){
+								String key = init.getKey();
+								String value = init.getValue();
+								boolean addInit = false;
+								if(value!=null&&value.contains(".")){
+									String libName  = value.split("\\.")[0];
+									if(!lib.contains(libName)){
+										addInit = true;
+									}
+								}else{
+									addInit = true;
+								}
+								if(addInit){
+									String thisInitValue = initMap.get(key);
+									if(thisInitValue==null||"".equals(thisInitValue)||"null".equals(thisInitValue)||"''".equals(thisInitValue)||"\"\"".equals(thisInitValue)){
+										initMap.put(key,value);
+									}
+								}
+							}
+						}
 						this.context.put("initMap",initMap);
 						continue;
 					}
@@ -341,7 +352,12 @@ public class Strategy {
 				List<Object> values = strategyOut.getValues();
 				if("line".equals(outType)||"bar".equals(outType)){
 					for(Object value : values){
-						rs += value.toString()+",";
+						String v = value.toString();
+						if(v.equals("-")){
+							rs += "'"+value.toString()+"',";
+						}else{
+							rs += value.toString()+",";
+						}
 					}
 					rs = rs.substring(0, rs.length()-1);
 					rsStr = "["+rs+"]";
