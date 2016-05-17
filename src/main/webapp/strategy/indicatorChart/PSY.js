@@ -9,10 +9,10 @@ out = 'PSY,PSYMA';
 xData = null;
 codeData = Data.getGPData(code,'settlement,close',null,null);
 result = {};
-//init
-
 result.PSY = indicator.PSY;
 result.PSYMA = lib.avg;
+//init
+
 result = json2str(result);
 
 

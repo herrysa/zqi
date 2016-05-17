@@ -32,6 +32,7 @@ import com.github.abel533.echarts.series.Line;
 import com.github.abel533.echarts.series.Series;
 import com.github.abel533.echarts.style.TextStyle;
 import com.zqi.frame.controller.BaseController;
+import com.zqi.strategy.Strategy;
 import com.zqi.strategy.StrategyFactoy;
 import com.zqi.strategy.StrategyOut;
 import com.zqi.strategy.lib.Data;
@@ -210,13 +211,13 @@ public class ChartController extends BaseController{
 		List<Series> indiSeries = new ArrayList<Series>();
 		for(String indi : indicatorArr){
 			StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
-			strategyFactoy.init("indicatorChart/"+indicator+".js");
-			strategyFactoy.setCode(code);
-			strategyFactoy.setxData(categoryData);
-			strategyFactoy.setStart(null);
-			strategyFactoy.setEnd(null);
-			strategyFactoy.eval();
-			List<StrategyOut> outList = strategyFactoy.getOutList();
+			Strategy strategy = strategyFactoy.getStrategy("indicatorChart/"+indicator+".js");
+			strategy.setCode(code);
+			strategy.setxData(categoryData);
+			strategy.setInitParam("start",null);
+			strategy.setInitParam("end",null);
+			strategy.eval();
+			List<StrategyOut> outList = strategy.getOutList();
 			for(StrategyOut strategyOut :outList){
 				String outNname = strategyOut.getName();
 				String outType = strategyOut.getType();
