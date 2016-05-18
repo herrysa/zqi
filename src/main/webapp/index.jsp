@@ -141,6 +141,24 @@
 				    </div>
 				  </div>
 				</div>
+				<div class="panel-group" id="strategyMenu" role="tablist" aria-multiselectable="true">
+				  <div class="panel panel-default">
+				    <div class="panel-heading" role="tab" id="strategyMenu-head">
+				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="strategyMenu" href="#strategyMenu-content" aria-expanded="false" aria-controls="strategyMenu-content">
+							策略分析
+				        </a>
+				    </div>
+				    <div id="strategyMenu-content" class="panel-collapse collapse" role="tabpanel" aria-labelledby="strategyMenu-head">
+				      <div class="panel-body">
+						<ul class="nav nav-pills nav-stacked">
+							<li><a href="javaScript:menuClick('report/reportMain')">选股</a></li>
+							<li><a href="javaScript:menuClick('strategy/strategyList')">历史回测</a></li>
+							<li><a href="javaScript:menuClick('report/reportMain')"></a></li>
+						</ul>
+				      </div>
+				    </div>
+				  </div>
+				</div>
 			</div>
 			<div id="openClose" class="close">&nbsp;</div>
 			<div id="mainContent" class='mainContent'>

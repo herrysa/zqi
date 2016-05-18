@@ -1,5 +1,6 @@
 package com.zqi.strategy;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,6 +29,7 @@ public class Strategy {
 	private ZqiDao zqiDao;
 	private Map<String, String> title;
 	private Map<String, String> initMap;
+	private List<String> initSeq;
 	private List<StrategyOut> outList;
 	private String body;
 	
@@ -95,13 +97,19 @@ public class Strategy {
 		zqiDao = (ZqiDao)context.get("dao");
 		String basePath = context.get("basePath").toString();
 		String lib = context.get("lib").toString();
-		List<String> contentList = StrategyFactoy.readStrategyFile(basePath+filePath);
+		String fileFullpath = basePath+filePath;
+		List<String> contentList = StrategyFactoy.readStrategyFile(fileFullpath);
 		boolean titleEnd = false,initEnd = false;
 		title = new HashMap<String, String>();
+		File file = new File(fileFullpath);
+		String fileName = file.getName();
+		title.put("code", fileName.split("\\.")[0]);
 		body = "";
 		parentInitMap = (Map<String, String>)context.get("initMap");
 		initMap = new HashMap<String, String>();
+		initSeq = new ArrayList<String>();
 		outList = new ArrayList<StrategyOut>();
+		
 		for(String content : contentList){
 			if("".equals(content)){
 				continue;
@@ -148,6 +156,9 @@ public class Strategy {
 									String thisInitValue = initMap.get(key);
 									if(thisInitValue==null||"".equals(thisInitValue)||"null".equals(thisInitValue)||"''".equals(thisInitValue)||"\"\"".equals(thisInitValue)){
 										initMap.put(key,value);
+										if(!initSeq.contains(key)){
+											initSeq.add(key);
+										}
 									}
 								}
 							}
@@ -162,42 +173,10 @@ public class Strategy {
 						String value = paramArr[1].trim();
 						if(paramArr.length>1){
 							if("out".equals(var)){
-								String out = value;
-								if(out.startsWith("{")){
-									JSONObject outObject = JSONObject.fromObject(out);
-									Iterator outIt = outObject.keys();
-									while(outIt.hasNext()){
-										String key = outIt.next().toString();
-										String type = outObject.get(key).toString();
-										StrategyOut strategyOut = new StrategyOut();
-										strategyOut.setName(key);
-										strategyOut.setType(type);
-										outList.add(strategyOut);
-									}
-								}else{
-									if(out.contains(",")){
-										String[] outArr = out.split(",");
-										for(String o :outArr){
-											StrategyOut strategyOut = new StrategyOut();
-											strategyOut.setName(o);
-											strategyOut.setType("line");
-											outList.add(strategyOut);
-										}
-									}else{
-										if(value.contains("'")){
-											value = value.replaceAll("'", "");
-										}
-										if(value.contains("\"")){
-											value = value.replaceAll("\"", "");
-										}
-										StrategyOut strategyOut = new StrategyOut();
-										strategyOut.setName(value);
-										strategyOut.setType("line");
-										outList.add(strategyOut);
-									}
-								}
+								dealOut(value);
 							}else{
 								initMap.put(var, value);
+								initSeq.add(var);
 							}
 						}
 					}
@@ -233,12 +212,8 @@ public class Strategy {
 	public String getStrategyScript(){
 		Set<Entry<String, String>> initSet = initMap.entrySet();
 		String explainedStrategyHead ="";
-		for(Entry<String, String> param : initSet){
-			String varName = param.getKey();
-			String func = param.getValue();
-			if(func!=null){
-				func = func.trim();
-			}
+		for(String varName : initSeq){
+			String func = initMap.get(varName);
 			String varLine = varName+"="+func+";";
 			explainedStrategyHead += varLine;
 		}
@@ -293,6 +268,38 @@ public class Strategy {
 				paramList.add(paramValue);
 			}
 			paramTypeList.add(String.class);
+		}
+	}
+	
+	private void dealOut(String out){
+		if(out.startsWith("{")){
+			JSONObject outObject = JSONObject.fromObject(out);
+			Iterator outIt = outObject.keys();
+			while(outIt.hasNext()){
+				String key = outIt.next().toString();
+				String type = outObject.get(key).toString();
+				StrategyOut strategyOut = new StrategyOut();
+				strategyOut.setName(key);
+				strategyOut.setType(type);
+				outList.add(strategyOut);
+			}
+		}else{
+			if(out.contains(",")){
+				out = getPureStr(out);
+				String[] outArr = out.split(",");
+				for(String o :outArr){
+					StrategyOut strategyOut = new StrategyOut();
+					strategyOut.setName(o);
+					strategyOut.setType("line");
+					outList.add(strategyOut);
+				}
+			}else{
+				out = getPureStr(out);
+				StrategyOut strategyOut = new StrategyOut();
+				strategyOut.setName(out);
+				strategyOut.setType("line");
+				outList.add(strategyOut);
+			}
 		}
 	}
 	
@@ -373,5 +380,11 @@ public class Strategy {
 		Strategy strategy = new Strategy();
 		strategy.init(context,fileName);
 		return strategy;
+	}
+	
+	public String getPureStr(String str){
+		str = str.replaceAll("'", "");
+		str = str.replaceAll("\"", "");
+		return str;
 	}
 }
