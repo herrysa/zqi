@@ -65,6 +65,9 @@ public class StrategyController extends BaseController{
 	public String strategyResult(HttpServletRequest request,ModelMap model){
 		String code = request.getParameter("code");
 		model.put("code", code);
+		StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
+		Strategy strategy = strategyFactoy.getStrategy("loopbacktest/"+code+".js");
+		strategy.eval();
 		return "strategy/strategyResult";
 	}
 	
