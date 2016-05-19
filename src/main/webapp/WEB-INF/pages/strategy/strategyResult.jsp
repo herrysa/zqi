@@ -7,7 +7,8 @@
 </head>
 <script>
 $(function() {
-	
+	var trans = "${strategyOption}";
+
 });
 
 </script>
@@ -25,8 +26,13 @@ $(function() {
 				<li><a href="#">Contact</a></li> 
 			</ul>
 		</div>
-		<div id="strategyRsContent" style="float:left;width:500px">
-			11111
+		<div id="strategyRsContent" style="float:left;width:1000px">
+			<div id="strategy_chart" style="height:400px"></div>
+			<script>
+			var strategyChart = echarts.init(document.getElementById('strategy_chart')); 
+			var strategyOption = eval('(${strategyOption})');
+			strategyChart.setOption(strategyOption);
+			</script>
 		</div>
 		</div>
 	</div>

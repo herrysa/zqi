@@ -2,7 +2,9 @@ package com.zqi.strategy;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,7 +64,6 @@ public class StrategyFactoy {
 	
 	public static List<String> readStrategyFile( String filePath ) {
         File ds = null;
-        FileReader fr = null;
         BufferedReader br = null;
         //String fileContent = "";
         List<String> contentList = new ArrayList<String>();
@@ -70,8 +71,7 @@ public class StrategyFactoy {
         try {
             ds = new File( filePath );
             if ( ds.exists() ) {
-                fr = new FileReader( ds );
-                br = new BufferedReader( fr );
+                br = new BufferedReader( new InputStreamReader(new FileInputStream(filePath),"UTF-8") );
                 temp = br.readLine();
                 while ( temp != null ) {
                     //fileContent += temp;
@@ -87,9 +87,6 @@ public class StrategyFactoy {
             try {
                 if ( br != null ) {
                     br.close();
-                }
-                if ( fr != null ) {
-                    fr.close();
                 }
             }
             catch ( Exception e ) {
