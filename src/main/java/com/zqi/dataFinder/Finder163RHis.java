@@ -6,12 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
 
 public class Finder163RHis implements IFinderRHis{
 	public static String[] rHisColumn163 = {"0","1","2","7","6","4","5","3","11","12","8","9","wu","10","wu","wu","wu","13","14","wu","wu","wu","wu"};
 	@Override
 	public List<Map<String, Object>> findRHis(Map<String, Object> gp,String dateFrom, String dateTo) {
+		System.out.println("1");
 		List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
 		String url = "http://quotes.money.163.com/service/chddata.html?code=%code%&start=%dateFrom%&end=%dateTo%&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP";
 		String fromYear = dateFrom.substring(0,4);
@@ -20,6 +22,8 @@ public class Finder163RHis implements IFinderRHis{
 		dateTo = dateTo.replace("-", "");
 		String code = gp.get("code").toString();
 		String type = gp.get("type").toString();
+		TestTimer tt = new TestTimer(code);
+		tt.begin();
 		String code163 = "";
 		if("0".equals(type)){
 			code163 = "0"+code;
@@ -33,6 +37,7 @@ public class Finder163RHis implements IFinderRHis{
 		urlTemp = urlTemp.replace("%dateFrom%", dateFrom);
 		urlTemp = urlTemp.replace("%dateTo%", dateTo);
 		String result = Tools.getByHttpUrl(urlTemp);
+		System.out.println(2);
 		if(fromYear.equals(toYear)){
 			result = result.replace(fromYear+"-", "\n"+fromYear+"-");
 		}else{
@@ -84,6 +89,7 @@ public class Finder163RHis implements IFinderRHis{
 			data.put("type", type);
 			dataList.add(data);
 		}
+		tt.done();
 		return dataList;
 	}
 	public static void main(String[] args) {

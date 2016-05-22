@@ -23,6 +23,7 @@ import net.sf.json.JSONObject;
 
 import com.zqi.frame.dao.impl.ZqiDao;
 import com.zqi.frame.util.Tools;
+import com.zqi.unit.FileUtil;
 
 public class Strategy {
 
@@ -60,6 +61,16 @@ public class Strategy {
 		initMap.put("xData", xDataStr);
 	}
 
+	public void addLib(String fileName){
+		String basePath = context.get("basePath").toString();
+		File lib = new File(basePath+fileName);
+		String libSript = FileUtil.readFile(basePath+fileName);
+		libSript = libSript.replaceAll("\t", "");
+		libSript = libSript.replaceAll("\n", "");
+		Map<String, String> utilMap = (Map<String, String>)context.get("util");
+		utilMap.put(lib.getName(), libSript);
+	}
+	
 	public String getBody() {
 		return body;
 	}
@@ -218,7 +229,12 @@ public class Strategy {
 			explainedStrategyHead += varLine;
 		}
 		Map<String, String> utilMap = (Map<String, String>)context.get("util");
-		String utilSript = utilMap.get("util");
+		String utilSript = "";
+		Set<Entry<String, String>> utilSet = utilMap.entrySet();
+		for(Entry<String, String> util : utilSet){
+			String value = util.getValue();
+			utilSript += "\n"+value;
+		}
 		return utilSript+"\n"+explainedStrategyHead+"\n"+body;
 	}
 	
@@ -231,6 +247,7 @@ public class Strategy {
 			String evalStr = getStrategyScript();
 			engine.eval(evalStr,bindings);
 			Object result = bindings.get("result");
+			System.out.println(result.toString());
 			JSONObject resultJson = JSONObject.fromObject(result);
 			for(StrategyOut strategyOut : outList){
 				String name = strategyOut.getName();
@@ -238,7 +255,12 @@ public class Strategy {
 				Object outValue = resultJson.get(name);
 				if(outValue!=null){
 					if("table".equals(type)){
-						
+						JSONArray outValueStr = (JSONArray)outValue;
+						List<Object> valueList = new ArrayList<Object>();
+						for(Object o : outValueStr){
+							valueList.add(o);
+						}
+						strategyOut.setValues(valueList);
 					}else{
 						JSONArray outValueStr = (JSONArray)outValue;
 						Object[] valueArr = (Object[])JSONArray.toArray(outValueStr);

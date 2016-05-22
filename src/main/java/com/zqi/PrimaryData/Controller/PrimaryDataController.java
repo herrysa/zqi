@@ -342,8 +342,11 @@ public class PrimaryDataController extends BaseController{
 				String type = gp.get("type").toString();
 				List<Map<String,Object>> dataList = finder163rHis.findRHis(gp, dateFrom, dateTo);
 				String deleteSql = "delete from "+daytable+" where code='"+code+"' and period between '"+dateFrom+"' and '"+dateTo+"' and type='"+type+"'";
+				TestTimer tt = new TestTimer(code+dataList.size()+"入库");
+				tt.begin();
 				zqiDao.excute(deleteSql);
 				zqiDao.addList(dataList, daytable);
+				tt.done();
 				count += dataList.size();
 			}
 			long msTime = importRHisDataTime.doner();
