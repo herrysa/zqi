@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?"> 
 <Catalog>
 <Project text="日数据">
-<ds id="dept" descURL="rHis.desc.xml" dataURL="http://localhost:9090/iHOS/getDataSourceBySql?sql=select top 50 deptId,name from t_department where disabled=0 and leaf=1">日数据</ds>
+<ds id="rdata" descURL="rData.desc.xml" dataURL="http://localhost:9191/zqi/report/getDataSourceBySql?sql=">日数据</ds>
 </Project> 
 </Catalog> 

@@ -81,6 +81,29 @@ public class ReportController extends BaseController{
 		return "report/reportShow";
 	}
 	
+	@ResponseBody
+	@RequestMapping("/getDataSourceBySql")
+	public List<Map<String, Object>> getDataSourceBySql(HttpServletRequest request){
+		String sql = request.getParameter("sql");
+		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+		JQueryPager pagedRequests = null;
+		pagedRequests = (JQueryPager) pagerFactory.getPager(
+				PagerFactory.JQUERYTYPE, request);
+		pagedRequests.setPageSize(500);
+		pagedRequests = zqiDao.findWithFilter(pagedRequests, sql, filters);
+		List<Map<String, Object>> rsList = pagedRequests.getList();
+		return rsList;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/getDataBySql")
+	public Map<String, Object> getDataBySql(HttpServletRequest request){
+		String sql = request.getParameter("sql");
+		Map<String, Object> rs = zqiDao.findFirst(sql);
+		resultMap.put("rs", rs);
+		return resultMap;
+	}
+	
 	public Map<String, String> getSaveMap(HttpServletRequest request,String[] columns){
 		Map<String, String> saveMap = new HashMap<String, String>();
 		for(String column : columns){

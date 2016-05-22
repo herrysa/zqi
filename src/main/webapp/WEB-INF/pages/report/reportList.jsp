@@ -39,8 +39,15 @@ $(function() {
 					height: 400,
 					rowNum: 20,
 					ondblClickRow:function(rowid, iRow, iCol, e){
-						$(".modal-body","#myModal").load("report/show");
-						$('#myModal').modal('show');
+						$('.modal-body','#modalDialog').html("");
+	                	$('#modalDialog').modal('show');
+	                	var _thisGrid = $(this);
+	                	setTimeout(function(){
+	                		var rowData = _thisGrid.jqGrid('getRowData',rowid);
+	                    	var code = rowData.code;
+	                    	//var name = rowData.name;
+	                    	$('.modal-body','#modalDialog').load("report/show?code="+code);
+	                	},1000);
 					},
 					pager: "#report_gridpager"
 				});

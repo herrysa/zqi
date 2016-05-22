@@ -1,12 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <root>
 	<functions>
-		<category name="自定义函数">
-			<function name="sourcepayinSum" >
-				<para>起始期间</para>
-				<para>结束期间</para>
-				<para>科室ID</para>
-				<para>项目类别，可选</para>
+		<category name="日数据">
+			<function name="findRData" >
+				<para>日期</para>
+				<para>代码</para>
+				<para>字段</para>
 				<returnDatatype>double</returnDatatype> 
 			</function>
 		</category>

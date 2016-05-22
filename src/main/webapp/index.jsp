@@ -133,7 +133,7 @@
 				      <div class="panel-body">
 						<ul class="nav nav-pills nav-stacked">
 							<li><a href="javaScript:menuClick('report/reportMain')">报表定义</a></li>
-							<li><a href="#">Java面向对象</a></li>
+							<li><a href="javaScript:menuClick('report/show')">Java面向对象</a></li>
 							<li><a href="#">Java核心API</a></li>
 							<li><a href="#">JavaEE</a></li>
 						</ul>
