@@ -1,5 +1,6 @@
 package com.zqi.report;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
+import org.dom4j.Document;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +21,7 @@ import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.controller.pagers.PagerFactory;
 import com.zqi.frame.util.SQLUtil;
+import com.zqi.frame.util.XMLUtil;
 
 @Controller
 @RequestMapping("/report")
@@ -76,9 +80,36 @@ public class ReportController extends BaseController{
 	}
 	
 	@RequestMapping("/show")
-	public String showReport(){
-		
+	public String showReport(HttpServletRequest request,ModelMap model){
+		String code = request.getParameter("code");
+		model.put("code", code);
+		HttpSession session = request.getSession();
+		String reportPath = session.getServletContext().getRealPath("report");
+		File report = new File(reportPath+"/user/"+code+".xml");
+		if(report.exists()){
+			model.put("reportFile", "user/"+code+".xml");
+		}else{
+			model.put("reportFile", "blank.xml");
+		}
 		return "report/reportShow";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/saveReportXml")
+	public Map<String, Object> saveReportXml(HttpServletRequest request){
+		String code = request.getParameter("code");
+		String reportXml = request.getParameter("reportXml");
+		
+		Document document = XMLUtil.stringToXml(reportXml);
+		HttpSession session = request.getSession();
+		String reportPath = session.getServletContext().getRealPath("report/user");
+		try {
+			XMLUtil.writDocumentToFile(document, reportPath+"/"+code+".xml", "UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		resultMap.put("message", "1");
+		return resultMap;
 	}
 	
 	@ResponseBody
@@ -100,6 +131,15 @@ public class ReportController extends BaseController{
 	public Map<String, Object> getDataBySql(HttpServletRequest request){
 		String sql = request.getParameter("sql");
 		Map<String, Object> rs = zqiDao.findFirst(sql);
+		resultMap.put("rs", rs);
+		return resultMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/getListDataBySql")
+	public Map<String, Object> getListDataBySql(HttpServletRequest request){
+		String sql = request.getParameter("sql");
+		List<Map<String, Object>> rs = zqiDao.findAll(sql);
 		resultMap.put("rs", rs);
 		return resultMap;
 	}

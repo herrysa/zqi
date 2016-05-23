@@ -4,7 +4,7 @@
 var reportDefine = {
 		key:"${random}_report_gridtable",
 		main:{
-			Build : '${ctx}/report/blank.xml',
+			Build : '${ctx}/report/${reportFile}',
 			SetSource : '${ctx}/report/datasource.xml',
 			Load :''
 		},
@@ -20,9 +20,10 @@ var reportDefine = {
 				if(p1=="104"){
 					var reportXml = grid.func("GetFileXML", "");
 					$.ajax({
-			            url: 'saveReportXml?code='+reportDefineCode+'&reportXml='+reportXml,
+			            url: 'report/saveReportXml',
 			            type: 'post',
 			            dataType: 'json',
+			            data :{code:'${code}',reportXml:reportXml},
 			            async:false,
 			            error: function(data){
 			            alertMsg.error("系统错误！");
@@ -63,6 +64,65 @@ var reportDefine = {
 			grid.func("SetParas", "RHIS \r\n sql="+url);
  		});
  	});
+ 	
+ 	function BatchControll(){ 
+ 		this.gridId = null;
+ 		this.time = 0;
+ 		this.pretreatment=0;
+ 		this.cellLength=0;
+ 		this.cellNum=0;
+ 		this.over=0;
+ 		this.rs = {};  
+ 	};
+ 	BatchControll.prototype.start=function(){
+ 		this.doAjax();
+ 	};
+ 	BatchControll.prototype.doAjax=function(){
+		$.ajax({
+            url: 'report/getListDataBySql',
+            type: 'post',
+            dataType: 'json',
+            data :{sql:this.sql},
+            async:false,
+            error: function(data){
+            alertMsg.error("系统错误！");
+            },
+            success: function(data){
+            	console.log(this.pretreatment);
+            	var grid = eval("("+gridId+")");
+            	var rsList = data.rs;
+            	if(rsList){
+            		for(var i in rsList){
+            			var rs = rsList[i];
+            			this.rs[rs.k] = rs.v;
+            		}
+            		this.over = 1;
+            	}
+            }
+        });
+ 		}
+ 	var batchFunction = new BatchControll();
+ 	batchFunction.pretreatment = 1;	
+ 	function batchFindRData(key,period,col,where){
+ 		//return checkperiod1;
+ 		var sum;
+ 		var sql = "select code k,"+col+" v from daytable_all where period='"+period+"'";
+ 		if(where){
+ 			sql += " "+where;
+ 		}
+ 		batchFunction.sql = sql;
+ 		batchFunction.start();
+ 		while(true){
+ 			if(batchFunction.over==1){
+ 				var value = batchFunction.rs[key];
+ 				if(value){
+ 					return value;
+ 				}else{
+ 					return "";
+ 				}
+ 			}
+ 		} 
+ 	}
  	function findRData(period,code,col){
  		//return checkperiod1;
  		var sum;

@@ -8,6 +8,13 @@
 				<para>字段</para>
 				<returnDatatype>double</returnDatatype> 
 			</function>
+			<function name="batchFindRData" >
+				<para>key</para>
+				<para>日期</para>
+				<para>字段</para>
+				<para>条件</para>
+				<returnDatatype>double</returnDatatype> 
+			</function>
 		</category>
 	</functions>
 </root>
