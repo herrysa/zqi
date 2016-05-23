@@ -2,6 +2,10 @@
 <root>
 	<functions>
 		<category name="日数据">
+			<function name="findPeriod" >
+				<para>倒推第几天</para>
+				<returnDatatype>string</returnDatatype> 
+			</function>
 			<function name="findRData" >
 				<para>日期</para>
 				<para>代码</para>

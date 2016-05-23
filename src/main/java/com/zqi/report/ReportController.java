@@ -1,13 +1,14 @@
 package com.zqi.report;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.dom4j.Document;
@@ -83,15 +84,34 @@ public class ReportController extends BaseController{
 	public String showReport(HttpServletRequest request,ModelMap model){
 		String code = request.getParameter("code");
 		model.put("code", code);
+		return "report/reportShow";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/getReportXml")
+	public String getReportXml(HttpServletRequest request,HttpServletResponse response){
+		String code = request.getParameter("code");
 		HttpSession session = request.getSession();
 		String reportPath = session.getServletContext().getRealPath("report");
 		File report = new File(reportPath+"/user/"+code+".xml");
-		if(report.exists()){
-			model.put("reportFile", "user/"+code+".xml");
-		}else{
-			model.put("reportFile", "blank.xml");
+		String reportXml = null;
+		if(!report.exists()){
+			report = new File(reportPath+"/blank.xml");
 		}
-		return "report/reportShow";
+		reportXml = XMLUtil.xmltoString(XMLUtil.read(report, "UTF-8"));
+		try {
+			response.setCharacterEncoding("UTF-8");  
+			response.setContentType("text/xml;charset=utf-8");  
+			response.setHeader("Cache-Control", "no-cache");  
+			PrintWriter out;
+			out = response.getWriter();
+			out.write(reportXml.toString());  
+			out.flush();  
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}  
+        return null;
 	}
 	
 	@ResponseBody
@@ -116,6 +136,7 @@ public class ReportController extends BaseController{
 	@RequestMapping("/getDataSourceBySql")
 	public List<Map<String, Object>> getDataSourceBySql(HttpServletRequest request){
 		String sql = request.getParameter("sql");
+		sql = replaceVari(request,sql);
 		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 		JQueryPager pagedRequests = null;
 		pagedRequests = (JQueryPager) pagerFactory.getPager(
@@ -144,6 +165,15 @@ public class ReportController extends BaseController{
 		return resultMap;
 	}
 	
+	@ResponseBody
+	@RequestMapping("/findPeriodList")
+	public Map<String, Object> findPeriodList(HttpServletRequest request){
+		List<Map<String, Object>> periodList = null;
+		periodList = getPeriodList(request);
+		resultMap.put("periodList", periodList);
+		return resultMap;
+	}
+	
 	public Map<String, String> getSaveMap(HttpServletRequest request,String[] columns){
 		Map<String, String> saveMap = new HashMap<String, String>();
 		for(String column : columns){
@@ -151,5 +181,24 @@ public class ReportController extends BaseController{
 			saveMap.put(column, value);
 		}
 		return saveMap;
+	}
+	
+	public String replaceVari(HttpServletRequest request,String str){
+		List<Map<String, Object>> periodList = null;
+		periodList = getPeriodList(request);
+		str = str.replaceAll("%lastperiod%", periodList.get(0).get("period").toString());
+		
+		return str;
+	}
+	
+	public List<Map<String, Object>> getPeriodList(HttpServletRequest request){
+		HttpSession session = request.getSession();
+		List<Map<String, Object>> periodList = null;
+		periodList = (List<Map<String, Object>>)session.getAttribute("periodList");
+		if(periodList==null){
+			String sql = "select period from daytable_all where code='0000001' order by period desc";
+			periodList = zqiDao.findAll(sql);
+		}
+		return periodList;
 	}
 }

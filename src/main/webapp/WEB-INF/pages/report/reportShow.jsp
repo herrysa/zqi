@@ -4,7 +4,7 @@
 var reportDefine = {
 		key:"${random}_report_gridtable",
 		main:{
-			Build : '${ctx}/report/${reportFile}',
+			Build : '${ctx}/report/getReportXml?code=${code}',
 			SetSource : '${ctx}/report/datasource.xml',
 			Load :''
 		},
@@ -43,7 +43,7 @@ var reportDefine = {
 				//var url = "${ctx}/report/getDataSourceBySql?sql=select * from daytable_all where";
 				
 				grid.func("NewDS", "rdata \r\n rdata");
-				var url = "select * from daytable_all where 1=1 and period='2016-05-20' and close<>0 and ROUND(settlement*0.1,2)=changeprice";
+				var url = "select * from daytable_all where 1=1 and period='%lastperiod%' and close<>0 and ROUND(settlement*0.1,2)=changeprice";
 				url += " order by period desc,code asc";
 				grid.func("SetParas", "rdata \r\n sql="+url+"");
 			}
@@ -51,6 +51,8 @@ var reportDefine = {
 	}; 
 	
     supcanGridMap['report_gridtable_${random}']=reportDefine; 
+    
+    var periodList ;
  	jQuery(document).ready(function(){
  		//reportDefine.main.Build = initreportColModel();
  		//alert(reportDefine.main.Build);
@@ -63,6 +65,20 @@ var reportDefine = {
 			alert();
 			grid.func("SetParas", "RHIS \r\n sql="+url);
  		});
+ 		$.ajax({
+            url: 'report/findPeriodList',
+            type: 'post',
+            dataType: 'json',
+            async:false,
+            error: function(data){
+            alertMsg.error("系统错误！");
+            },
+            success: function(data){
+            	if(data.periodList){
+            		periodList = data.periodList;
+            	}
+            }
+        });
  	});
  	
  	function BatchControll(){ 
@@ -145,6 +161,18 @@ var reportDefine = {
  		
  		return sum;
  	}
+ 	
+ 	function findPeriod(day){
+ 		var period;
+ 		period = periodList[day].period;
+ 		return period;
+ 	}
+ 	
+ 	/* function zfValue(v1,v2,v3){
+ 		var period;
+ 		period = periodList[day].period;
+ 		return period;
+ 	} */
  </script>
  <div class="page">
 	<div class="pageContent">
