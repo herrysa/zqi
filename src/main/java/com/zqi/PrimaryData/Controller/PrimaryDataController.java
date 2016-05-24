@@ -31,6 +31,8 @@ import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.zqi.PrimaryData.DataAddThread;
+import com.zqi.PrimaryData.HisContext;
+import com.zqi.PrimaryData.HisDataAddThread;
 import com.zqi.dataFinder.Finder163RHis;
 import com.zqi.dataFinder.Finder163RToday;
 import com.zqi.dataFinder.Finder163ZhishuRToday;
@@ -365,13 +367,34 @@ public class PrimaryDataController extends BaseController{
 		TestTimer importRHisDataTime = new TestTimer("导入今日数据");
 		importRHisDataTime.begin();
 		try {
-			List<Map<String, Object>> gpList = findAGpDicList();
+			//List<Map<String, Object>> gpList = findAGpDicList();
+			Map<String, List<Map<String, Object>>> gpListMap = findAGpDicListMap();
 			Finder163RHis finder163rHis = new Finder163RHis();
 			int count = 0;
 			Map<String, List<Map<String, Object>>> dayTableData = new HashMap<String, List<Map<String,Object>>>();
 			String delSql = "delete from daytable_all where period between '"+dateFrom+"' and '"+dateTo+"'";
 			zqiDao.excute(delSql);
-			for(Map<String, Object> gp : gpList){
+			
+			Set<String> daytableSet = gpListMap.keySet();
+			List<Thread> threads = new ArrayList<Thread>();
+			HisContext hisContext = new HisContext();
+			hisContext.setDateFrom(dateFrom);
+			hisContext.setDateTo(dateTo);
+			for(String daytable : daytableSet){
+				List<Map<String, Object>> gpList = gpListMap.get(daytable);
+				HisDataAddThread hisDataAddThread = new HisDataAddThread(gpList, daytable, hisContext);
+				Thread thread = new Thread(hisDataAddThread);
+				thread.start();
+				threads.add(thread);
+			}
+			for(Thread thread : threads){
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			/*for(Map<String, Object> gp : gpList){
 				code = gp.get("code").toString();
 				String daytable = gp.get("daytable").toString();
 				String type = gp.get("type").toString();
@@ -381,7 +404,7 @@ public class PrimaryDataController extends BaseController{
 				zqiDao.addList(dataList, daytable);
 				tt.done();
 				count += dataList.size();
-			}
+			}*/
 			
 			long msTime = importRHisDataTime.doner();
 			Map<String, Object> errorLog = new HashMap<String, Object>();

@@ -1,5 +1,6 @@
 package com.zqi.frame.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,22 @@ public class BaseController {
 		String dicSql = "select * from d_gpdic order by code asc";
 		List<Map<String, Object>> gpList = zqiDao.findAll(dicSql);
 		return gpList;
+	}
+	
+	public Map<String, List<Map<String, Object>>> findAGpDicListMap(){
+		String dicSql = "select * from d_gpdic order by code asc";
+		List<Map<String, Object>> gpList = zqiDao.findAll(dicSql);
+		Map<String, List<Map<String, Object>>> gpDicListMap = new HashMap<String, List<Map<String,Object>>>();
+		for(Map<String, Object> gp : gpList){
+			String daytable = gp.get("daytable").toString();
+			List<Map<String, Object>> gpListDaytable = gpDicListMap.get(daytable);
+			if(gpListDaytable==null){
+				gpListDaytable = new ArrayList<Map<String,Object>>();
+				gpDicListMap.put(daytable, gpListDaytable);
+			}
+			gpListDaytable.add(gp);
+		}
+		return gpDicListMap;
 	}
 
 }

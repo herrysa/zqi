@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
@@ -13,7 +16,7 @@ public class Finder163RHis implements IFinderRHis{
 	public static String[] rHisColumn163 = {"0","1","2","7","6","4","5","3","11","12","8","9","wu","10","wu","wu","wu","13","14","wu","wu","wu","wu"};
 	@Override
 	public List<Map<String, Object>> findRHis(Map<String, Object> gp,String dateFrom, String dateTo) {
-		System.out.println("1");
+		//System.out.println("1");
 		List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
 		String url = "http://quotes.money.163.com/service/chddata.html?code=%code%&start=%dateFrom%&end=%dateTo%&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP";
 		String fromYear = dateFrom.substring(0,4);
@@ -37,12 +40,18 @@ public class Finder163RHis implements IFinderRHis{
 		urlTemp = urlTemp.replace("%dateFrom%", dateFrom);
 		urlTemp = urlTemp.replace("%dateTo%", dateTo);
 		String result = Tools.getByHttpUrl(urlTemp);
-		System.out.println(2);
+		ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(2);
+		GetHttpSuperviseThread task1 = new GetHttpSuperviseThread("", null);
+		scheduled.schedule(task1, 1000, TimeUnit.MILLISECONDS);
+		//System.out.println(2);
 		if(fromYear.equals(toYear)){
 			result = result.replace(fromYear+"-", "\n"+fromYear+"-");
 		}else{
-			result = result.replace(fromYear+"-", "\n"+fromYear+"-");
-			result = result.replace(toYear+"-", "\n"+toYear+"-");
+			int fyear = Integer.parseInt(fromYear);
+			int tyear = Integer.parseInt(toYear);
+			for(int year=fyear;year<=tyear;year++){
+				result = result.replace(year+"-", "\n"+year+"-");
+			}
 		}
 		String[] rowArr = result.split("\n");
 		for(int r=1;r<rowArr.length;r++){
