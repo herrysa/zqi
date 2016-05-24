@@ -30,6 +30,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.zqi.PrimaryData.DataAddThread;
 import com.zqi.dataFinder.Finder163RHis;
 import com.zqi.dataFinder.Finder163RToday;
 import com.zqi.dataFinder.Finder163ZhishuRToday;
@@ -264,6 +265,9 @@ public class PrimaryDataController extends BaseController{
 			List<Map<String, Object>> todayZhishuList = iFinderZhishuRToday.findRToday();
 			Map<String, Map<String, Object>> gpmap = findAGpDicMap();
 			int count = 0;
+			Map<String, List<Map<String, Object>>> dayTableData = new HashMap<String, List<Map<String,Object>>>();
+			String delSql = "delete from daytable_all where period='"+period+"'";
+			zqiDao.excute(delSql);
 			for(Map<String, Object> dayData :todayList){
 				code = dayData.get("code").toString();
 				period = dayData.get("period").toString();
@@ -278,9 +282,14 @@ public class PrimaryDataController extends BaseController{
 				if(gpdic!=null){
 					String daytable = gpdic.get("daytable").toString();
 					String type = gpdic.get("type").toString();
-					zqiDao.excute("delete from "+daytable+" where code='"+code+"' and period='"+period+"' and type in ('0','1')");
 					dayData.put("type", type);
-					zqiDao.add(dayData, daytable);
+					List<Map<String, Object>> dayTableList = dayTableData.get(daytable);
+					if(dayTableList==null){
+						dayTableList = new ArrayList<Map<String,Object>>();
+						dayTableData.put(daytable,dayTableList);
+					}
+					dayTableList.add(dayData);
+					//zqiDao.add(dayData, daytable);
 					count++;
 				}
 			}
@@ -298,12 +307,35 @@ public class PrimaryDataController extends BaseController{
 				if(gpdic!=null){
 					String type = gpdic.get("type").toString();
 					String daytable = gpdic.get("daytable").toString();
-					zqiDao.excute("delete from "+daytable+" where code='"+code+"' and period='"+period+"' and type in ('2','3')");
 					dayZhishuData.put("type", type);
-					zqiDao.add(dayZhishuData, daytable);
+					List<Map<String, Object>> dayTableList = dayTableData.get(daytable);
+					if(dayTableList==null){
+						dayTableList = new ArrayList<Map<String,Object>>();
+						dayTableData.put(daytable,dayTableList);
+					}
+					dayTableList.add(dayZhishuData);
+					//zqiDao.add(dayZhishuData, daytable);
 					count++;
 				}
 			}
+			
+			Set<String> daytableSet = dayTableData.keySet();
+			List<Thread> threads = new ArrayList<Thread>();
+			for(String daytable : daytableSet){
+				List<Map<String, Object>> dayTableList = dayTableData.get(daytable);
+				DataAddThread dataAddThread = new DataAddThread(dayTableList, daytable);
+				Thread thread = new Thread(dataAddThread);
+				thread.start();
+				threads.add(thread);
+			}
+			for(Thread thread : threads){
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			
 			long msTime = importTodayDataTime.doner();
 			Map<String, Object> errorLog = new HashMap<String, Object>();
 			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
@@ -336,19 +368,21 @@ public class PrimaryDataController extends BaseController{
 			List<Map<String, Object>> gpList = findAGpDicList();
 			Finder163RHis finder163rHis = new Finder163RHis();
 			int count = 0;
+			Map<String, List<Map<String, Object>>> dayTableData = new HashMap<String, List<Map<String,Object>>>();
+			String delSql = "delete from daytable_all where period between '"+dateFrom+"' and '"+dateTo+"'";
+			zqiDao.excute(delSql);
 			for(Map<String, Object> gp : gpList){
 				code = gp.get("code").toString();
 				String daytable = gp.get("daytable").toString();
 				String type = gp.get("type").toString();
 				List<Map<String,Object>> dataList = finder163rHis.findRHis(gp, dateFrom, dateTo);
-				String deleteSql = "delete from "+daytable+" where code='"+code+"' and period between '"+dateFrom+"' and '"+dateTo+"' and type='"+type+"'";
 				TestTimer tt = new TestTimer(code+dataList.size()+"入库");
 				tt.begin();
-				zqiDao.excute(deleteSql);
 				zqiDao.addList(dataList, daytable);
 				tt.done();
 				count += dataList.size();
 			}
+			
 			long msTime = importRHisDataTime.doner();
 			Map<String, Object> errorLog = new HashMap<String, Object>();
 			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());

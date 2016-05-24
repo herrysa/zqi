@@ -1,17 +1,23 @@
 package com.zqi.report;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.dom4j.Document;
+import org.dom4j.Element;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +28,9 @@ import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.controller.pagers.PagerFactory;
 import com.zqi.frame.util.SQLUtil;
+import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.XMLUtil;
+import com.zqi.report.model.ReportFunc;
 
 @Controller
 @RequestMapping("/report")
@@ -200,5 +208,113 @@ public class ReportController extends BaseController{
 			periodList = zqiDao.findAll(sql);
 		}
 		return periodList;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/batchFunc")
+	public String batchFunc(HttpServletRequest request,HttpServletResponse response){
+		TestTimer tt = new TestTimer("batchFunc");
+		tt.begin();
+		BufferedReader br = null;
+		String result = "";
+		try {
+			br = new BufferedReader(new InputStreamReader((ServletInputStream)request.getInputStream()));
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				result += line+"\r\n";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(br!=null){
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		Map<String, String> funcMap = new HashMap<String, String>();
+		funcMap.put("sourcepayinSum", "select sum(amount) from v_sourcepayin where checkPeriod BETWEEN ? and ? and kdDeptId=?");
+		List<ReportFunc> funcList = parseFunc(result,funcMap);
+		exeFunc(funcList);
+		String returnXml = funcToXml(funcList);
+		//设置编码  
+		response.setCharacterEncoding("UTF-8");  
+		response.setContentType("text/xml;charset=utf-8");  
+		response.setHeader("Cache-Control", "no-cache");  
+		PrintWriter out;
+		try {
+			out = response.getWriter();
+			out.write(returnXml);  
+			out.flush();  
+			out.close(); 
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}  
+		System.out.println(funcList.size());
+		tt.done();
+		return null;
+	}
+	
+	private List<ReportFunc> parseFunc(String xml,Map<String, String> funcMap){
+		List<ReportFunc> funcList = new ArrayList<ReportFunc>();
+		Document doc = XMLUtil.stringToXml(xml);
+		Element root= doc.getRootElement();
+		Element elementFuncs = root.element("Functions");
+		Iterator<Element> elementIt = elementFuncs.elementIterator("Function");
+		while(elementIt.hasNext()){
+			ReportFunc func =new ReportFunc();
+			Element element = elementIt.next();
+			String funcName = element.attributeValue("name");
+			func.setName(funcName);
+			String funcBody = funcMap.get(funcName);
+			func.setFunc(funcBody);
+			Iterator<Element> paraIt = element.elementIterator("Para");
+			while(paraIt.hasNext()){
+				Element para = paraIt.next();
+				String p = para.getTextTrim();
+				func.addPara(p);
+			}
+			funcList.add(func);
+		}
+		return funcList;
+	}
+	
+	private String funcToXml(List<ReportFunc> funcList){
+		Document doc = XMLUtil.createDocument();
+		Element root = doc.addElement("Root");
+		Element funcs = root.addElement("Functions");
+		for(ReportFunc reportFunc : funcList){
+			Element func = funcs.addElement("Function");
+			String value = reportFunc.getValue();
+			if(value!=null){
+				func.setText(value);
+			}else{
+				func.setText("");
+			}
+			
+		}
+		return XMLUtil.xmltoString(doc,"UTF-8");
+	}
+	
+	private void exeFunc(List<ReportFunc> funcList){
+		int thredNum = 10;
+		double eachLength = Math.ceil(funcList.size()/10);
+		List<Thread> threads = new ArrayList<Thread>();
+		for(int i=0;i<thredNum;i++){
+			BathFuncThread bathFuncThread = new BathFuncThread((int)(i*eachLength), (int)((i+1)*eachLength-1), funcList);
+			Thread thread = new Thread(bathFuncThread);
+			thread.start();
+			threads.add(thread);
+		}
+		for(Thread thread : threads){
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
