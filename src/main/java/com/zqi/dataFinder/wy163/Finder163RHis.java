@@ -1,4 +1,4 @@
-package com.zqi.dataFinder;
+package com.zqi.dataFinder.wy163;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -9,11 +9,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.zqi.PrimaryData.HisContext;
+import com.zqi.dataFinder.GetHttpThread;
+import com.zqi.dataFinder.IFinderRHis;
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
 
 public class Finder163RHis implements IFinderRHis{
 	public static String[] rHisColumn163 = {"0","1","2","7","6","4","5","3","11","12","8","9","wu","10","wu","wu","wu","13","14","wu","wu","wu","wu"};
+	
+	HisContext hisContext;
+	public Finder163RHis(HisContext hisContext){
+		this.hisContext = hisContext;
+	}
+	
 	@Override
 	public List<Map<String, Object>> findRHis(Map<String, Object> gp,String dateFrom, String dateTo) {
 		//System.out.println("1");
@@ -39,11 +48,22 @@ public class Finder163RHis implements IFinderRHis{
 		urlTemp = urlTemp.replace("%code%", code163);
 		urlTemp = urlTemp.replace("%dateFrom%", dateFrom);
 		urlTemp = urlTemp.replace("%dateTo%", dateTo);
-		String result = Tools.getByHttpUrl(urlTemp);
-		ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(2);
-		GetHttpSuperviseThread task1 = new GetHttpSuperviseThread("", null);
-		scheduled.schedule(task1, 1000, TimeUnit.MILLISECONDS);
+		//String result = Tools.getByHttpUrl(urlTemp);
+		Map<String, Object> context = new HashMap<String, Object>();
+		context.put("url", urlTemp);
+		context.put("count", 0);
+		context.put("code", code163);
+		context.put("hisContext", hisContext);
+		
+		ScheduledExecutorService schedule = Executors.newScheduledThreadPool(2);
+		context.put("schedule", schedule);
+		GetHttpThread getHistask = new GetHttpThread(context);
+		schedule.scheduleAtFixedRate(getHistask, 0, 300, TimeUnit.MILLISECONDS);
+		//schedule.awaitTermination(timeout, TimeUnit.MILLISECONDS)
 		//System.out.println(2);
+		while (!schedule.isTerminated()) {
+		} 
+		String result = context.get("result").toString();
 		if(fromYear.equals(toYear)){
 			result = result.replace(fromYear+"-", "\n"+fromYear+"-");
 		}else{

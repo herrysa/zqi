@@ -1,4 +1,4 @@
-package com.zqi.dataFinder;
+package com.zqi.dataFinder.wy163;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -10,20 +10,21 @@ import java.util.Map;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import com.zqi.dataFinder.IFinderRToday;
 import com.zqi.frame.util.Tools;
 
-public class FinderGpDic163Zhishu implements IFinderGpDic{
+public class Finder163ZhishuRToday implements IFinderRToday{
 
-	public String[] gpDicColumn163Zhishu = {"CODE","CODE","NAME","NAME","wu","wu","wu","wu","pinyinCode","daytable","remark"};
+	public static String[] rZhishuDayColumn163 = {"period","CODE","NAME","YESTCLOSE","OPEN","HIGH","LOW","PRICE","VOLUME","TURNOVER","UPDOWN","PERCENT","zhenfu"};
 	
 	@Override
-	public List<Map<String, Object>> findGpDic() {
-		List<Map<String, Object>> gpDicList = findZhishuSh();
-		gpDicList.addAll(findZhishuSz());
-		return gpDicList;
-	}
+	public List<Map<String,Object>> findRToday(){
+		List<Map<String,Object>> dataList = findZhishuShRToday();
+		dataList.addAll(findZhishuSzRToday());
+		return dataList;
+	   }
 	
-	private List<Map<String,Object>> findZhishuSh(){
+	private List<Map<String,Object>> findZhishuShRToday(){
 		String url = "http://quotes.money.163.com/hs/service/hsindexrank.php?host=/hs/service/hsindexrank.php&page=0&query=IS_INDEX:true;EXCHANGE:CNSESH&fields=no,SYMBOL,NAME,PRICE,UPDOWN,PERCENT,zhenfu,VOLUME,TURNOVER,YESTCLOSE,OPEN,HIGH,LOW&sort=SYMBOL&order=asc&count=500&type=query&callback=callback_925897272&req=1228";
 		String result = Tools.getByHttpUrl(url);
 		result = result.replace("callback_925897272(", "");
@@ -47,49 +48,54 @@ public class FinderGpDic163Zhishu implements IFinderGpDic{
 				Iterator<JSONObject> itemIt = items.iterator();
 				while (itemIt.hasNext()) {
 					JSONObject item = itemIt.next();
-					String codeValue = "",daytable = "daytable",nameValue = "";
 					Map<String, Object> data = new HashMap<String, Object>();
-					for(int i=0;i<gpDicColumn.length;i++){
-						String key = gpDicColumn[i];
-						if(key.equals("pinyinCode")){
-							data.put(key,Tools.getPYIndexStr(nameValue, true));
-						}else if(key.equals("daytable")){
-							data.put(key,daytable);
-						}else if(key.equals("remark")){
-							data.put(key,"");
+					String code = "";
+					for(int i=0;i<rDayColumn.length;i++){
+						if(i==rZhishuDayColumn163.length){
+							break;
+						}
+						String key = rDayColumn[i];
+						if(key.equals("period")){
+							data.put(key, day);
+							//data.put(key, "2016-05-06");
 						}else{
-							String datakey = gpDicColumn163Zhishu[i];
-							if("wu".equals(datakey)){
-								continue;
-							}
-							Object value = item.get(datakey);
+							String dataKey = rZhishuDayColumn163[i];
+							String dataType = rDayColumnType[i];
+							Object value = item.get(dataKey);
 							String v = "";
 							if(value!=null){
 								v = value.toString();
-								if(key.equals(name)){
-									nameValue = v;
-								}else if(key.equals(code)){
-									codeValue = v;
-									daytable += codeValue.substring(0,1)+"_";
-									Long codeNum = Long.parseLong(codeValue.substring(1));
-									daytable += ""+(codeNum/50+1);
-									v = "sh"+v.substring(1);
+								if(key.equals("code")){
+									code = v;
 								}
-								data.put(key, v);
+								if("decimal".equals(dataType)){
+									if(!"".equals(v)&&!"null".equals(v)){
+										try {
+											BigDecimal vNum = new BigDecimal(v);
+											data.put(key, vNum);
+										} catch (Exception e) {
+											System.out.println("---------error:"+code+":{"+dataKey+":"+v+"}--------------------");
+											data.put(key, new BigDecimal(-9999));
+										}
+									}
+								}else{
+									data.put(key, v);
+								}
+								
 							}
+							
 						}
 					}
-					data.put("type", "2");
 					dataList.add(data);
 				}
 			}else{
 				System.out.println(url);
 			}
-		System.out.println("---------------163沪市指数字典:"+dataList.size()+"------------------");
+		System.out.println("---------------163沪市指数today:"+dataList.size()+"------------------");
 			return dataList;
 	   }
 	
-	private List<Map<String,Object>> findZhishuSz(){
+	private List<Map<String,Object>> findZhishuSzRToday(){
 		String url = "http://quotes.money.163.com/hs/service/hsindexrank.php?host=/hs/service/hsindexrank.php&page=0&query=IS_INDEX:true;EXCHANGE:CNSESZ&fields=no,SYMBOL,NAME,PRICE,UPDOWN,PERCENT,zhenfu,VOLUME,TURNOVER,YESTCLOSE,OPEN,HIGH,LOW&sort=SYMBOL&order=asc&count=500&type=query&callback=callback_925897272&req=1228";
 		String result = Tools.getByHttpUrl(url);
 		result = result.replace("callback_925897272(", "");
@@ -113,45 +119,47 @@ public class FinderGpDic163Zhishu implements IFinderGpDic{
 				Iterator<JSONObject> itemIt = items.iterator();
 				while (itemIt.hasNext()) {
 					JSONObject item = itemIt.next();
-					String codeValue = "",daytable = "daytable",nameValue = "";
 					Map<String, Object> data = new HashMap<String, Object>();
-					for(int i=0;i<gpDicColumn.length;i++){
-						String key = gpDicColumn[i];
-						if(key.equals("pinyinCode")){
-							data.put(key,Tools.getPYIndexStr(nameValue, true));
-						}else if(key.equals("daytable")){
-							data.put(key,daytable);
-						}else if(key.equals("remark")){
-							data.put(key,"");
+					String code = "";
+					for(int i=0;i<rDayColumn.length;i++){
+						if(i==rZhishuDayColumn163.length){
+							break;
+						}
+						String key = rDayColumn[i];
+						if(key.equals("period")){
+							data.put(key, day);
+							//data.put(key, "2016-05-06");
 						}else{
-							String datakey = gpDicColumn163Zhishu[i];
-							if("wu".equals(datakey)){
-								continue;
-							}
-							Object value = item.get(datakey);
+							String dataKey = rZhishuDayColumn163[i];
+							String dataType = rDayColumnType[i];
+							Object value = item.get(dataKey);
 							String v = "";
 							if(value!=null){
 								v = value.toString();
-								if(key.equals(name)){
-									nameValue = v;
-								}else if(key.equals(code)){
-									codeValue = v;
-									daytable += codeValue.substring(0,1)+"_";
-									Long codeNum = Long.parseLong(codeValue.substring(1));
-									daytable += ""+(codeNum/50+1);
-									v = "sz"+v.substring(1);
+								if("decimal".equals(dataType)){
+									if(!"".equals(v)&&!"null".equals(v)){
+										try {
+											BigDecimal vNum = new BigDecimal(v);
+											data.put(key, vNum);
+										} catch (Exception e) {
+											System.out.println("---------error:"+code+":{"+dataKey+":"+v+"}--------------------");
+											data.put(key, new BigDecimal(-9999));
+										}
+									}
+								}else{
+									data.put(key, v);
 								}
-								data.put(key, v);
+								
 							}
+							
 						}
 					}
-					data.put("type", "3");
 					dataList.add(data);
 				}
 			}else{
 				System.out.println(url);
 			}
-		System.out.println("---------------163深市指数字典:"+dataList.size()+"------------------");
+		System.out.println("---------------163深市指数today:"+dataList.size()+"------------------");
 			return dataList;
 	   }
 }

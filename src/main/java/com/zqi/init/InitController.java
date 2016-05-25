@@ -11,9 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.zqi.dataFinder.FinderGpDic163Zhishu;
-import com.zqi.dataFinder.FinderGpDicSe;
 import com.zqi.dataFinder.IFinderGpDic;
+import com.zqi.dataFinder.se.FinderGpDicSe;
+import com.zqi.dataFinder.wy163.FinderGpDic163Zhishu;
 import com.zqi.frame.controller.BaseController;
 
 @Controller

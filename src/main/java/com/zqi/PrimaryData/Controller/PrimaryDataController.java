@@ -14,6 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,10 +36,10 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.zqi.PrimaryData.DataAddThread;
 import com.zqi.PrimaryData.HisContext;
 import com.zqi.PrimaryData.HisDataAddThread;
-import com.zqi.dataFinder.Finder163RHis;
-import com.zqi.dataFinder.Finder163RToday;
-import com.zqi.dataFinder.Finder163ZhishuRToday;
 import com.zqi.dataFinder.IFinderRToday;
+import com.zqi.dataFinder.wy163.Finder163RHis;
+import com.zqi.dataFinder.wy163.Finder163RToday;
+import com.zqi.dataFinder.wy163.Finder163ZhishuRToday;
 import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
@@ -369,7 +372,6 @@ public class PrimaryDataController extends BaseController{
 		try {
 			//List<Map<String, Object>> gpList = findAGpDicList();
 			Map<String, List<Map<String, Object>>> gpListMap = findAGpDicListMap();
-			Finder163RHis finder163rHis = new Finder163RHis();
 			int count = 0;
 			Map<String, List<Map<String, Object>>> dayTableData = new HashMap<String, List<Map<String,Object>>>();
 			String delSql = "delete from daytable_all where period between '"+dateFrom+"' and '"+dateTo+"'";
@@ -380,20 +382,26 @@ public class PrimaryDataController extends BaseController{
 			HisContext hisContext = new HisContext();
 			hisContext.setDateFrom(dateFrom);
 			hisContext.setDateTo(dateTo);
+			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10); 
 			for(String daytable : daytableSet){
 				List<Map<String, Object>> gpList = gpListMap.get(daytable);
 				HisDataAddThread hisDataAddThread = new HisDataAddThread(gpList, daytable, hisContext);
-				Thread thread = new Thread(hisDataAddThread);
-				thread.start();
-				threads.add(thread);
+				fixedThreadPool.execute(hisDataAddThread);
+				//Thread thread = new Thread(hisDataAddThread);
+				//thread.start();
+				//threads.add(thread);
+				//break;
 			}
-			for(Thread thread : threads){
+			while(!fixedThreadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)){
+				
+			}
+			/*for(Thread thread : threads){
 				try {
 					thread.join();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			}
+			}*/
 			/*for(Map<String, Object> gp : gpList){
 				code = gp.get("code").toString();
 				String daytable = gp.get("daytable").toString();

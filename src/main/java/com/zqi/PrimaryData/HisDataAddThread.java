@@ -8,7 +8,7 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import com.zqi.dataFinder.Finder163RHis;
+import com.zqi.dataFinder.wy163.Finder163RHis;
 import com.zqi.unit.SpringContextHelper;
 
 public class HisDataAddThread implements Runnable{
@@ -19,17 +19,19 @@ public class HisDataAddThread implements Runnable{
 	String daytable;
 	String dateFrom;
 	String dateTo;
+	HisContext hisContext;
 	
 	public HisDataAddThread(List<Map<String, Object>> gpList,String daytable,HisContext hisContext){
 		this.gpList = gpList;
 		this.daytable = daytable;
 		this.dateFrom = hisContext.getDateFrom();
 		this.dateTo = hisContext.getDateTo();
+		this.hisContext = hisContext;
 	}
 	
 	@Override
 	public void run() {
-		Finder163RHis finder163rHis = new Finder163RHis();
+		Finder163RHis finder163rHis = new Finder163RHis(hisContext);
 		List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
 		for(Map<String, Object> gp : gpList){
 			dataList.addAll(finder163rHis.findRHis(gp, dateFrom, dateTo));
@@ -38,6 +40,7 @@ public class HisDataAddThread implements Runnable{
 		for(Map<String, Object> data : dataList){
 			simpleJdbcInsert.execute(data);
 		}
+		hisContext.getRecordMap().put(daytable, dataList.size());
 	}
 
 }
