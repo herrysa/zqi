@@ -9,8 +9,15 @@ public class ReportFunc {
 	String func;
 	Object[] para;
 	List<Object> paraList;
-	String value;
+	String value="";
+	boolean execute = true;
 	
+	public boolean isExecute() {
+		return execute;
+	}
+	public void setExecute(boolean execute) {
+		this.execute = execute;
+	}
 	public String getName() {
 		return name;
 	}

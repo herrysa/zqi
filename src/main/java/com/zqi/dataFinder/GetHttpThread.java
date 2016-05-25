@@ -37,11 +37,14 @@ public class GetHttpThread implements Runnable{
 		}else{
 			ScheduledExecutorService schedule = (ScheduledExecutorService)context.get("schedule");
 			schedule.shutdownNow();
-			Map<String, String> log = hisContext.getLog().get(code);
-			if(log==null){
-				log = new HashMap<String, String>();
+			Map<String,Map<String, String>> log = hisContext.getLog();
+			Map<String, String> codeLog = log.get(code);
+			if(codeLog==null){
+				codeLog = new HashMap<String, String>();
+				log.put(code, codeLog);
 			}
-			log.put("count", countObj);
+			
+			codeLog.put("count", countObj);
 		}
 	}
 

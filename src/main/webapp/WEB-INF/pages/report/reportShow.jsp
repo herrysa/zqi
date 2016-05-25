@@ -14,7 +14,7 @@ var reportDefine = {
 			"Opened":function( id,p1, p2, p3, p4){
 				var grid = eval("("+id+")");
 				grid.func("AddUserFunctions", "${ctx}/report/func.xml");
-				grid.func("SetBatchFunctionURL","batchFunc \r\n functions=10000;timeout=9999 \r\n user=normal");
+				grid.func("SetBatchFunctionURL","report/batchFunc \r\n functions=10000;timeout=9999 \r\n user=normal");
 			},
 			"Toolbar":function( id,p1, p2, p3, p4){
 				var grid = eval("("+id+")");

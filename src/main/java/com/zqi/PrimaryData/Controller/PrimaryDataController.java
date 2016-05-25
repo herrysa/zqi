@@ -378,12 +378,14 @@ public class PrimaryDataController extends BaseController{
 			zqiDao.excute(delSql);
 			
 			Set<String> daytableSet = gpListMap.keySet();
-			List<Thread> threads = new ArrayList<Thread>();
 			HisContext hisContext = new HisContext();
 			hisContext.setDateFrom(dateFrom);
 			hisContext.setDateTo(dateTo);
+			List<String> daytableList = new ArrayList<String>();
+			hisContext.setDaytableList(daytableList);
 			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10); 
 			for(String daytable : daytableSet){
+				daytableList.add(daytable);
 				List<Map<String, Object>> gpList = gpListMap.get(daytable);
 				HisDataAddThread hisDataAddThread = new HisDataAddThread(gpList, daytable, hisContext);
 				fixedThreadPool.execute(hisDataAddThread);
@@ -393,7 +395,9 @@ public class PrimaryDataController extends BaseController{
 				//break;
 			}
 			while(!fixedThreadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)){
-				
+				if(daytableList.size()==0){
+					fixedThreadPool.shutdownNow();
+				}
 			}
 			/*for(Thread thread : threads){
 				try {

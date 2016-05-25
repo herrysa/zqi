@@ -2,7 +2,7 @@
 
 <!--By Supcan Report -->
 <Report> 
-  <WorkSheet name="今日涨停"> 
+  <WorkSheet name="今日涨停" isDefault="true"> 
     <Properties> 
       <BackGround bgColor="#FFFFFF"/>  
       <DefaultTD> 
@@ -49,19 +49,21 @@
         <TD col="0" datatype="1" formula="=headrow('rdata')">编码</TD>  
         <TD col="1" datatype="1">名称</TD>  
         <TD col="2" datatype="1">收盘价</TD>  
-        <TD col="3" formula="=findPeriod(1)">2016-05-20</TD>  
-        <TD col="4" formula="=findPeriod(2)">2016-05-19</TD>  
-        <TD col="5" formula="=findPeriod(3)">2016-05-18</TD>  
+        <TD col="3" formula="=findPeriod(1)">2015-12-31</TD>  
+        <TD col="4" formula="=findPeriod(2)">2015-12-30</TD>  
+        <TD col="5" formula="=findPeriod(3)">2015-12-29</TD>  
+        <TD col="7" datatype="1">涨幅</TD>  
         <TD col="19" topBorder="0"/> 
       </TR>  
       <TR height="29" sequence="2"> 
         <TD col="0" datatype="1" formula="=datarow('rdata')"/>  
         <TD col="1" datatype="1"/>  
         <TD col="2" datatype="1"/>  
-        <TD col="3" datatype="6" formula="=findRData(D2,@A3,'changepercent')" maskid="1"/>  
-        <TD col="4" datatype="6" formula="=findRData(E2,@A3,'changepercent')" maskid="1"/>  
-        <TD col="5" datatype="6" formula="=findRData(F2,@A3,'changepercent')" maskid="1"/>  
+        <TD col="3" datatype="6" formula="=findRData(D2,@A3)" maskid="1"/>  
+        <TD col="4" datatype="6" formula="=findRData(E2,@A3)" maskid="1"/>  
+        <TD col="5" datatype="6" formula="=findRData(F2,@A3)" maskid="1"/>  
         <TD col="6" datatype="6" formula="=sum(@D3, @E3,@F3, 10)"/>  
+        <TD col="7" datatype="1">9.984</TD>  
         <TD col="19" topBorder="0"/> 
       </TR>  
       <TR height="24" sequence="3"> 
@@ -538,7 +540,7 @@
       </Page> 
     </PrintPage> 
   </WorkSheet>  
-  <WorkSheet name="Sheet" isDefault="true"> 
+  <WorkSheet name="Sheet"> 
     <Properties> 
       <BackGround bgColor="#FFFFFF"/>  
       <DefaultTD> 
@@ -576,7 +578,7 @@
         <TD col="1" datatype="1">名称</TD>  
         <TD col="2" datatype="1">收盘价</TD>  
         <TD col="3" datatype="1">涨幅</TD>  
-        <TD col="4" formula="=findPeriod(1)">2016-05-20</TD>  
+        <TD col="4" formula="=findPeriod(1)">2015-12-31</TD>  
         <TD col="20" topBorder="0"/> 
       </TR>  
       <TR height="24" sequence="1"> 
@@ -584,7 +586,7 @@
         <TD col="1" datatype="1"/>  
         <TD col="2" datatype="1"/>  
         <TD col="3" datatype="1"/>  
-        <TD col="4" formula="=batchFindRData(@A2, E1, 'changepercent')"/>  
+        <TD col="4" formula="=batchFindRData(E1,@A2)"/>  
         <TD col="20" topBorder="0"/> 
       </TR>  
       <TR height="24" sequence="2"> 

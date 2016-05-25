@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -235,7 +240,7 @@ public class ReportController extends BaseController{
 			}
 		}
 		Map<String, String> funcMap = new HashMap<String, String>();
-		funcMap.put("sourcepayinSum", "select sum(amount) from v_sourcepayin where checkPeriod BETWEEN ? and ? and kdDeptId=?");
+		funcMap.put("findRData","select changepercent from daytable_all where period=? and code=?");
 		List<ReportFunc> funcList = parseFunc(result,funcMap);
 		exeFunc(funcList);
 		String returnXml = funcToXml(funcList);
@@ -270,12 +275,23 @@ public class ReportController extends BaseController{
 			String funcName = element.attributeValue("name");
 			func.setName(funcName);
 			String funcBody = funcMap.get(funcName);
-			func.setFunc(funcBody);
-			Iterator<Element> paraIt = element.elementIterator("Para");
-			while(paraIt.hasNext()){
-				Element para = paraIt.next();
-				String p = para.getTextTrim();
-				func.addPara(p);
+			if(funcBody!=null&&!"".equals(funcBody)){
+				func.setFunc(funcBody);
+				Iterator<Element> paraIt = element.elementIterator("Para");
+				while(paraIt.hasNext()){
+					Element para = paraIt.next();
+					String p = para.getTextTrim();
+					if(p==null||"".equals(p)){
+						func.setExecute(false);
+					}
+					func.addPara(p);
+				}
+				int qmNum = getQuestionMark(func.getFunc());
+				if(func.getPara().length!=qmNum){
+					func.setExecute(false);
+				}
+			}else{
+				func.setExecute(false);
 			}
 			funcList.add(func);
 		}
@@ -300,21 +316,41 @@ public class ReportController extends BaseController{
 	}
 	
 	private void exeFunc(List<ReportFunc> funcList){
-		int thredNum = 10;
-		double eachLength = Math.ceil(funcList.size()/10);
-		List<Thread> threads = new ArrayList<Thread>();
-		for(int i=0;i<thredNum;i++){
-			BathFuncThread bathFuncThread = new BathFuncThread((int)(i*eachLength), (int)((i+1)*eachLength-1), funcList);
-			Thread thread = new Thread(bathFuncThread);
-			thread.start();
-			threads.add(thread);
+		ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10);
+		for(ReportFunc func : funcList){
+			BathFuncThread bathFuncThread = new BathFuncThread(func);
+			fixedThreadPool.execute(bathFuncThread);
 		}
-		for(Thread thread : threads){
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		try {
+			fixedThreadPool.shutdown();
+			while(!fixedThreadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)){
+				
 			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+	}
+	
+	private int getQuestionMark(String str){
+		String pattern = "\\?";
+		Pattern p = Pattern.compile(pattern);
+		Matcher matcher = p.matcher(str);
+		int matcherCount = 0;
+		while(matcher.find()){
+			matcherCount++;
+		}
+		return matcherCount;
+	}
+	
+	public static void main(String[] args) {
+		String funcBody = "aaass?dsd?? dd?";
+		String pattern = "\\?";
+		Pattern p = Pattern.compile(pattern);
+		Matcher matcher = p.matcher(funcBody);
+		int matcherCount = 0;
+		while(matcher.find()){
+			matcherCount++;
+		}
+		System.out.println(matcherCount);
 	}
 }

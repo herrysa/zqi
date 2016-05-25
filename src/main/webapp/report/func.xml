@@ -4,6 +4,7 @@
 		<category name="日数据">
 			<function name="findPeriod" >
 				<para>倒推第几天</para>
+				<runAt>Local</runAt>
 				<returnDatatype>string</returnDatatype> 
 			</function>
 			<function name="findRData" >

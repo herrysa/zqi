@@ -32,15 +32,17 @@ public class HisDataAddThread implements Runnable{
 	@Override
 	public void run() {
 		Finder163RHis finder163rHis = new Finder163RHis(hisContext);
-		List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
-		for(Map<String, Object> gp : gpList){
-			dataList.addAll(finder163rHis.findRHis(gp, dateFrom, dateTo));
-		}
+		int count = 0;
 		simpleJdbcInsert.withTableName(daytable);
-		for(Map<String, Object> data : dataList){
-			simpleJdbcInsert.execute(data);
+		for(Map<String, Object> gp : gpList){
+			List<Map<String,Object>> dataListTemp = finder163rHis.findRHis(gp, dateFrom, dateTo);
+			count += dataListTemp.size();
+			for(Map<String, Object> data : dataListTemp){
+				simpleJdbcInsert.execute(data);
+			}
 		}
-		hisContext.getRecordMap().put(daytable, dataList.size());
+		hisContext.getRecordMap().put(daytable, count);
+		hisContext.getDaytableList().remove(daytable);
 	}
 
 }

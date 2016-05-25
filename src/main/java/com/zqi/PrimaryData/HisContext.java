@@ -1,6 +1,7 @@
 package com.zqi.PrimaryData;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HisContext {
@@ -9,7 +10,7 @@ public class HisContext {
 	String dateTo;
 	Map<String, Integer> recordMap;
 	Map<String, Map<String, String>> log;
-	
+	List<String> daytableList;
 	
 	public Map<String, Integer> getRecordMap() {
 		if(recordMap==null){
@@ -41,6 +42,11 @@ public class HisContext {
 	public void setDateTo(String dateTo) {
 		this.dateTo = dateTo;
 	}
-	
+	public List<String> getDaytableList() {
+		return daytableList;
+	}
+	public void setDaytableList(List<String> daytableList) {
+		this.daytableList = daytableList;
+	}
 	
 }
