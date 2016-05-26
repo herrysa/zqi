@@ -5,6 +5,22 @@
 <head>
 <script>
 $(function() {
+	
+	$("#initReportData").click(function(){
+		var days = $("#reportDays").val();
+		$.ajax({
+            url: 'report/initData?days='+days,
+            type: 'post',
+            dataType: 'json',
+            async:false,
+            error: function(data){
+           	 alert("系统错误！");
+            },
+            success: function(data){
+                alert(data);
+            }
+        });
+	});
 });
 </script>
 </head>
@@ -17,6 +33,10 @@ $(function() {
 			<label>报表类别：</label><input id="reportType" name="gpCode" type="text"style="width:100px"/>
 			<button id="reloadDataGrid" type="button" class="btn btn-primary" >
 				查询
+			</button>
+			<label>初始化天数：</label><input id="reportDays" name="reportDays" type="text"style="width:100px"/>
+			<button id="initReportData" type="button" class="btn btn-primary" >
+				初始化
 			</button>
 		</div>
 		<div style="margin:2px">

@@ -1,6 +1,7 @@
 package com.zqi.PrimaryData.Controller;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -49,6 +50,7 @@ import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
 import com.zqi.unit.DateConverter;
 import com.zqi.unit.DateUtil;
+import com.zqi.unit.FileUtil;
 import com.zqi.unit.UUIDGenerator;
 
 @Controller
@@ -260,7 +262,7 @@ public class PrimaryDataController extends BaseController{
 	
 	
 	public void findTodayData(){
-		String code = "",symbol = "",period = "";
+		String code = "",symbol = "",period = DateUtil.getDateNow();
 		TestTimer importTodayDataTime = new TestTimer("导入今日数据");
 		importTodayDataTime.begin();
 		try {
@@ -377,15 +379,14 @@ public class PrimaryDataController extends BaseController{
 			String delSql = "delete from daytable_all where period between '"+dateFrom+"' and '"+dateTo+"'";
 			zqiDao.excute(delSql);
 			
+			String dataCol = "period,code,name,type,settlement,open,high,low,close,volume,amount,changeprice,changepercent";
 			Set<String> daytableSet = gpListMap.keySet();
 			HisContext hisContext = new HisContext();
 			hisContext.setDateFrom(dateFrom);
 			hisContext.setDateTo(dateTo);
-			List<String> daytableList = new ArrayList<String>();
-			hisContext.setDaytableList(daytableList);
+			hisContext.setColArr(dataCol.split(","));
 			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10); 
 			for(String daytable : daytableSet){
-				daytableList.add(daytable);
 				List<Map<String, Object>> gpList = gpListMap.get(daytable);
 				HisDataAddThread hisDataAddThread = new HisDataAddThread(gpList, daytable, hisContext);
 				fixedThreadPool.execute(hisDataAddThread);
@@ -394,11 +395,20 @@ public class PrimaryDataController extends BaseController{
 				//threads.add(thread);
 				//break;
 			}
+			fixedThreadPool.shutdown();
 			while(!fixedThreadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)){
-				if(daytableList.size()==0){
-					fixedThreadPool.shutdownNow();
-				}
 			}
+			String basePath = "D:/t/";
+			File parentFile = new File(basePath);
+			String[] files = parentFile.list();
+			List<String> loadList = new ArrayList<String>();
+	        for(String fileName : files){
+	        	String name = fileName.split("\\.")[0];
+	        	String loadDataSql = "load data infile '"+basePath+name+".txt' into table "+name+"("+dataCol+");";
+	        	loadList.add(loadDataSql);
+	        }
+	        String[] loadSqls = loadList.toArray(new String[loadList.size()]);
+	        zqiDao.bathUpdate(loadSqls);
 			/*for(Thread thread : threads){
 				try {
 					thread.join();
@@ -417,7 +427,32 @@ public class PrimaryDataController extends BaseController{
 				tt.done();
 				count += dataList.size();
 			}*/
+	        Map<String, Integer> recordMap = hisContext.getRecordMap();
+	        Set<String> recordSet = recordMap.keySet();
+	        StringBuilder stringBuilder = new StringBuilder();
+	        stringBuilder.append("------daytable记录数--------\n");
+			for(String record : recordSet){
+				count += recordMap.get(record);
+				stringBuilder.append("[count]:"+record+":"+count+"\n");
+			}
+			stringBuilder.append("\n");
+			Map<String,Map<String, String>> logMap = hisContext.getLog();
 			
+			Set<String> codeSet = logMap.keySet();
+			int gpCount = 0;
+			for(String gpcode : codeSet){
+				stringBuilder.append("------"+gpcode+"--------\n");
+				Map<String, String> gpLog = logMap.get(gpcode);
+				String httpcount = gpLog.get("count");
+				String timeoutcount = gpLog.get("timeoutcount");
+				stringBuilder.append("[http次数]:"+httpcount+"\n");
+				stringBuilder.append("[http超时次数]:"+timeoutcount+"\n");
+				gpCount++;
+			}
+			stringBuilder.append("------total--------\n");
+			stringBuilder.append("[更新股票数量]:"+gpCount+"\n");
+			stringBuilder.append("[更新股票总记录数量]:"+count+"\n");
+			FileUtil.writeFile(stringBuilder.toString(), "D:/zqi/log/"+dateFrom+"-"+dateTo+"_log.txt");
 			long msTime = importRHisDataTime.doner();
 			Map<String, Object> errorLog = new HashMap<String, Object>();
 			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());

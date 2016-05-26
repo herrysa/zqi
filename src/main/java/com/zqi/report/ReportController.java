@@ -36,6 +36,7 @@ import com.zqi.frame.util.SQLUtil;
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.XMLUtil;
 import com.zqi.report.model.ReportFunc;
+import com.zqi.unit.DateUtil;
 
 @Controller
 @RequestMapping("/report")
@@ -142,6 +143,37 @@ public class ReportController extends BaseController{
 			e.printStackTrace();
 		}
 		resultMap.put("message", "1");
+		return resultMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/initData")
+	public Map<String, Object> initData(HttpServletRequest request){
+		String days = request.getParameter("days");
+		if(days!=null){
+			int dayCount = Integer.parseInt(days);
+			List<Map<String, Object>> periodList = this.getPeriodList(request);
+			String periodStr = "";
+			int d=0;
+			for(Map<String, Object> periodMap : periodList){
+				periodStr += "'"+periodMap.get("period")+"',";
+				d++;
+				if(d>=dayCount){
+					break;
+				}
+			}
+			if(!"".equals(periodStr)){
+				periodStr = periodStr.substring(0, periodStr.length()-1);
+			}else{
+				periodStr = "''";
+			}
+			String daySql = "select * from daytable_all where period in("+periodStr+") order by period desc";
+			zqiDao.excute("DROP TABLE report_daytable;");
+			zqiDao.excute("create table report_daytable ("+daySql+");");
+ 			resultMap.put("message", "初始化成功！") ;
+		}else{
+			resultMap.put("message", "请输入初始化天数！");
+		}
 		return resultMap;
 	}
 	

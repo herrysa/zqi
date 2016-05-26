@@ -90,7 +90,7 @@ public class InitController extends BaseController{
 				if(dayTableCount!=null){
 					String xxxxxxxxxxxxxxxxxxxxxxx = dayTableCount.get("count").toString();
 				}
-				String createSql = "create table "+daytble+"(period varchar(10) not null,code varchar(20),name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3));";
+				String createSql = "create table "+daytble+"(period date not null,code int,name varchar(20),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3),PRIMARY KEY (`period`,`code`));";
 				if(!createDaytableSqls.contains(createSql)){
 					createDaytableSqls.add(createSql);
 				}
@@ -121,18 +121,20 @@ public class InitController extends BaseController{
 		for(Map<String, Object> gp : gpDiList){
 			String daytble = gp.get("daytable").toString();
 			daytableSet.add(daytble);
-			String createSql = "create table "+daytble+"(period varchar(10) not null,code varchar(20),name varchar(20),type varchar(2),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3))ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+			String createSql = "create table "+daytble+"(period date,code varchar(20),name varchar(20),type varchar(2),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3),PRIMARY KEY (`period`,`code`))ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 			if(!createDaytableSqls.contains(createSql)){
 				createDaytableSqls.add(createSql);
 			}
 		}
+		String report_daytble = "create table report_daytable (period date,code varchar(20),name varchar(20),type varchar(2),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3),PRIMARY KEY (`period`,`code`))ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		createDaytableSqls.add(report_daytble);
 		for(String daytable : daytableSet){
 			daytableUnion += daytable+",";
 		}
 		if(!"".equals(daytableUnion)){
 			daytableUnion = daytableUnion.substring(0, daytableUnion.length()-1);
-			String createSql = "create table daytable_all (period varchar(10) not null,code varchar(20),name varchar(20),type varchar(2),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3))ENGINE=MRG_MyISAM DEFAULT CHARSET=utf8 INSERT_METHOD=LAST UNION=("+daytableUnion+");";
-			zqiDao.createTableBySQL(createSql);
+			String createSql = "create table daytable_all (period date,code varchar(20),name varchar(20),type varchar(2),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3),PRIMARY KEY (`period`,`code`))ENGINE=MRG_MyISAM DEFAULT CHARSET=utf8 INSERT_METHOD=LAST UNION=("+daytableUnion+");";
+			createDaytableSqls.add(createSql);
 		}
 		String[] sqls =  createDaytableSqls.toArray(new String[createDaytableSqls.size()]);
 		zqiDao.bathUpdate(sqls);
@@ -140,19 +142,19 @@ public class InitController extends BaseController{
 	}
 	
 	private void createGpInfoTable(){
-		String infoSql = "create table i_gpinfo(period varchar(10),code varchar(20),name varchar(20),infoType varchar(20),info varchar(100));";
+		String infoSql = "create table i_gpinfo(period date,code varchar(20),name varchar(20),infoType varchar(20),info varchar(100),PRIMARY KEY (`period`,`code`));";
 		zqiDao.excute(infoSql);
 		System.out.println("--------------股票信息表建立完毕-----------------");
 	}
 	
 	private void createGpCwInfoTable(){
-		String infoSql = "create table i_gpCw(period varchar(10),code varchar(20),name varchar(20),cwType varchar(20),cwData varchar(20));";
+		String infoSql = "create table i_gpCw(period date,code varchar(20),name varchar(20),cwType varchar(20),cwData varchar(20),PRIMARY KEY (`period`,`code`));";
 		zqiDao.excute(infoSql);
-		System.out.println("--------------股票信息表建立完毕-----------------");
+		System.out.println("--------------股票财务信息表建立完毕-----------------");
 	}
 	
 	private void createGpFhInfoTable(){
-		String createql= "create table i_gpFh(period varchar(10),code varchar(20),name varchar(20),ssrq varchar(10),info varchar(100));";
+		String createql= "create table i_gpFh(period date,code varchar(20),name varchar(20),ssrq varchar(10),info varchar(100),PRIMARY KEY (`period`,`code`));";
 		zqiDao.excute(createql);
 		System.out.println("--------------股票分红信息表建立完毕-----------------");
 	}

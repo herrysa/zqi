@@ -32,7 +32,7 @@ public class GetHttpThread implements Runnable{
 		count++;
 		context.put("count",count);
 		if(context.get("result")==null){
-			result = getByHttpUrl(url);
+			result = getByHttpUrl(url,code);
 			context.put("result", result);
 		}else{
 			ScheduledExecutorService schedule = (ScheduledExecutorService)context.get("schedule");
@@ -48,7 +48,7 @@ public class GetHttpThread implements Runnable{
 		}
 	}
 
-	public static String getByHttpUrl(String url){
+	public String getByHttpUrl(String url,String code){
 		   String result = "";
 			BufferedReader in = null;
 			try {
@@ -78,6 +78,18 @@ public class GetHttpThread implements Runnable{
 					result += line;
 				}
 			} catch (Exception e) {
+				Map<String,Map<String, String>> log = hisContext.getLog();
+				Map<String, String> codeLog = log.get(code);
+				if(codeLog==null){
+					codeLog = new HashMap<String, String>();
+					log.put(code, codeLog);
+				}
+				String timeoutcount = codeLog.get("timeoutcount");
+				int c = 1;
+				if(timeoutcount!=null){
+					c = Integer.parseInt(timeoutcount)+1;
+				}
+				codeLog.put("timeoutcount", ""+c);
 				System.out.println("发送GET请求出现异常！" + e.getMessage());
 			}
 			// 使用finally块来关闭输入流

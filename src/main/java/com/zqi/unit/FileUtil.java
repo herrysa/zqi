@@ -1,8 +1,12 @@
 package com.zqi.unit;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 
 public class FileUtil {
 
@@ -50,5 +54,47 @@ public class FileUtil {
 
         }
         return fileContent;
+    }
+    
+    /**
+     * 文件读写方法
+     * 
+     * @param content
+     * @param filePath
+     */
+    public synchronized static void writeFile( String content, String filePath ) {
+        mkParent( filePath );
+        try {
+        	OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(filePath),"UTF-8");
+            out.write( content );
+            out.flush();
+            out.close();
+        }
+        catch ( Exception e ) {
+            e.printStackTrace();
+
+        }
+    }
+    
+    /**
+     * 生成路径
+     * 
+     * @param filePath
+     */
+    public static void mkParent( String filePath ) {
+        File f = new File( filePath );
+        File pf = f.getParentFile();
+        while ( !pf.exists() ) {
+            if ( pf.getParentFile().exists() )
+                pf.mkdir();
+            else
+                mkParent( pf.getPath() );
+            try {
+                Thread.sleep( 1000 );
+            }
+            catch ( Exception e ) {
+
+            }
+        }
     }
 }

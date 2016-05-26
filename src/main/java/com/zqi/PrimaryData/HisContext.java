@@ -11,7 +11,14 @@ public class HisContext {
 	Map<String, Integer> recordMap;
 	Map<String, Map<String, String>> log;
 	List<String> daytableList;
+	String[] colArr;
 	
+	public String[] getColArr() {
+		return colArr;
+	}
+	public void setColArr(String[] colArr) {
+		this.colArr = colArr;
+	}
 	public Map<String, Integer> getRecordMap() {
 		if(recordMap==null){
 			recordMap = new HashMap<String, Integer>();
