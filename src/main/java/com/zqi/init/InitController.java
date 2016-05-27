@@ -27,7 +27,7 @@ public class InitController extends BaseController{
 	}
 	@ResponseBody
 	@RequestMapping("/createTable")
-	public String createTable(){
+	public Map<String, Object> createTable(){
 		try {
 			createDicAndDayTable();
 			createGpInfoTable();
@@ -36,12 +36,12 @@ public class InitController extends BaseController{
 			creatReportTable();
 			creatIndicatorTable();
 			creatLogTable();
-			message = "建表成功！";
+			this.setMessage("建表成功！");
 		} catch (Exception e) {
-			message = "建表失败！";
+			this.setMessage("建表失败！");
 			e.printStackTrace();
 		}
-		return message;
+		return resultMap;
 	}
 	
 	@ResponseBody
@@ -98,12 +98,10 @@ public class InitController extends BaseController{
 			String[] sqls =  createDaytableSqls.toArray(new String[createDaytableSqls.size()]);
 			zqiDao.bathUpdate(sqls);
 			System.out.println("--------------日数据表更新完毕-----------------");
-			message = "建表成功！";
 		} catch (Exception e) {
-			message = "建表失败！";
 			e.printStackTrace();
 		}
-		return message;
+		return "";
 	}
 	
 	private void createDicAndDayTable(){
@@ -166,7 +164,7 @@ public class InitController extends BaseController{
 	}
 	
 	private void creatIndicatorTable(){
-		String createql= "create table i_indicator(code varchar(20),formula varchar(1000),type varchar(10),remark varchar(50));";
+		String createql= "create table i_indicator(code varchar(20),formula varchar(1000),type varchar(10),dataSource varchar(500),dsDesc varchar(200),remark varchar(50));";
 		zqiDao.excute(createql);
 		System.out.println("--------------指标表建立完毕-----------------");
 	}

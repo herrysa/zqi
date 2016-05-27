@@ -4,8 +4,7 @@
 var reportDefine = {
 		key:"${random}_report_gridtable",
 		main:{
-			Build : '${ctx}/report/getReportXml?code=${code}',
-			SetSource : '${ctx}/report/datasource.xml',
+			Build : '${ctx}/report/getReportXml?code=${report.code}',
 			Load :''
 		},
 		event:{
@@ -24,7 +23,7 @@ var reportDefine = {
 			            url: 'report/saveReportXml',
 			            type: 'post',
 			            dataType: 'json',
-			            data :{code:'${code}',reportXml:reportXml},
+			            data :{code:'${report.code}',reportXml:reportXml},
 			            async:false,
 			            error: function(data){
 			            alertMsg.error("系统错误！");
@@ -40,13 +39,20 @@ var reportDefine = {
 		callback:{
 			onComplete : function(id){
 				var grid = eval("("+id+")");
-				console.log(111);
-				//var url = "${ctx}/report/getDataSourceBySql?sql=select * from daytable_all where";
-				
-				grid.func("NewDS", "rdata \r\n rdata");
-				var url = "select * from daytable_all where 1=1 and period='%lastperiod%' and close<>0 and ROUND(settlement*0.1,2)=changeprice";
-				url += " order by period desc,code asc";
-				grid.func("SetParas", "rdata \r\n sql="+url+"");
+				var url = "${report.dataSource}";
+				var urlArr = url.split(";");
+				for(var u in urlArr){
+					var uTemp = urlArr[u];
+					var utArr = uTemp.split(":");
+					console.log(utArr[0]);
+					console.log(utArr[1]);
+					grid.func("NewDS", utArr[0]+" \r\n rdata");
+					grid.func("SetParas", utArr[0]+" \r\n "+utArr[1]+"");
+				}
+				var desXml = getDesXml("${report.dsDesc}");
+				if(!desXml){
+					//grid.func("SetDSXML", desXml);
+				}
 			}
 		}
 	}; 
@@ -167,6 +173,29 @@ var reportDefine = {
  		var period;
  		period = periodList[day].period;
  		return period;
+ 	}
+ 	
+ 	function getDesXml(xml){
+ 		var desXml = "";
+ 		if(xml){
+	 		var colArr = xml.split(",");
+ 			for(var colIndex in colArr){
+ 				var col = colIndex.split(":");
+ 				var colXml = "";
+ 				var colCode = col[0];
+ 				var colName = col[1];
+ 				var coltype = "";
+ 				if(col.length>2){
+ 					coltype = col[2];
+ 				}else{
+ 					coltype = "string";
+ 				}
+ 				colXml += '<col name="'+col+'" datatype="'+coltype+'">'+colName+'</col>';
+ 				desXml += colXml;
+ 			}
+ 			desXml = '<?xml version="1.0" encoding="UTF-8"?"><cols>'+desXml+'</cols>';
+ 		}
+ 		return desXml;
  	}
  	
  	/* function zfValue(v1,v2,v3){

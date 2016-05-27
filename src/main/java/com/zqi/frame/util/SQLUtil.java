@@ -1,8 +1,11 @@
 package com.zqi.frame.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -54,8 +57,47 @@ public class SQLUtil {
 		}
 		sql_build.append("UPDATE ").append(tableName).append(" SET ")
         .append(StringUtils.join(values, ",")).append(" WHERE ")
-        .append(pkName).append(" = ").append(id);
+        .append(pkName).append(" = ").append("'"+id+"'");
 		String sql = sql_build.toString();
 		return sql;
+	}
+	
+	public String sql_delete(String id){
+		StringBuilder sql_build = new StringBuilder();
+		sql_build.append("DELETE FROM ").append(tableName).append(" WHERE ")
+		.append(pkName).append(" = ").append("'"+id+"'");
+		String sql = sql_build.toString();
+		return sql;
+	}
+	
+	public String sql_get(String id){
+		StringBuilder sql_build = new StringBuilder();
+		sql_build.append("SELECT * FROM ").append(tableName).append(" WHERE ")
+		.append(pkName).append(" = ").append("'"+id+"'");
+		String sql = sql_build.toString();
+		return sql;
+	}
+	
+	public String getId(HttpServletRequest request){
+		String id = request.getParameter(pkName);
+		return id;
+	}
+	
+	public String sql_get(HttpServletRequest request){
+		String id = getId(request);
+		StringBuilder sql_build = new StringBuilder();
+		sql_build.append("SELECT * FROM ").append(tableName).append(" WHERE ")
+		.append(pkName).append(" = ").append("'"+id+"'");
+		String sql = sql_build.toString();
+		return sql;
+	}
+	
+	public Map<String, String> getSaveMap(HttpServletRequest request){
+		Map<String, String> saveMap = new HashMap<String, String>();
+		for(String column : columns){
+			String value = request.getParameter(column);
+			saveMap.put(column, value);
+		}
+		return saveMap;
 	}
 }

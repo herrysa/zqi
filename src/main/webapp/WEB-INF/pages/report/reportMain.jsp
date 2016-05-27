@@ -5,6 +5,7 @@
 <head>
 <script>
 $(function() {
+	$("#reportListContent").load("report/reportList");
 	$("#reportList").click(function(){
 		$("#reportListContent").load("report/reportList");
 	});

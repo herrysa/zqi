@@ -5,16 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.zqi.frame.controller.pagers.JQueryPager;
 import com.zqi.frame.controller.pagers.PagerFactory;
 import com.zqi.frame.dao.impl.ZqiDao;
+import com.zqi.frame.util.SQLUtil;
 
 public class BaseController {
 
 	protected Map<String, Object> resultMap = new HashMap<String, Object>();
-	protected String message = "";
 	
 	protected ZqiDao zqiDao; 
 	protected PagerFactory pagerFactory;
@@ -43,9 +45,26 @@ public class BaseController {
 	public void setResultMap(Map<String, Object> resultMap) {
 		this.resultMap = resultMap;
 	}
+	
+	public void setMessage(String message){
+		this.resultMap.put("message", message);
+	}
 
 	public BaseController() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	public void save(HttpServletRequest request,SQLUtil sQLUtil){
+		String findSql = sQLUtil.sql_get(request);
+		Map<String, Object> entity = zqiDao.findFirst(findSql);
+		Map<String, String> entityMap = sQLUtil.getSaveMap(request);
+		if(entity.isEmpty()){
+			String inseartSql = sQLUtil.sql_inseart(entityMap);
+			zqiDao.excute(inseartSql);
+		}else{
+			String updateSql = sQLUtil.sql_update(entityMap, sQLUtil.getId(request));
+			zqiDao.update(updateSql);
+		}
 	}
 	
 	protected void makeResultMap(JQueryPager pagedRequests){

@@ -42,7 +42,7 @@ import com.zqi.unit.DateUtil;
 @RequestMapping("/report")
 public class ReportController extends BaseController{
 
-	private SQLUtil sQLUtil = new SQLUtil(new String[]{"code","name","type","remark"}, "r_report", "code", "");
+	private SQLUtil sQLUtil = new SQLUtil(new String[]{"code","name","type","dataSource","dsDesc","remark"}, "r_report", "code", "");
 	
 	@RequestMapping("/reportMain")
 	public String reportMain(){
@@ -60,7 +60,7 @@ public class ReportController extends BaseController{
 	public String reportForm(HttpServletRequest request,ModelMap model){
 		String id = request.getParameter("id");
 		if(id!=null&&!"".equals(id)){
-			Map<String, Object> report = zqiDao.findFirst("select * from report where code='"+id+"'");
+			Map<String, Object> report = zqiDao.findFirst("select * from r_report where code='"+id+"'");
 			model.put("report", report);
 		}
 		return "report/reportForm";
@@ -68,17 +68,22 @@ public class ReportController extends BaseController{
 	
 	@ResponseBody
 	@RequestMapping("/save")
-	public String save(HttpServletRequest request){
-		String id = request.getParameter("id");
-		Map<String, String> entityMap = getSaveMap(request,sQLUtil.columns);
+	public Map<String, Object> save(HttpServletRequest request){
+		super.save(request,sQLUtil);
+		resultMap.put("message", "保存成功!");
+		return resultMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/delete")
+	public Map<String, Object> delete(HttpServletRequest request){
+		String id = request.getParameter("code");
 		if(id!=null&&!"".equals(id)){
-			String updateSql = sQLUtil.sql_update(entityMap, id);
+			String updateSql = sQLUtil.sql_delete( id);
 			zqiDao.update(updateSql);
-		}else{
-			String inseartSql = sQLUtil.sql_inseart(entityMap);
-			zqiDao.excute(inseartSql);
 		}
-		return "保存成功!";
+		resultMap.put("message", "删除成功!");
+		return resultMap;
 	}
 	
 	@ResponseBody
@@ -96,8 +101,17 @@ public class ReportController extends BaseController{
 	
 	@RequestMapping("/show")
 	public String showReport(HttpServletRequest request,ModelMap model){
-		String code = request.getParameter("code");
-		model.put("code", code);
+		String sql = sQLUtil.sql_get(request);
+		Map<String, Object> report = zqiDao.findFirst(sql);
+		String dataSource = report.get("dataSource").toString();
+		String dsDesc = report.get("dsDesc").toString();
+		dataSource = dataSource.replaceAll("\n", "");
+		dataSource = dataSource.replaceAll("\r", "");
+		dsDesc = dsDesc.replaceAll("\n", "");
+		dsDesc = dsDesc.replaceAll("\r", "");
+		report.put("dataSource", dataSource);
+		report.put("dsDesc", dsDesc);
+		model.put("report", report);
 		return "report/reportShow";
 	}
 	
@@ -151,16 +165,20 @@ public class ReportController extends BaseController{
 	public Map<String, Object> initData(HttpServletRequest request){
 		String days = request.getParameter("days");
 		if(days!=null){
-			int dayCount = Integer.parseInt(days);
-			List<Map<String, Object>> periodList = this.getPeriodList(request);
+			//int dayCount = Integer.parseInt(days);
+			HttpSession session = request.getSession();
+			List<Map<String, Object>> periodList = null;
+			String sql = "select period from daytable_all where code='0000001' order by period desc limit 0,"+days;
+			periodList = zqiDao.findAll(sql);
+			session.setAttribute("periodList",periodList);
 			String periodStr = "";
-			int d=0;
+			//int d=0;
 			for(Map<String, Object> periodMap : periodList){
 				periodStr += "'"+periodMap.get("period")+"',";
-				d++;
+				/*d++;
 				if(d>=dayCount){
 					break;
-				}
+				}*/
 			}
 			if(!"".equals(periodStr)){
 				periodStr = periodStr.substring(0, periodStr.length()-1);
@@ -219,19 +237,11 @@ public class ReportController extends BaseController{
 		return resultMap;
 	}
 	
-	public Map<String, String> getSaveMap(HttpServletRequest request,String[] columns){
-		Map<String, String> saveMap = new HashMap<String, String>();
-		for(String column : columns){
-			String value = request.getParameter(column);
-			saveMap.put(column, value);
-		}
-		return saveMap;
-	}
 	
 	public String replaceVari(HttpServletRequest request,String str){
 		List<Map<String, Object>> periodList = null;
 		periodList = getPeriodList(request);
-		str = str.replaceAll("%lastperiod%", periodList.get(0).get("period").toString());
+		str = str.replaceAll("%lastperiod%", "'"+periodList.get(0).get("period").toString()+"'");
 		
 		return str;
 	}
@@ -241,8 +251,9 @@ public class ReportController extends BaseController{
 		List<Map<String, Object>> periodList = null;
 		periodList = (List<Map<String, Object>>)session.getAttribute("periodList");
 		if(periodList==null){
-			String sql = "select period from daytable_all where code='0000001' order by period desc";
+			String sql = "select period from report_daytable where code='0000001' order by period desc";
 			periodList = zqiDao.findAll(sql);
+			session.setAttribute("periodList",periodList);
 		}
 		return periodList;
 	}

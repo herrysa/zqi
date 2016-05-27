@@ -18,6 +18,8 @@ public class Report extends BaseObject{
 	private String code;
 	private String name;
 	private String type;
+	private String dataSource;
+	private String dsDesc;
 	private String remark;
 	
 	@Id
@@ -43,7 +45,20 @@ public class Report extends BaseObject{
 	public void setType(String type) {
 		this.type = type;
 	}
-	
+	@Column
+	public String getDataSource() {
+		return dataSource;
+	}
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+	@Column
+	public String getDsDesc() {
+		return dsDesc;
+	}
+	public void setDsDesc(String dsDesc) {
+		this.dsDesc = dsDesc;
+	}
 	@Column
 	public String getRemark() {
 		return remark;

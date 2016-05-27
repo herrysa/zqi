@@ -70,6 +70,10 @@
 		.pageContent{
 			height:100%
 		}
+		.pageForm{
+			margin : 15px;
+			font-size: 13px;
+		}
 		
 		.form-search{
 			margin-bottom :0
