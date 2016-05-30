@@ -56,7 +56,7 @@ public class FinderSinaBk implements IFinderBk{
 				for(Map<String, String> gnbkgpData : gnbkgpDataList){
 					String symbol = gnbkgpData.get("code");
 					String gpName = gnbkgpData.get("name");
-					bkData += period+","+symbol+","+gpName+","+bkCode+","+bkName+"/n";
+					bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
 				}
 			}
 			System.out.println("------"+bkCode+"--------");
@@ -79,11 +79,10 @@ public class FinderSinaBk implements IFinderBk{
 			SimpleDateFormat myFmt2=new SimpleDateFormat("yyyy-MM-dd");
 			Date nowDate=new Date();
 			String period = myFmt2.format(nowDate);
-			DBHelper dicDb = new DBHelper();
 			for(Map<String, String> gnbkgpData : gnbkgpDataList){
 				String symbol = gnbkgpData.get("code");
 				String gpName = gnbkgpData.get("name");
-				bkData += period+","+symbol+","+gpName+","+bkCode+","+bkName+"\n";
+				bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
 			}
 			System.out.println("------"+bkName+"--------");
 			i++;
@@ -106,11 +105,10 @@ public class FinderSinaBk implements IFinderBk{
 			SimpleDateFormat myFmt2=new SimpleDateFormat("yyyy-MM-dd");
 			Date nowDate=new Date();
 			String period = myFmt2.format(nowDate);
-			DBHelper dicDb = new DBHelper();
 			for(Map<String, String> gnbkgpData : gnbkgpDataList){
 				String symbol = gnbkgpData.get("code");
 				String gpName = gnbkgpData.get("name");
-				bkData += period+","+symbol+","+gpName+","+bkCode+","+bkName+"\n";
+				bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
 			}
 			System.out.println("------"+bkName+"--------");
 			i++;

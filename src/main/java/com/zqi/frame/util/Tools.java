@@ -309,4 +309,12 @@ public class Tools {
 		}
 		return str;
 	}
+	
+	public static String getTxtData(Map<String,Object> dataMap,String[] colArr){
+		String dataLine = "";
+		for(String col : colArr){
+			dataLine += dataMap.get(col)+"\t";
+		}
+		return dataLine+"\n";
+	}
 }

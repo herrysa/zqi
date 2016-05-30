@@ -398,13 +398,14 @@ public class PrimaryDataController extends BaseController{
 			fixedThreadPool.shutdown();
 			while(!fixedThreadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)){
 			}
-			String basePath = "D:/zqi/";
-			File parentFile = new File(basePath);
+			String basePath = Tools.getResource("baseDir");
+			String rHisDataDir = basePath+Tools.getResource("rhisDir");
+			File parentFile = new File(rHisDataDir);
 			String[] files = parentFile.list();
 			List<String> loadList = new ArrayList<String>();
 	        for(String fileName : files){
 	        	String name = fileName.split("\\.")[0];
-	        	String loadDataSql = "load data infile '"+basePath+name+".txt' into table "+name+"("+dataCol+");";
+	        	String loadDataSql = "load data infile '"+rHisDataDir+name+".txt' into table "+name+"("+dataCol+");";
 	        	loadList.add(loadDataSql);
 	        }
 	        String[] loadSqls = loadList.toArray(new String[loadList.size()]);
@@ -452,7 +453,8 @@ public class PrimaryDataController extends BaseController{
 			stringBuilder.append("------total--------\n");
 			stringBuilder.append("[更新股票数量]:"+gpCount+"\n");
 			stringBuilder.append("[更新股票总记录数量]:"+count+"\n");
-			FileUtil.writeFile(stringBuilder.toString(), "D:/zqi/log/"+dateFrom+"-"+dateTo+"_log.txt");
+			String logDir = basePath+Tools.getResource("logDir");
+			FileUtil.writeFile(stringBuilder.toString(), logDir+dateFrom+"-"+dateTo+"_log.txt");
 			long msTime = importRHisDataTime.doner();
 			Map<String, Object> errorLog = new HashMap<String, Object>();
 			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());

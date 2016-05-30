@@ -186,7 +186,7 @@ public class ReportController extends BaseController{
 				periodStr = "''";
 			}
 			String daySql = "select * from daytable_all where period in("+periodStr+") order by period desc";
-			zqiDao.excute("DROP TABLE report_daytable;");
+			zqiDao.excute("DROP TABLE IF EXISTS report_daytable;");
 			zqiDao.excute("create table report_daytable ("+daySql+");");
  			resultMap.put("message", "初始化成功！") ;
 		}else{

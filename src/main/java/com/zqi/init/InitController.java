@@ -1,7 +1,6 @@
 package com.zqi.init;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,12 +18,13 @@ import com.zqi.dataFinder.se.FinderGpDicSe;
 import com.zqi.dataFinder.sina.FinderSinaBk;
 import com.zqi.dataFinder.wy163.FinderGpDic163Zhishu;
 import com.zqi.frame.controller.BaseController;
-import com.zqi.unit.DBHelper;
+import com.zqi.frame.util.Tools;
 import com.zqi.unit.FileUtil;
 
 @Controller
 @RequestMapping("/init")
 public class InitController extends BaseController{
+	String exceptTable = "";
 
 	@RequestMapping("/initpage")
 	public String init(){
@@ -35,6 +35,7 @@ public class InitController extends BaseController{
 	@RequestMapping("/createTable")
 	public Map<String, Object> createTable(){
 		try {
+			dropTable();
 			createDicAndDayTable();
 			createGpInfoTable();
 			findBkInfo();
@@ -112,6 +113,20 @@ public class InitController extends BaseController{
 		return "";
 	}
 	
+	private void dropTable(){
+		String databaseName = Tools.getResource("databaseName");
+		String findTableSql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '"+databaseName+"'";
+		List<Map<String, Object>> tableList = zqiDao.findAll(findTableSql);
+		for(Map<String, Object> table : tableList){
+			String tableName = table.get("TABLE_NAME").toString();
+			if(!exceptTable.contains("["+databaseName+"]")){
+				String dropTable = "DROP TABLE IF EXISTS `"+tableName+"`; ";
+				zqiDao.excute(dropTable);
+				System.out.println("--------------删除"+tableName+"表-----------------");
+			}
+		}
+	}
+	
 	private void createDicAndDayTable(){
 		String dicSql= "create table d_gpdic(code varchar(20),symbol varchar(20),name varchar(20),symbolName varchar(20),listDate varchar(10),totalShares varchar(20),totalFlowShares varchar(20),endDate varchar(10),pinyinCode varchar(10),type varchar(2),daytable varchar(20),remark varchar(50));";
 		zqiDao.excute(dicSql);
@@ -119,11 +134,13 @@ public class InitController extends BaseController{
 		List<Map<String, Object>> gpDiList = iFinderGpDicSse.findGpDic();
 		IFinderGpDic iFinderGpDicZishu = new FinderGpDic163Zhishu();
 		gpDiList.addAll(iFinderGpDicZishu.findGpDic());
-		zqiDao.addList(gpDiList, "d_gpdic");
-		System.out.println("--------------股票字典添加完毕-----------------");
+		//zqiDao.addList(gpDiList, "d_gpdic");
 		List<String> createDaytableSqls = new ArrayList<String>();
 		String daytableUnion = "";
 		Set<String> daytableSet = new HashSet<String>();
+		String gpDataCol = "code,symbol,name,symbolName,listDate,totalShares,totalFlowShares,endDate,pinyinCode,type,daytable";
+		String[] gpDicCol = gpDataCol.split(",");
+		String gpDataStr = "";
 		for(Map<String, Object> gp : gpDiList){
 			String daytble = gp.get("daytable").toString();
 			daytableSet.add(daytble);
@@ -131,7 +148,19 @@ public class InitController extends BaseController{
 			if(!createDaytableSqls.contains(createSql)){
 				createDaytableSqls.add(createSql);
 			}
+			gpDataStr += Tools.getTxtData(gp, gpDicCol);
 		}
+		String basePath = Tools.getResource("baseDir");
+		String dicPath = basePath+Tools.getResource("dicDir");
+		String filePath = dicPath+"d_gpdic.txt";
+		File bkFile = new File(filePath);
+		bkFile.deleteOnExit();
+		FileUtil.writeFile(gpDataStr, filePath);
+		String loadDataSql = "load data infile '"+filePath+"' into table d_gpdic("+gpDataCol+");";
+		String deleteBkInfoSql = "delete from d_gpdic";
+		zqiDao.excute(deleteBkInfoSql);
+		zqiDao.excute(loadDataSql);
+		System.out.println("--------------股票字典添加完毕-----------------");
 		String report_daytble = "create table report_daytable (period date,code varchar(20),name varchar(20),type varchar(2),settlement decimal(10,3),open decimal(10,3),high decimal(10,3),low decimal(10,3),close decimal(10,3),volume decimal(20,3),amount decimal(20,3),changeprice decimal(10,3),changepercent decimal(10,3),swing decimal(10,3),turnoverrate decimal(10,3),fiveminute decimal(10,3),lb decimal(10,3),wb decimal(10,3),tcap decimal(20,3),mcap decimal(20,3),pe decimal(10,3),mfsum decimal(10,3),mfratio2 decimal(20,3),mfratio10 decimal(20,3),PRIMARY KEY (`period`,`code`))ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 		createDaytableSqls.add(report_daytble);
 		for(String daytable : daytableSet){
@@ -148,7 +177,7 @@ public class InitController extends BaseController{
 	}
 	
 	private void createGpInfoTable(){
-		String infoSql = "create table i_gpinfo(period date,code varchar(20),name varchar(20),infoType varchar(20),info varchar(100),PRIMARY KEY (`period`,`code`));";
+		String infoSql = "create table i_gpinfo(period date,code varchar(20),name varchar(20),infoType varchar(20),info varchar(100));";
 		zqiDao.excute(infoSql);
 		System.out.println("--------------股票信息表建立完毕-----------------");
 	}
@@ -156,7 +185,11 @@ public class InitController extends BaseController{
 	private void findBkInfo() {
 		IFinderBk iFinderBk = new FinderSinaBk();
 		String bkData = iFinderBk.findBkInfoStr();
-		String filePath = "D:/zqi/i_gpinfo.txt";
+		String basePath = Tools.getResource("baseDir");
+		String dicPath = basePath+Tools.getResource("dicDir");
+		String filePath = dicPath+"i_gpinfo.txt";
+		File bkFile = new File(filePath);
+		bkFile.deleteOnExit();
 		FileUtil.writeFile(bkData, filePath);
 		String dataCol = "period,code,name,infoType,info";
 		String loadDataSql = "load data infile '"+filePath+"' into table i_gpinfo("+dataCol+");";
@@ -180,15 +213,19 @@ public class InitController extends BaseController{
 	}
 	
 	private void creatReportTable(){
-		String createql= "create table r_report(code varchar(20),name varchar(20),type varchar(2),remark varchar(50));";
-		zqiDao.excute(createql);
-		System.out.println("--------------报表表建立完毕-----------------");
+		if(!exceptTable.contains("[r_report]")){
+			String createql= "create table r_report(code varchar(20),name varchar(20),type varchar(2),dataSource varchar(500),dsDesc varchar(200),remark varchar(50),PRIMARY KEY (`code`));";
+			zqiDao.excute(createql);
+			System.out.println("--------------报表表建立完毕-----------------");
+		}
 	}
 	
 	private void creatReportFuncTable(){
-		String createql= "create table r_reportFunc(code varchar(20),name varchar(20),category varchar(20),type varchar(2),params varchar(100),funcSql varchar(500), remark varchar(50));";
-		zqiDao.excute(createql);
-		System.out.println("--------------报表函数表建立完毕-----------------");
+		if(!exceptTable.contains("[r_reportFunc]")){
+			String createql= "create table r_reportFunc(code varchar(20),name varchar(20),category varchar(20),type varchar(2),params varchar(100),funcSql varchar(500), remark varchar(50),PRIMARY KEY (`code`));";
+			zqiDao.excute(createql);
+			System.out.println("--------------报表函数表建立完毕-----------------");
+		}
 	}
 	
 	private void creatIndicatorTable(){

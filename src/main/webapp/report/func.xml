@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <root>
 	<functions>
+		<category name="辅助函数">
+			<function name="findBySql" >
+				<para>sql</para>
+				<returnDatatype>string</returnDatatype> 
+			</function>
+		</category>
 		<category name="日数据">
 			<function name="findPeriod" >
 				<para>倒推第几天</para>

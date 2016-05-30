@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.zqi.dataFinder.wy163.Finder163RHis;
+import com.zqi.frame.util.Tools;
 import com.zqi.unit.FileUtil;
 import com.zqi.unit.SpringContextHelper;
 
@@ -42,15 +43,17 @@ public class HisDataAddThread implements Runnable{
 			count += dataListTemp.size();
 			for(Map<String, Object> data : dataListTemp){
 				//simpleJdbcInsert.execute(data);
-				String dataLine = getInsert(data,daytable);
+				String dataLine = getInsert(data);
 				insertbBuffer.append(dataLine);
 			}
 		}
-		FileUtil.writeFile(insertbBuffer.toString(), "D:/zqi/log/"+daytable+".txt");
+		String basePath = Tools.getResource("baseDir");
+		String rHisDataDir = Tools.getResource("rhisDir");
+		FileUtil.writeFile(insertbBuffer.toString(), basePath+rHisDataDir+daytable+".txt");
 		hisContext.getRecordMap().put(daytable, count);
 	}
 
-	private String getInsert(Map<String,Object> dataMap,String daytable){
+	private String getInsert(Map<String,Object> dataMap){
 		String dataLine = "";
 		for(String col : colArr){
 			dataLine += dataMap.get(col)+"\t";
