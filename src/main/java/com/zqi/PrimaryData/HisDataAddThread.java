@@ -46,7 +46,7 @@ public class HisDataAddThread implements Runnable{
 				insertbBuffer.append(dataLine);
 			}
 		}
-		FileUtil.writeFile(insertbBuffer.toString(), "D:/t/"+daytable+".txt");
+		FileUtil.writeFile(insertbBuffer.toString(), "D:/zqi/log/"+daytable+".txt");
 		hisContext.getRecordMap().put(daytable, count);
 	}
 

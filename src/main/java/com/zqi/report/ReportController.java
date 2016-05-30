@@ -241,7 +241,7 @@ public class ReportController extends BaseController{
 	public String replaceVari(HttpServletRequest request,String str){
 		List<Map<String, Object>> periodList = null;
 		periodList = getPeriodList(request);
-		str = str.replaceAll("%lastperiod%", "'"+periodList.get(0).get("period").toString()+"'");
+		str = str.replaceAll("%lastperiod%", periodList.get(0).get("period").toString());
 		
 		return str;
 	}
@@ -282,8 +282,14 @@ public class ReportController extends BaseController{
 				}
 			}
 		}
-		Map<String, String> funcMap = new HashMap<String, String>();
-		funcMap.put("findRData","select changepercent from daytable_all where period=? and code=?");
+		
+		String findFuncs =  "select * from r_reportFunc";
+		List<Map<String, Object>> funcsList = zqiDao.findAll(findFuncs);
+		Map<String, Map<String, Object>> funcMap = new HashMap<String, Map<String, Object>>();
+		for(Map<String, Object> func : funcsList){
+			funcMap.put(func.get("code").toString(), func);
+		}
+		
 		List<ReportFunc> funcList = parseFunc(result,funcMap);
 		exeFunc(funcList);
 		String returnXml = funcToXml(funcList);
@@ -306,7 +312,7 @@ public class ReportController extends BaseController{
 		return null;
 	}
 	
-	private List<ReportFunc> parseFunc(String xml,Map<String, String> funcMap){
+	private List<ReportFunc> parseFunc(String xml,Map<String, Map<String, Object>> funcMap){
 		List<ReportFunc> funcList = new ArrayList<ReportFunc>();
 		Document doc = XMLUtil.stringToXml(xml);
 		Element root= doc.getRootElement();
@@ -317,22 +323,52 @@ public class ReportController extends BaseController{
 			Element element = elementIt.next();
 			String funcName = element.attributeValue("name");
 			func.setName(funcName);
-			String funcBody = funcMap.get(funcName);
+			
+			Map<String, Object> reprotFunc = funcMap.get(funcName);
+			String funcBody = reprotFunc.get("funcSql").toString();
 			if(funcBody!=null&&!"".equals(funcBody)){
-				func.setFunc(funcBody);
+				String funcType = reprotFunc.get("type").toString();
+				func.setType(funcType);
+				String funcParam = reprotFunc.get("params").toString();
+				String[] paramArr = funcParam.split(";");
+				List<String> paramNameList = new ArrayList<String>();
+				for(String p : paramArr){
+					String[] pArr = p.split(":");
+					paramNameList.add(pArr[0]);
+				}
+				
+				Map<String, String> paramMap = new HashMap<String, String>();
 				Iterator<Element> paraIt = element.elementIterator("Para");
-				while(paraIt.hasNext()){
+				int pIndex = 0;
+				while(paraIt.hasNext()&&pIndex<paramNameList.size()){
 					Element para = paraIt.next();
+					String paramName = paramNameList.get(pIndex);
 					String p = para.getTextTrim();
 					if(p==null||"".equals(p)){
-						func.setExecute(false);
+						paramMap.put(paramName, null);
+					}else{
+						paramMap.put(paramName, p);
 					}
-					func.addPara(p);
+					pIndex++;
 				}
-				int qmNum = getQuestionMark(func.getFunc());
-				if(func.getPara().length!=qmNum){
-					func.setExecute(false);
+				//List<String> variList = getVariStr(funcBody);
+				//List<String> filterList = getFilterStr(funcBody);
+				
+				for(String paramName : paramNameList){
+					if(funcBody.contains("%"+paramName+"%")){
+						String filterStr = getFilterStr(funcBody,paramName);
+						String paramValue = paramMap.get(paramName);
+						if(!"".equals(filterStr)){
+							if(paramValue==null){
+								funcBody.replace(filterStr, "");
+							}else{
+								funcBody.replace(filterStr, filterStr.substring(1, filterStr.length()-1));
+							}
+						}
+						funcBody = funcBody.replaceAll("%"+paramName+"%", paramValue);
+					}
 				}
+				func.setFunc(funcBody);
 			}else{
 				func.setExecute(false);
 			}
@@ -374,6 +410,8 @@ public class ReportController extends BaseController{
 		}
 	}
 	
+	
+	
 	private int getQuestionMark(String str){
 		String pattern = "\\?";
 		Pattern p = Pattern.compile(pattern);
@@ -385,13 +423,50 @@ public class ReportController extends BaseController{
 		return matcherCount;
 	}
 	
+	private List<String> getFilterStr(String sql){
+		String pattern = "(?<=\\{)[^\\}]+";
+		Pattern p = Pattern.compile(pattern);
+		Matcher matcher = p.matcher(sql);
+		List<String> filterList = new ArrayList<String>();
+		while(matcher.find()){
+			filterList.add(matcher.group());
+		}
+		return filterList;
+	}
+	
+	private String getFilterStr(String sql,String vari){
+		String pattern = "(?<=\\{).*"+vari+"{1}[^\\}]+";
+		Pattern p = Pattern.compile(pattern);
+		Matcher matcher = p.matcher(sql);
+		String filterStr = "";
+		while(matcher.find()){
+			vari = matcher.group();
+		}
+		return filterStr;
+	}
+	
+	private List<String> getVariStr(String sql){
+		String pattern = "%(.*?)%";
+		Pattern p = Pattern.compile(pattern);
+		Matcher matcher = p.matcher(sql);
+		List<String> filterList = new ArrayList<String>();
+		while(matcher.find()){
+			filterList.add(matcher.group());
+		}
+		return filterList;
+	}
+	
 	public static void main(String[] args) {
-		String funcBody = "aaass?dsd?? dd?";
-		String pattern = "\\?";
+		String funcBody = "aaass{ds%abc%d}{?}{? d}{d?";
+		//String funcBody = "aaa)ss%ds%d%)(%{?){? d}{d";
+		//String pattern = "\\{.*\\}";
+		String pattern = "(?<=\\{).*abc{1}[^\\}]+";
+		//String pattern = "%(.*?)%";
 		Pattern p = Pattern.compile(pattern);
 		Matcher matcher = p.matcher(funcBody);
 		int matcherCount = 0;
 		while(matcher.find()){
+			System.out.println(matcher.group());
 			matcherCount++;
 		}
 		System.out.println(matcherCount);

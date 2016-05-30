@@ -40,10 +40,10 @@ public class QiInit {
 		//creatZqiTable();
 		//creatGpInfo();
 		//createGpCwInfo();
-		creatReportTable();
+		//creatReportTable();
 		//creatLogTable();
 		//insertDayData();
-		//findBkInfo();
+		findBkInfo();
 		//Calendar calendar = Calendar.getInstance();
 		//calendar.set(Calendar.MONTH, 2);
 		//System.out.println(Calendar.getInstance().getTimeInMillis());
@@ -619,7 +619,7 @@ public class QiInit {
 			String gnbkgpUrl = "http://money.finance.sina.com.cn/d/api/openapi_proxy.php/?__s=[[%22bkshy_node%22,%22"+code+"%22,%22%22,0,1,40]]&callback=FDC_DC.theTableData";
 			List<Map<String, String>>  gnbkgpDataList = getHttpUrlMap(gnbkgpKey,gnbkgpUrl,null);
 			for(Map<String, String> gnbkgpData : gnbkgpDataList){
-				String symbol = gnbkgpData.get("symbol");
+				String symbol = gnbkgpData.get("code");
 				String gpName = gnbkgpData.get("name");
 				//String updateGnbkSql = "update d_gpdic set b_gn='"+bkName+"' where code='"+symbol.toUpperCase()+"'";
 				String updateGnbkSql = "insert into i_gpinfo (period,code,name,infoType,info) values('"+period+"','"+symbol+"','"+gpName+"','"+bkCode+"','"+bkName+"')";
@@ -654,7 +654,7 @@ public class QiInit {
 		String period = myFmt2.format(nowDate);
 		DBHelper dicDb = new DBHelper();
 		for(Map<String, String> gnbkgpData : gnbkgpDataList){
-			String symbol = gnbkgpData.get("symbol");
+			String symbol = gnbkgpData.get("code");
 			String gpName = gnbkgpData.get("name");
 			//String updateGnbkSql = "update d_gpdic set b_gn='"+bkName+"' where code='"+symbol.toUpperCase()+"'";
 			String updateGnbkSql = "insert into i_gpinfo (period,code,name,infoType,info) values('"+period+"','"+symbol+"','"+gpName+"','"+bkCode+"','"+bkName+"')";

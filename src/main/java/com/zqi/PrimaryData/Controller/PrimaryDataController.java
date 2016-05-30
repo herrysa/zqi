@@ -398,7 +398,7 @@ public class PrimaryDataController extends BaseController{
 			fixedThreadPool.shutdown();
 			while(!fixedThreadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)){
 			}
-			String basePath = "D:/t/";
+			String basePath = "D:/zqi/";
 			File parentFile = new File(basePath);
 			String[] files = parentFile.list();
 			List<String> loadList = new ArrayList<String>();

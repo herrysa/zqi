@@ -7,6 +7,7 @@ public class ReportFunc {
 
 	String name;
 	String func;
+	String type;
 	Object[] para;
 	List<Object> paraList;
 	String value="";
@@ -53,5 +54,11 @@ public class ReportFunc {
 	}
 	public void setValue(String value) {
 		this.value = value;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
 	}
 }

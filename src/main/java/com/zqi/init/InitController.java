@@ -1,5 +1,7 @@
 package com.zqi.init;
 
+import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,10 +13,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.zqi.dataFinder.IFinderBk;
 import com.zqi.dataFinder.IFinderGpDic;
 import com.zqi.dataFinder.se.FinderGpDicSe;
+import com.zqi.dataFinder.sina.FinderSinaBk;
 import com.zqi.dataFinder.wy163.FinderGpDic163Zhishu;
 import com.zqi.frame.controller.BaseController;
+import com.zqi.unit.DBHelper;
+import com.zqi.unit.FileUtil;
 
 @Controller
 @RequestMapping("/init")
@@ -31,9 +37,11 @@ public class InitController extends BaseController{
 		try {
 			createDicAndDayTable();
 			createGpInfoTable();
+			findBkInfo();
 			createGpCwInfoTable();
 			createGpFhInfoTable();
 			creatReportTable();
+			creatReportFuncTable();
 			creatIndicatorTable();
 			creatLogTable();
 			this.setMessage("建表成功！");
@@ -145,6 +153,20 @@ public class InitController extends BaseController{
 		System.out.println("--------------股票信息表建立完毕-----------------");
 	}
 	
+	private void findBkInfo() {
+		IFinderBk iFinderBk = new FinderSinaBk();
+		String bkData = iFinderBk.findBkInfoStr();
+		String filePath = "D:/zqi/i_gpinfo.txt";
+		FileUtil.writeFile(bkData, filePath);
+		String dataCol = "period,code,name,infoType,info";
+		String loadDataSql = "load data infile '"+filePath+"' into table i_gpinfo("+dataCol+");";
+		String deleteBkInfoSql = "delete from i_gpinfo where infoType in ('gainianbankuai','diyu','bkshy','cyb','zxqy','zhishu_000001','zhishu_399001','hs300')";
+		zqiDao.excute(deleteBkInfoSql);
+		zqiDao.excute(loadDataSql);
+		System.out.println("--------------板块信息更新完毕-----------------");
+	}
+	
+	
 	private void createGpCwInfoTable(){
 		String infoSql = "create table i_gpCw(period date,code varchar(20),name varchar(20),cwType varchar(20),cwData varchar(20),PRIMARY KEY (`period`,`code`));";
 		zqiDao.excute(infoSql);
@@ -158,9 +180,15 @@ public class InitController extends BaseController{
 	}
 	
 	private void creatReportTable(){
-		String createql= "create table r_report(code varchar(20),name varchar(20),type varchar(20),remark varchar(50));";
+		String createql= "create table r_report(code varchar(20),name varchar(20),type varchar(2),remark varchar(50));";
 		zqiDao.excute(createql);
 		System.out.println("--------------报表表建立完毕-----------------");
+	}
+	
+	private void creatReportFuncTable(){
+		String createql= "create table r_reportFunc(code varchar(20),name varchar(20),category varchar(20),type varchar(2),params varchar(100),funcSql varchar(500), remark varchar(50));";
+		zqiDao.excute(createql);
+		System.out.println("--------------报表函数表建立完毕-----------------");
 	}
 	
 	private void creatIndicatorTable(){

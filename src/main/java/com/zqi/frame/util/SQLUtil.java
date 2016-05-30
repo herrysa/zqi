@@ -31,6 +31,9 @@ public class SQLUtil {
 		for(String column : columns){
 			String value = inseartMap.get(column);
 			if(value!=null){
+				if(value.contains("'")){
+					value = value.replace("'", "''");
+				}
 				value = "'"+value+"'";
 			}else{
 				value = "null";
@@ -49,6 +52,9 @@ public class SQLUtil {
 		for(String column : columns){
 			String value = updateMap.get(column);
 			if(value!=null){
+				if(value.contains("'")){
+					value = value.replace("'", "''");
+				}
 				value = column+"='"+value+"'";
 			}else{
 				value = column+"=null";
