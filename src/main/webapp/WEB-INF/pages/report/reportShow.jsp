@@ -15,6 +15,7 @@ var reportDefine = {
 				grid.func("AddUserFunctions", "${ctx}/report/func.xml");
 				grid.func("SetBatchFunctionURL","report/batchFunc \r\n functions=10000;timeout=9999 \r\n user=normal");
 				grid.func("SetAutoCalc","0");
+				grid.func("SubscribeEvent", "Clicked");
 			},
 			"Toolbar":function( id,p1, p2, p3, p4){
 				var grid = eval("("+id+")");
@@ -35,7 +36,16 @@ var reportDefine = {
 			        });
 					grid.func("CancelEvent", "");
 				}
-			}
+			},
+			"Clicked":function( id,p1, p2, p3, p4){
+				var grid = eval("("+id+")");
+				console.log(p1+":"+p2+":"+p3+":"+ p4);
+				if(p3&&p3.indexOf("report:")!=-1){
+					var reportCode = p3.replace("report:","");
+					grid.func("appendWorksheet", "${ctx}/report/getReportXml?code="+reportCode+" \r\n sheetnum=0; isWithFormula=false"); 
+					//grid.func("appendWorksheet", "${ctx}/report/getReportXml?code=0000001statistic \r\n sheetnum=0; isWithFormula=false"); 
+				}
+			} 
 		},
 		callback:{
 			onComplete : function(id){

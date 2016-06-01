@@ -122,8 +122,8 @@ public class Finder163RHis implements IFinderRHis{
 		return dataList;
 	}
 	public static void main(String[] args) {
-		String urlTemp = "http://quotes.money.163.com/service/chddata.html?code=1300141&start=20160112&end=20160428&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP";
-		String result = Tools.getByHttpUrl(urlTemp);
+		String urlTemp = "http://quotes.money.163.com/cjmx/2016/20160525/0600000.xls";
+		String result = Tools.getExcelByHttpUrl(urlTemp);
 		System.out.println();
 	}
 }
