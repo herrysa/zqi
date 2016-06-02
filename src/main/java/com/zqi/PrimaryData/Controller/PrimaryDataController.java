@@ -57,6 +57,11 @@ import com.zqi.unit.UUIDGenerator;
 @RequestMapping("/primaryData")
 public class PrimaryDataController extends BaseController{
 
+	@RequestMapping("/primaryDataMain")
+	public String primaryMain(){
+		
+		return "primaryData/primaryDataMain";
+	}
 	@ResponseBody
 	@RequestMapping("/primaryDataGridList")
 	public Map<String, Object> primaryDataGridList(HttpServletRequest request){

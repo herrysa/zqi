@@ -153,7 +153,7 @@ $(function() {
     var contentHeight = $("#mainContent").height();
     var contentWidth = $("#mainContent").width();
     gridWidth = contentWidth-5;
-    gridHeight = contentHeight-searchFormHeight-10;
+    gridHeight = contentHeight-searchFormHeight-52;
     $("#jqGrid_div").height(gridHeight);
 }); 
 

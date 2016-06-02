@@ -119,7 +119,7 @@
 				      <div class="panel-body">
 						<ul class="nav nav-pills nav-stacked">
 							<li><a href="javaScript:menuClick('init/initpage')">初始化</a></li>
-							<li><a href="javaScript:menuClick('primaryData/primaryDataList')">原始数据</a></li>
+							<li><a href="javaScript:menuClick('primaryData/primaryDataMain')">原始数据</a></li>
 							<li><a href="javaScript:menuClick('chart/kChart?code=600847')">图形</a></li>
 							<li><a href="javaScript:menuClick('hq/findHQ')">行情</a></li>
 						</ul>

@@ -207,7 +207,7 @@ public class InitController extends BaseController{
 	}
 	
 	private void createGpFhInfoTable(){
-		String createql= "create table i_gpFh(period date,code varchar(20),name varchar(20),ssrq varchar(10),info varchar(100),PRIMARY KEY (`period`,`code`));";
+		String createql= "CREATE TABLE i_gpFh (CODE VARCHAR (20),fhYear VARCHAR (4),ggDate date,djDate date,cqDate date,sg DECIMAL (10, 3),zz DECIMAL (10, 3),fh DECIMAL (10, 3),sgss date,zzss date,sgdz date,zzdz date,txt varchar(50));";
 		zqiDao.excute(createql);
 		System.out.println("--------------股票分红信息表建立完毕-----------------");
 	}
