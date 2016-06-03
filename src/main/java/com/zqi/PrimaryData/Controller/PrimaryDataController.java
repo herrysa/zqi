@@ -2,8 +2,10 @@ package com.zqi.PrimaryData.Controller;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.json.JSONArray;
@@ -37,10 +40,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.zqi.PrimaryData.DataAddThread;
 import com.zqi.PrimaryData.HisContext;
 import com.zqi.PrimaryData.HisDataAddThread;
+import com.zqi.dataFinder.IFinderFh;
 import com.zqi.dataFinder.IFinderRToday;
-import com.zqi.dataFinder.wy163.Finder163RHis;
 import com.zqi.dataFinder.wy163.Finder163RToday;
 import com.zqi.dataFinder.wy163.Finder163ZhishuRToday;
+import com.zqi.dataFinder.xq.FinderXqFh;
 import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
@@ -725,9 +729,7 @@ public class PrimaryDataController extends BaseController{
 		/*PrimaryDataController primaryDataController = new PrimaryDataController();
 		String sql = "http://quotes.money.163.com/trade/lsjysj_600000.html#06f01";
 		primaryDataController.findDayData("600000","600000","2016","01");*/
-		String url = "http://quotes.money.163.com/service/chddata.html?code=1300141&start=20160112&end=20160428&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP";
-		String a = Tools.getByHttpUrl(url);
-		System.out.println(a);
+		String url = "https://xueqiu.com/stock/f10/bonus.json?symbol=SZ000426&page=1&size=50";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -792,4 +794,62 @@ public class PrimaryDataController extends BaseController{
 		}
 			return dataList;
 	}
+	
+	@RequestMapping("fhDataList")
+	public String fhDataList(HttpServletRequest request,ModelMap model){
+		String code = request.getParameter("gpCode");
+		String period = request.getParameter("period");
+		model.addAttribute("gpCode", code);
+		model.put("period", period);
+		return "primaryData/fhDataList";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/fhDataGridList")
+	public Map<String, Object> fhDataGridList(HttpServletRequest request){
+		String code = request.getParameter("gpCode");
+		String period = request.getParameter("period");
+		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+		JQueryPager pagedRequests = null;
+		pagedRequests = (JQueryPager) pagerFactory.getPager(
+				PagerFactory.JQUERYTYPE, request);
+		if(code!=null&&!"".equals(code)){
+			String dayDataSql = "select * from i_gpFh where code='"+code+"'";
+			if(period!=null&&!"".equals(period)){
+				dayDataSql += " and cqDate='"+period+"'";
+			}
+			pagedRequests = zqiDao.findWithFilter(pagedRequests, dayDataSql, filters);
+		}
+		resultMap.put("page", pagedRequests.getPageNumber());
+		resultMap.put("records", pagedRequests.getTotalNumberOfRows());
+		resultMap.put("rows", pagedRequests.getList());
+		resultMap.put("total", pagedRequests.getTotalNumberOfPages());
+		return resultMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/importFhData")
+	public Map<String, Object> importFhData(){
+		List<Map<String, Object>> gpList = findAGpDicList("'0','1'");
+		IFinderFh iFinderFh = new FinderXqFh();
+		List<Map<String, Object>> fhList = new ArrayList<Map<String,Object>>();
+		StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("------分红信息--------\n");
+		for(Map<String, Object> gp : gpList){
+			String name = gp.get("name").toString();
+			List<Map<String, Object>> fhData = iFinderFh.findFhInfo(gp);
+			fhList.addAll(fhData);
+			stringBuilder.append("------["+name+"]"+fhData.size()+"次--------\n");
+		}
+		String basePath = Tools.getResource("baseDir");
+		String info = basePath+Tools.getResource("info");
+		
+		for(){
+			
+		}
+		String logDir = basePath+Tools.getResource("logDir");
+		FileUtil.writeFile(stringBuilder.toString(), logDir+"_fhlog.txt");
+		return resultMap;
+	}
+	
 }

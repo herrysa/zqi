@@ -84,8 +84,12 @@ public class BaseController {
 		return gpMap;
 	}
 	
-	public List<Map<String, Object>> findAGpDicList(){
-		String dicSql = "select * from d_gpdic order by code asc";
+	public List<Map<String, Object>> findAGpDicList(String type){
+		String dicSql = "select * from d_gpdic";
+		if(type!=null){
+			dicSql += " where type in ("+type+")";
+		}
+		dicSql += " order by code asc";
 		List<Map<String, Object>> gpList = zqiDao.findAll(dicSql);
 		return gpList;
 	}

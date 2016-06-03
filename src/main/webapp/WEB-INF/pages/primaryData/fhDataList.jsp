@@ -54,18 +54,17 @@ $(function() {
 		}).trigger("reloadGrid");
     });
     
-    $("#importTodayData").click(function(){
-		var dateFrom = $("#dateFrom").val();
+    $("#importFhData").click(function(){
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=today&dateFrom='+dateFrom,
+			url: 'primaryData/importFhData',
 			type: 'post',
 			dataType: 'json',
 			async:false,
 			error: function(data){
-				//alertMsg.error("系统错误！");
+				alert("系统错误！");
 			},
 			success: function(data){
-				alert(data);
+				alert(data.message);
 			}
 		});
 	});
@@ -93,7 +92,7 @@ $(function() {
 			dataType: 'json',
 			async:false,
 			error: function(data){
-				//alertMsg.error("系统错误！");
+				//alertMsg.error("系统错误！");s
 			},
 			success: function(data){
 				alert(data);
@@ -170,10 +169,8 @@ $(function() {
 			<button id="reloadFhDataGrid" type="button" class="btn btn-primary" >
 					查询
 			</button>
-			<button type="button" class="btn btn-primary" 
-				data-toggle="dropdown">
+			<button id="importFhData" type="button" class="btn btn-primary" >
 				更新分红数据
-				<span class="caret"></span>
 			</button>
 		</div>
 	</form>
@@ -194,11 +191,11 @@ $(function() {
                     { name: 'code', label: '编码', width: 75 },
                     { name: 'name', label: '名称', width: 100 },
                     { name: 'fhYear', label: '年度', width: 100 },
-                    { name: 'sg', label: '送股比例(10送X)',align:'right', formatter:'number', width: 60 },
-                    { name: 'zz', label: '转增股比例(10转增X)',align:'right', formatter:'number',width: 60 },
-                    { name: 'fh', label: '税前红利(元)',align:'right', formatter:'number', width: 60 },
-                    { name: 'djDate', label: '股权登记日',align:'left', width: 60 },
-                    { name: 'cqDate', label: '除权除息日',align:'left', width: 60 }
+                    { name: 'sg', label: '送股比例(10送X)',align:'right', formatter:'number', width: 100 },
+                    { name: 'zz', label: '转增股比例(10转增X)',align:'right', formatter:'number',width: 100 },
+                    { name: 'fh', label: '税前红利(元)',align:'right', formatter:'number', width: 100 },
+                    { name: 'djDate', label: '股权登记日',align:'left', width: 100 },
+                    { name: 'cqDate', label: '除权除息日',align:'left', width: 100 }
                 ],
                 sortname: 'period',
             	sortorder: 'desc',
