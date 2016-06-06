@@ -2,10 +2,8 @@ package com.zqi.PrimaryData.Controller;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -21,7 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.json.JSONArray;
@@ -42,9 +39,9 @@ import com.zqi.PrimaryData.HisContext;
 import com.zqi.PrimaryData.HisDataAddThread;
 import com.zqi.dataFinder.IFinderFh;
 import com.zqi.dataFinder.IFinderRToday;
+import com.zqi.dataFinder.wy163.Finder163Fh;
 import com.zqi.dataFinder.wy163.Finder163RToday;
 import com.zqi.dataFinder.wy163.Finder163ZhishuRToday;
-import com.zqi.dataFinder.xq.FinderXqFh;
 import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
@@ -813,13 +810,15 @@ public class PrimaryDataController extends BaseController{
 		JQueryPager pagedRequests = null;
 		pagedRequests = (JQueryPager) pagerFactory.getPager(
 				PagerFactory.JQUERYTYPE, request);
+		String dayDataSql = "select * from i_gpFh where 1=1 ";
 		if(code!=null&&!"".equals(code)){
-			String dayDataSql = "select * from i_gpFh where code='"+code+"'";
-			if(period!=null&&!"".equals(period)){
-				dayDataSql += " and cqDate='"+period+"'";
-			}
-			pagedRequests = zqiDao.findWithFilter(pagedRequests, dayDataSql, filters);
+			dayDataSql += " code='"+code+"'";
 		}
+		
+		if(period!=null&&!"".equals(period)){
+			dayDataSql += " and cqDate='"+period+"'";
+		}
+		pagedRequests = zqiDao.findWithFilter(pagedRequests, dayDataSql, filters);
 		resultMap.put("page", pagedRequests.getPageNumber());
 		resultMap.put("records", pagedRequests.getTotalNumberOfRows());
 		resultMap.put("rows", pagedRequests.getList());
@@ -829,26 +828,49 @@ public class PrimaryDataController extends BaseController{
 	
 	@ResponseBody
 	@RequestMapping("/importFhData")
-	public Map<String, Object> importFhData(){
-		List<Map<String, Object>> gpList = findAGpDicList("'0','1'");
-		IFinderFh iFinderFh = new FinderXqFh();
-		List<Map<String, Object>> fhList = new ArrayList<Map<String,Object>>();
-		StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("------分红信息--------\n");
-		for(Map<String, Object> gp : gpList){
-			String name = gp.get("name").toString();
-			List<Map<String, Object>> fhData = iFinderFh.findFhInfo(gp);
-			fhList.addAll(fhData);
-			stringBuilder.append("------["+name+"]"+fhData.size()+"次--------\n");
-		}
+	public Map<String, Object> importFhData(HttpServletRequest request){
+		String year = request.getParameter("year");
+		Map<String, Object> infoMap = new HashMap<String, Object>();
+		infoMap.put("year", year);
+		IFinderFh iFinderFh = new Finder163Fh();
+		List<Map<String, Object>> fhDataList = iFinderFh.findFhInfo(infoMap);
 		String basePath = Tools.getResource("baseDir");
 		String info = basePath+Tools.getResource("info");
-		
-		for(){
-			
+		File file = new File(info+"i_gpFh.txt");
+		file.deleteOnExit();
+		String deleteSql = "delete from i_gpFh where fhYear like '"+year+"%'";
+		zqiDao.excute(deleteSql);
+		StringBuilder stringBuilder = new StringBuilder();
+		String dataCol = "code,name,fhYear,ggDate,djDate,cqDate,fh,sg,zz,sgss,zzss,sgdz,zzdz,zzdz";
+		String[] colArr = dataCol.split(",");
+		for(Map<String, Object> fhData : fhDataList){
+			String dataLine = "";
+			String txt = "";
+			for(String col : colArr){
+				Object value = fhData.get(col);
+				String v = "\\N";
+				if(value!=null){
+					v = value.toString();
+					if("--".equals(v)){
+						v = "\\N";
+					}
+				}
+				if("fh".equals(col)&&!"\\N".equals(v)){
+					txt += "派"+v;
+				}else if("sg".equals(col)&&!"\\N".equals(v)){
+					txt += "送"+v;
+				}else if("zz".equals(col)&&!"\\N".equals(v)){
+					txt += "转"+v;
+				}
+				dataLine += v+"\t";
+			}
+			dataLine += txt;
+			stringBuilder.append(dataLine+"\n");
 		}
-		String logDir = basePath+Tools.getResource("logDir");
-		FileUtil.writeFile(stringBuilder.toString(), logDir+"_fhlog.txt");
+		FileUtil.writeFile(stringBuilder.toString(), info+"i_gpFh.txt");
+		String loadDataSql = "load data infile '"+info+"i_gpFh.txt' into table i_gpFh("+dataCol+",txt"+");";
+		zqiDao.excute(loadDataSql);
+		System.out.println("------"+year+"分红信息导入成功--------");
 		return resultMap;
 	}
 	

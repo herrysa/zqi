@@ -55,8 +55,9 @@ $(function() {
     });
     
     $("#importFhData").click(function(){
+    	var fhYear = $("#fhYear").val();
 		$.ajax({
-			url: 'primaryData/importFhData',
+			url: 'primaryData/importFhData?year='+fhYear,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -164,8 +165,8 @@ $(function() {
 	<form id="primaryDataSearchForm" action="primaryData/fillPrimaryData" method="post" class="breadcrumb form-search">
 		<div>
 			<label>股票：</label><input id="fhGpCode" name="fhGpCode" type="hidden"style="width:100px"/><input id="fhGpName" name="fhGpName" type="text"style="width:100px"/>
-			<label>日期：</label><input id="fhDateFrom" name="fhDateFrom" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
-				value="${paramMap.beginDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>
+			<label>年度：</label><input id="fhYear" name="fhYear" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
+				value="${paramMap.beginDate}" onclick="WdatePicker({dateFmt:'yyyy',isShowClear:false});"/>
 			<button id="reloadFhDataGrid" type="button" class="btn btn-primary" >
 					查询
 			</button>
@@ -191,13 +192,14 @@ $(function() {
                     { name: 'code', label: '编码', width: 75 },
                     { name: 'name', label: '名称', width: 100 },
                     { name: 'fhYear', label: '年度', width: 100 },
-                    { name: 'sg', label: '送股比例(10送X)',align:'right', formatter:'number', width: 100 },
-                    { name: 'zz', label: '转增股比例(10转增X)',align:'right', formatter:'number',width: 100 },
+                    { name: 'sg', label: '送股比例(10送X)',align:'right', formatter:'number', width: 110 },
+                    { name: 'zz', label: '转增股比例(10转增X)',align:'right', formatter:'number',width: 110 },
                     { name: 'fh', label: '税前红利(元)',align:'right', formatter:'number', width: 100 },
                     { name: 'djDate', label: '股权登记日',align:'left', width: 100 },
-                    { name: 'cqDate', label: '除权除息日',align:'left', width: 100 }
+                    { name: 'cqDate', label: '除权除息日',align:'left', width: 100 },
+                    { name: 'txt', label: '分红送转',align:'left', width: 100 }
                 ],
-                sortname: 'period',
+                sortname: 'ggDate',
             	sortorder: 'desc',
 				page: 1,
 				rownumbers :true,

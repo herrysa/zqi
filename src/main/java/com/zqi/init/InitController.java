@@ -24,6 +24,7 @@ import com.zqi.unit.FileUtil;
 @Controller
 @RequestMapping("/init")
 public class InitController extends BaseController{
+	//String exceptTable = "[r_report],[r_reportfunc]";
 	String exceptTable = "";
 
 	@RequestMapping("/initpage")
@@ -119,7 +120,7 @@ public class InitController extends BaseController{
 		List<Map<String, Object>> tableList = zqiDao.findAll(findTableSql);
 		for(Map<String, Object> table : tableList){
 			String tableName = table.get("TABLE_NAME").toString();
-			if(!exceptTable.contains("["+databaseName+"]")){
+			if(!exceptTable.contains("["+tableName+"]")){
 				String dropTable = "DROP TABLE IF EXISTS `"+tableName+"`; ";
 				zqiDao.excute(dropTable);
 				System.out.println("--------------删除"+tableName+"表-----------------");
@@ -207,7 +208,7 @@ public class InitController extends BaseController{
 	}
 	
 	private void createGpFhInfoTable(){
-		String createql= "CREATE TABLE i_gpFh (CODE VARCHAR (20),fhYear VARCHAR (4),ggDate date,djDate date,cqDate date,sg DECIMAL (10, 3),zz DECIMAL (10, 3),fh DECIMAL (10, 3),sgss date,zzss date,sgdz date,zzdz date,txt varchar(50));";
+		String createql= "CREATE TABLE i_gpFh (code VARCHAR (20),name VARCHAR (30),fhYear VARCHAR (10),ggDate date,djDate date,cqDate date,sg DECIMAL (10, 3),zz DECIMAL (10, 3),fh DECIMAL (10, 3),sgss date,zzss date,sgdz date,zzdz date,txt varchar(50));";
 		zqiDao.excute(createql);
 		System.out.println("--------------股票分红信息表建立完毕-----------------");
 	}
