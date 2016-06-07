@@ -69,26 +69,11 @@ $(function() {
 			}
 		});
 	});
-    $("#importTenDayData").click(function(){
-		var dateFrom = $("#dateFrom").val();
-		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=10&dateFrom='+dateFrom,
-			type: 'post',
-			dataType: 'json',
-			async:false,
-			error: function(data){
-				//alertMsg.error("系统错误！");
-			},
-			success: function(data){
-				alert(data);
-			}
-		});
-	});
     $("#importHisDayData").click(function(){
 		var dateFrom = $("#dateFrom").val();
-		var dateTo = $("#dateTo").val();
+		//var dateTo = $("#dateTo").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=date&dateFrom='+dateFrom+'&dateTo='+dateTo,
+			url: 'primaryData/fillPrimaryData?fillType=date&dateFrom='+dateFrom+'&dateTo='+dateFrom,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -100,10 +85,10 @@ $(function() {
 			}
 		});
 	});
-	$("#importSeasonData").click(function(){
+	$("#importYearHisData").click(function(){
 		var dateFrom = $("#dateFrom").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=jidu&dateFrom='+dateFrom,
+			url: 'primaryData/fillPrimaryData?fillType=year&dateFrom='+dateFrom,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -115,39 +100,6 @@ $(function() {
 			}
 		});
 	});
-	$("#createTable").click(function(){
-		$.ajax({
-			url: 'init/createTable',
-			type: 'post',
-			dataType: 'json',
-			async:false,
-			error: function(data){
-				//alertMsg.error("系统错误！");
-			},
-			success: function(data){
-				alert(data);
-			}
-		});
-	});
-    $("#hisDayDataBtn").show();
-	$("#hisCwDataBtn").hide();
-	$("#hisMxDataBtn").hide();
-    $("#showDataType").change(function(){
-    	var dataType = $(this).val();
-    	if(dataType=='day'){
-    		$("#hisDayDataBtn").show();
-    		$("#hisCwDataBtn").hide();
-    		$("#hisMxDataBtn").hide();
-    	}else if(dataType=='cw'){
-    		$("#hisDayDataBtn").hide();
-    		$("#hisCwDataBtn").show();
-    		$("#hisMxDataBtn").hide();
-    	}else if(dataType=='mx'){
-    		$("#hisDayDataBtn").hide();
-    		$("#hisCwDataBtn").hide();
-    		$("#hisMxDataBtn").show();
-    	}
-    });
 	
     var searchFormHeight = $("#primaryDataSearchForm").height();
     var contentHeight = $("#mainContent").height();
@@ -164,17 +116,11 @@ $(function() {
 		<div class="pageContent">
 	<form id="primaryDataSearchForm" action="primaryData/fillPrimaryData" method="post" class="breadcrumb form-search">
 		<div>
-			<label>数据类型：</label>
-			<select id="showDataType" style="width:100px">
-			<option value="day">日数据</option>
-			<option value="cw">财务数据</option>
-			<option value="mx">成交明细数据</option>
-			</select>
 			<label>股票：</label><input id="gpCode" name="gpCode" type="hidden"style="width:100px"/><input id="gpName" name="gpName" type="text"style="width:100px"/>
 			<label>日期：</label><input id="dateFrom" name="dateFrom" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
 				value="${paramMap.beginDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>
-			<label>结束日期：</label><input id="dateTo" name="dateTo" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
-				value="${paramMap.endDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/>
+			<%-- <label>结束日期：</label><input id="dateTo" name="dateTo" type="text" readonly="readonly" maxlength="20" class="input-small Wdate"
+				value="${paramMap.endDate}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',isShowClear:false});"/> --%>
 			<button id="reloadDataGrid" type="button" class="btn btn-primary" >
 					查询
 			</button>
@@ -187,25 +133,9 @@ $(function() {
 				<ul class="dropdown-menu">
 					<li><a id="importTodayData">导入当日数据</a></li>
 					<li><a id="importHisDayData">导入日期数据</a></li>
-					<!-- <li><a id="importTenDayData">导入日期10天前数据</a></li>
-					<li><a id="importSeasonData" href="javaScript:">导入日期季度数据</a></li>
-					<li><a id="createTable" href="javaScript:">建表</a></li> -->
+					<li><a id="importYearHisData">导入年度数据</a></li>
 				</ul>
 			</div>
-			<div id="hisCwDataBtn" class="btn-group">
-				<button type="button" class="btn btn-primary dropdown-toggle" 
-					data-toggle="dropdown">
-					导入财务数据
-					<span class="caret"></span>
-				</button>
-				<ul class="dropdown-menu">
-					<li><a id="importCwData" href="javaScript:">导入财务数据</a></li>
-					<li><a id="importHisFhData" href="javaScript:">导入历史分红数据</a></li>
-				</ul>
-			</div>
-			<button id="hisMxDataBtn" type="button" class="btn btn-primary" >
-					导入日期明细数据
-			</button>
 		</div>
 	</form>
 	<div id="jqGrid_div" style="margin:2px;">

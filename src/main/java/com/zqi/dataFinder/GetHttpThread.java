@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.zqi.PrimaryData.HisContext;
 import com.zqi.frame.util.Tools;
+import com.zqi.primaryData.HisContext;
 
 public class GetHttpThread implements Runnable{
 	

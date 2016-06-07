@@ -9,11 +9,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.zqi.PrimaryData.HisContext;
 import com.zqi.dataFinder.GetHttpThread;
 import com.zqi.dataFinder.IFinderRHis;
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
+import com.zqi.primaryData.HisContext;
 
 public class Finder163RHis implements IFinderRHis{
 	public static String[] rHisColumn163 = {"0","1","2","7","6","4","5","3","11","12","8","9","wu","10","wu","wu","wu","13","14","wu","wu","wu","wu"};

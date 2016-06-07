@@ -1,4 +1,4 @@
-package com.zqi.PrimaryData;
+package com.zqi.primaryData;
 
 import java.util.List;
 import java.util.Map;
@@ -9,23 +9,21 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.zqi.dataFinder.wy163.Finder163RHis;
 import com.zqi.frame.util.Tools;
+import com.zqi.primaryData.fileDataBase.IFileDataBase;
+import com.zqi.primaryData.fileDataBase.RHisFileDataBase;
 import com.zqi.unit.FileUtil;
 import com.zqi.unit.SpringContextHelper;
 
-public class HisDataAddThread implements Runnable{
+public class HisDataFindThread implements Runnable{
 
-	DataSource dataSource = (DataSource)SpringContextHelper.getBean("dataSource");
-	SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(dataSource);
-	List<Map<String, Object>> gpList;
-	String daytable;
+	Map<String, Object> gp;
 	String dateFrom;
 	String dateTo;
 	HisContext hisContext;
 	String[] colArr;
 	
-	public HisDataAddThread(List<Map<String, Object>> gpList,String daytable,HisContext hisContext){
-		this.gpList = gpList;
-		this.daytable = daytable;
+	public HisDataFindThread(Map<String, Object> gp,HisContext hisContext){
+		this.gp = gp;
 		this.dateFrom = hisContext.getDateFrom();
 		this.dateTo = hisContext.getDateTo();
 		this.hisContext = hisContext;
@@ -35,22 +33,18 @@ public class HisDataAddThread implements Runnable{
 	@Override
 	public void run() {
 		Finder163RHis finder163rHis = new Finder163RHis(hisContext);
-		int count = 0;
-		simpleJdbcInsert.withTableName(daytable);
 		StringBuffer insertbBuffer = new StringBuffer();
-		for(Map<String, Object> gp : gpList){
-			List<Map<String,Object>> dataListTemp = finder163rHis.findRHis(gp, dateFrom, dateTo);
-			count += dataListTemp.size();
-			for(Map<String, Object> data : dataListTemp){
-				//simpleJdbcInsert.execute(data);
-				String dataLine = getInsert(data);
-				insertbBuffer.append(dataLine);
-			}
+		List<Map<String,Object>> dataListTemp = finder163rHis.findRHis(gp, dateFrom, dateTo);
+		for(Map<String, Object> data : dataListTemp){
+			String dataLine = getInsert(data);
+			insertbBuffer.append(dataLine);
 		}
-		String basePath = Tools.getResource("baseDir");
+		IFileDataBase fdb = new RHisFileDataBase(hisContext.getYear());
+		fdb.writeStr(gp.get("code").toString(), insertbBuffer.toString());
+		/*String basePath = Tools.getResource("baseDir");
 		String rHisDataDir = Tools.getResource("rhisDir");
 		FileUtil.writeFile(insertbBuffer.toString(), basePath+rHisDataDir+daytable+".txt");
-		hisContext.getRecordMap().put(daytable, count);
+		hisContext.getRecordMap().put(daytable, count);*/
 	}
 
 	private String getInsert(Map<String,Object> dataMap){

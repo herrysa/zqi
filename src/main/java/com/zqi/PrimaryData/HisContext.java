@@ -1,4 +1,4 @@
-package com.zqi.PrimaryData;
+package com.zqi.primaryData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.Map;
 
 public class HisContext {
 
+	String year;
 	String dateFrom;
 	String dateTo;
-	Map<String, Integer> recordMap;
 	Map<String, Map<String, String>> log;
 	List<String> daytableList;
 	String[] colArr;
@@ -19,15 +19,6 @@ public class HisContext {
 	public void setColArr(String[] colArr) {
 		this.colArr = colArr;
 	}
-	public Map<String, Integer> getRecordMap() {
-		if(recordMap==null){
-			recordMap = new HashMap<String, Integer>();
-		}
-		return recordMap;
-	}
-	public void setRecordMap(Map<String, Integer> recordMap) {
-		this.recordMap = recordMap;
-	}
 	public Map<String, Map<String, String>> getLog() {
 		if(log==null){
 			log = new HashMap<String, Map<String,String>>();
@@ -36,6 +27,12 @@ public class HisContext {
 	}
 	public void setLog(Map<String, Map<String, String>> log) {
 		this.log = log;
+	}
+	public String getYear() {
+		return year;
+	}
+	public void setYear(String year) {
+		this.year = year;
 	}
 	public String getDateFrom() {
 		return dateFrom;

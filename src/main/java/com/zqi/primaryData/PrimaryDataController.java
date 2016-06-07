@@ -1,4 +1,4 @@
-package com.zqi.PrimaryData.Controller;
+package com.zqi.primaryData;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,9 +34,6 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.zqi.PrimaryData.DataAddThread;
-import com.zqi.PrimaryData.HisContext;
-import com.zqi.PrimaryData.HisDataAddThread;
 import com.zqi.dataFinder.IFinderFh;
 import com.zqi.dataFinder.IFinderRToday;
 import com.zqi.dataFinder.wy163.Finder163Fh;
@@ -49,6 +46,8 @@ import com.zqi.frame.controller.pagers.PagerFactory;
 import com.zqi.frame.controller.pagers.SortOrderEnum;
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
+import com.zqi.primaryData.fileDataBase.IFileDataBase;
+import com.zqi.primaryData.fileDataBase.RHisFileDataBase;
 import com.zqi.unit.DateConverter;
 import com.zqi.unit.DateUtil;
 import com.zqi.unit.FileUtil;
@@ -214,54 +213,25 @@ public class PrimaryDataController extends BaseController{
 	@ResponseBody
 	@RequestMapping("/fillPrimaryData")
 	public String findHisDayData(String dateFrom,String dateTo,String fillType){
-		Calendar calendar = Calendar.getInstance();
-		if(dateTo!=null&&!"".equals(dateTo)){
-			DateConverter dateConverter = new DateConverter();
-			Date dateObj = (Date)dateConverter.convert(Date.class, dateTo);
-			calendar.setTime(dateObj);
-		}
-		
-		int year = calendar.get(Calendar.YEAR);
-		int season = 1;
-		int month = calendar.get(Calendar.MONTH);  
-        switch (month) {  
-        case Calendar.JANUARY:  
-        case Calendar.FEBRUARY:  
-        case Calendar.MARCH:  
-            season = 1;  
-            break;  
-        case Calendar.APRIL:  
-        case Calendar.MAY:  
-        case Calendar.JUNE:  
-            season = 2;  
-            break;  
-        case Calendar.JULY:  
-        case Calendar.AUGUST:  
-        case Calendar.SEPTEMBER:  
-            season = 3;  
-            break;  
-        case Calendar.OCTOBER:  
-        case Calendar.NOVEMBER:  
-        case Calendar.DECEMBER:  
-            season = 4;  
-            break;  
-        default:  
-            break;  
-        }  
+
         if("today".equals(fillType)){
         	findTodayData();
-		}else if("jidu".equals(fillType)){
-			findHisDayDataByJidu(""+year,""+season,-1);
-		}else if("date".equals(fillType)){
-			findRHisData(dateFrom,dateTo);
-		}else{
-			int days = -1;
-			try {
-				days = Integer.parseInt(fillType);
-			} catch (Exception e) {
-				days = 3;
+		}else if("year".equals(fillType)){
+			Calendar calendar = Calendar.getInstance();
+			if(dateFrom!=null&&!"".equals(dateFrom)){
+				DateConverter dateConverter = new DateConverter();
+				Date dateObj = (Date)dateConverter.convert(Date.class, dateFrom);
+				calendar.setTime(dateObj);
 			}
-			findHisDayDataByJidu(""+year,""+season,days);
+			int year = calendar.get(Calendar.YEAR);
+			calendar.set(Calendar.DAY_OF_YEAR, 1);
+			dateFrom = DateUtil.convertDateToString(calendar.getTime());
+			calendar.set(Calendar.YEAR, year+1);
+			calendar.set(Calendar.DAY_OF_YEAR, -1);
+			dateTo = DateUtil.convertDateToString(calendar.getTime());
+			findRHisData(dateFrom,dateTo,""+year);
+		}else if("date".equals(fillType)){
+			findRHisData(dateFrom,dateTo,null);
 		}
 		return "导入成功！";
 	}
@@ -336,10 +306,10 @@ public class PrimaryDataController extends BaseController{
 			List<Thread> threads = new ArrayList<Thread>();
 			for(String daytable : daytableSet){
 				List<Map<String, Object>> dayTableList = dayTableData.get(daytable);
-				DataAddThread dataAddThread = new DataAddThread(dayTableList, daytable);
-				Thread thread = new Thread(dataAddThread);
-				thread.start();
-				threads.add(thread);
+				//DataAddThread dataAddThread = new DataAddThread(dayTableList, daytable);
+				//Thread thread = new Thread(dataAddThread);
+				//thread.start();
+				//threads.add(thread);
 			}
 			for(Thread thread : threads){
 				try {
@@ -373,15 +343,14 @@ public class PrimaryDataController extends BaseController{
 		
 	}
 	
-	public void findRHisData(String dateFrom, String dateTo){
-		String code = "";
+	public void findRHisData(String dateFrom, String dateTo ,String year){
+		//String code = "";
 		TestTimer importRHisDataTime = new TestTimer("导入今日数据");
 		importRHisDataTime.begin();
 		try {
-			//List<Map<String, Object>> gpList = findAGpDicList();
+			List<Map<String, Object>> gpList = findAGpDicList(null);
 			Map<String, List<Map<String, Object>>> gpListMap = findAGpDicListMap();
 			int count = 0;
-			Map<String, List<Map<String, Object>>> dayTableData = new HashMap<String, List<Map<String,Object>>>();
 			String delSql = "delete from daytable_all where period between '"+dateFrom+"' and '"+dateTo+"'";
 			zqiDao.excute(delSql);
 			
@@ -391,58 +360,53 @@ public class PrimaryDataController extends BaseController{
 			hisContext.setDateFrom(dateFrom);
 			hisContext.setDateTo(dateTo);
 			hisContext.setColArr(dataCol.split(","));
-			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10); 
-			for(String daytable : daytableSet){
-				List<Map<String, Object>> gpList = gpListMap.get(daytable);
-				HisDataAddThread hisDataAddThread = new HisDataAddThread(gpList, daytable, hisContext);
-				fixedThreadPool.execute(hisDataAddThread);
-				//Thread thread = new Thread(hisDataAddThread);
-				//thread.start();
-				//threads.add(thread);
-				//break;
+			if (year == null) {
+				year = "temp";
 			}
+			hisContext.setYear(year);
+			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10); 
+			for(Map<String, Object> gp : gpList){
+				HisDataFindThread hisDataAddThread = new HisDataFindThread(gp, hisContext);
+				fixedThreadPool.execute(hisDataAddThread);
+			}
+			/*for(String daytable : daytableSet){
+				List<Map<String, Object>> gpList = gpListMap.get(daytable);
+				HisDataFindThread hisDataAddThread = new HisDataFindThread(gpList, daytable, hisContext);
+				fixedThreadPool.execute(hisDataAddThread);
+			}*/
 			fixedThreadPool.shutdown();
 			while(!fixedThreadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)){
 			}
 			String basePath = Tools.getResource("baseDir");
+			/*List<String> daytableList = new ArrayList<String>();
+			for(Map<String, Object> gp : gpList){
+				String code = gp.get("code").toString();
+				String daytable = gp.get("daytable").toString();
+				IFileDataBase rhisFileDb = new RHisFileDataBase(year);
+				String content = rhisFileDb.readStr(code);
+				rhisFileDb.writeStr(daytable, content);
+				daytableList.add(daytable);
+			}
+			
+			String basePath = Tools.getResource("baseDir");
 			String rHisDataDir = basePath+Tools.getResource("rhisDir");
-			File parentFile = new File(rHisDataDir);
-			String[] files = parentFile.list();
 			List<String> loadList = new ArrayList<String>();
-	        for(String fileName : files){
-	        	String name = fileName.split("\\.")[0];
-	        	String loadDataSql = "load data infile '"+rHisDataDir+name+".txt' into table "+name+"("+dataCol+");";
+	        for(String daytable : daytableList){
+	        	String loadDataSql = "load data infile '"+rHisDataDir+daytable+".txt' into table "+daytable+"("+dataCol+");";
 	        	loadList.add(loadDataSql);
 	        }
 	        String[] loadSqls = loadList.toArray(new String[loadList.size()]);
-	        zqiDao.bathUpdate(loadSqls);
-			/*for(Thread thread : threads){
-				try {
-					thread.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}*/
-			/*for(Map<String, Object> gp : gpList){
-				code = gp.get("code").toString();
-				String daytable = gp.get("daytable").toString();
-				String type = gp.get("type").toString();
-				List<Map<String,Object>> dataList = finder163rHis.findRHis(gp, dateFrom, dateTo);
-				TestTimer tt = new TestTimer(code+dataList.size()+"入库");
-				tt.begin();
-				zqiDao.addList(dataList, daytable);
-				tt.done();
-				count += dataList.size();
-			}*/
-	        Map<String, Integer> recordMap = hisContext.getRecordMap();
+	        zqiDao.bathUpdate(loadSqls);*/
+			
+			StringBuilder stringBuilder = new StringBuilder();
+	       /* Map<String, Integer> recordMap = hisContext.getRecordMap();
 	        Set<String> recordSet = recordMap.keySet();
-	        StringBuilder stringBuilder = new StringBuilder();
 	        stringBuilder.append("------daytable记录数--------\n");
 			for(String record : recordSet){
 				count += recordMap.get(record);
 				stringBuilder.append("[count]:"+record+":"+count+"\n");
 			}
-			stringBuilder.append("\n");
+			stringBuilder.append("\n");*/
 			Map<String,Map<String, String>> logMap = hisContext.getLog();
 			
 			Set<String> codeSet = logMap.keySet();
@@ -476,7 +440,7 @@ public class PrimaryDataController extends BaseController{
 			errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
 			errorLog.put("type", "findRHisData");
 			errorLog.put("mainId", "findRHisDataError");
-			errorLog.put("assistId", code);
+			//errorLog.put("assistId", code);
 			errorLog.put("info", dateFrom+" to "+dateTo+"导入历史日数据错误！");
 			errorLog.put("logDate", DateUtil.getDateTimeNow());
 			zqiDao.add(errorLog,"_log");
@@ -484,7 +448,7 @@ public class PrimaryDataController extends BaseController{
 		}
 	}
 	
-	public void findTodayDataSina(){
+/*	public void findTodayDataSina(){
 		String[] hs_aKey = {"symbol","code","name","trade","pricechange","changepercent","buy","sell","settlement","open","high","low","volume","amount","ticktime","per","per_d","nta","pb","mktcap","nmc","turnoverratio","favor","guba"};
 		int findNum=0;
 		for(int page=1;page<=50;page++){
@@ -540,79 +504,7 @@ public class PrimaryDataController extends BaseController{
 			}
 			System.out.println(findNum);
 		}
-	}
-	public void findHisDayDataByJidu(String year,String jidu,int days){
-		String lastFillSql = "select assistId from _log where mainId='findJiduDataSuccess'";
-        Map<String, Object> lastFill = zqiDao.findFirst(lastFillSql);
-        String lastSymbol = "";
-        String dicSql= "select * from d_gpDic order by symbol";
-        if(lastFill!=null&&!lastFill.isEmpty()){
-        	lastSymbol = lastFill.get("assistId").toString();
-        	dicSql= "select * from d_gpDic where symbol>'"+lastSymbol+"' order by symbol";
-        }
-        List<Map<String, Object>> dicList = zqiDao.findAll(dicSql);
-        for(Map<String, Object> dicMap : dicList){
-        	String symbol = dicMap.get("symbol").toString();
-        	System.out.println("----------------"+symbol+"-----------------");
-        	try {
-            	String name = dicMap.get("name").toString();
-            	String code = dicMap.get("code").toString();
-            	String daytable = dicMap.get("daytable").toString();
-            	List<String[]> dataList = findDayData(symbol,code,""+year,""+jidu);
-            	if(dataList==null||dataList.size()==0){
-            		continue;
-            	}
-            	List<String> dataSqlList = new ArrayList<String>();
-            	List<String> delDataSqlList = new ArrayList<String>();
-            	if(days==-1){
-            		days = dataList.size()-2;
-            	}
-            	for(int row=2;row<days+2;row++){
-            		String[] rowData = dataList.get(row);
-            		String[] rowData2 = null;
-            		String settlement = "-1";
-            		if(row<dataList.size()-1){
-            			rowData2 = dataList.get(row+1);
-            			settlement = rowData2[3];
-            		}
-            		String period = rowData[0];
-                    String open = rowData[1];
-                    String high = rowData[2];
-                    String low = rowData[4];
-                    String close = rowData[3];
-                    String volume = rowData[5];
-                    String amount = rowData[6];
-            		String dataSql= "insert into "+daytable+"(period,code,name,settlement,open,high,low,close,volume,amount) values ('"+period+"','"+symbol+"','"+name+"','"+settlement+"','"+open+"','"+high+"','"+low+"','"+close+"','"+volume+"','"+amount+"');";
-            		String delDataSql = "delete from "+daytable+" where period='"+period+"' and code='"+symbol+"'";
-            		dataSqlList.add(dataSql);
-            		delDataSqlList.add(delDataSql);
-            	}
-            	String[] sqls = dataSqlList.toArray(new String[dataSqlList.size()]);
-            	String[] delSqls = delDataSqlList.toArray(new String[delDataSqlList.size()]);
-            	zqiDao.bathUpdate(delSqls);
-            	zqiDao.bathUpdate(sqls);
-            	zqiDao.excute("delete from _log where mainId='findJiduDataSuccess'");
-            	Map<String, Object> successLog = new HashMap<String, Object>();
-            	successLog.put("id", UUIDGenerator.getInstance().getNextValue());
-            	successLog.put("type", "findHisDayData");
-            	successLog.put("mainId", "findJiduDataSuccess");
-            	successLog.put("assistId", symbol);
-		    	successLog.put("info", "导入成功！");
-		    	successLog.put("logDate", DateUtil.getDateTimeNow());
-		    	zqiDao.add(successLog,"_log");
-			} catch (Exception e) {
-				Map<String, Object> errorLog = new HashMap<String, Object>();
-		    	errorLog.put("id", UUIDGenerator.getInstance().getNextValue());
-		    	errorLog.put("type", "findHisDayData");
-		    	errorLog.put("mainId", "findJiduDataError");
-		    	errorLog.put("assistId", symbol);
-		    	errorLog.put("info", year+jidu+"导入日数据错误！");
-		    	errorLog.put("logDate", DateUtil.getDateTimeNow());
-		    	zqiDao.add(errorLog,"_log");
-				e.printStackTrace();
-			}
-        }
-	}
+	}*/
 	
 	public List<String[]> findDayData(String symbol,String code,String year,String jidu){
 		String str = "";
