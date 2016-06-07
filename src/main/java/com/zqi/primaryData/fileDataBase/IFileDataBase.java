@@ -17,4 +17,6 @@ public interface IFileDataBase {
 	public void writeList(String fileName,String content);
 	
 	public String getFilePath(String fileName);
+	
+	public void deleteDataBase();
 }

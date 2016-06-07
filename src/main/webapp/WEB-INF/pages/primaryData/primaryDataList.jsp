@@ -85,7 +85,7 @@ $(function() {
 			}
 		});
 	});
-	$("#importYearHisData").click(function(){
+	$("#downLoadYearHisData").click(function(){
 		var dateFrom = $("#dateFrom").val();
 		$.ajax({
 			url: 'primaryData/fillPrimaryData?fillType=year&dateFrom='+dateFrom,
@@ -132,7 +132,7 @@ $(function() {
 				</button>
 				<ul class="dropdown-menu">
 					<li><a id="importTodayData">导入当日数据</a></li>
-					<li><a id="importHisDayData">导入日期数据</a></li>
+					<li><a id="downLoadYearHisData">下载年度数据</a></li>
 					<li><a id="importYearHisData">导入年度数据</a></li>
 				</ul>
 			</div>

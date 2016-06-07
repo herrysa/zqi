@@ -39,6 +39,9 @@ public class RHisFileDataBase implements IFileDataBase{
 	@Override
 	public String getFilePath(String fileName){
 		String filePath = basePath+rHisDataDir+year+"/"+fileName+".txt";
+		if(fileName==null){
+			filePath = basePath+rHisDataDir+year;
+		}
 		return filePath;
 	}
 	@Override
@@ -50,6 +53,11 @@ public class RHisFileDataBase implements IFileDataBase{
 	public void writeList(String fileName, String content) {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public void deleteDataBase() {
+		String databasePath = getFilePath(null);
+		FileUtil.delFolder(databasePath);
 	}
 
 }

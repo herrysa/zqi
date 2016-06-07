@@ -364,7 +364,9 @@ public class PrimaryDataController extends BaseController{
 				year = "temp";
 			}
 			hisContext.setYear(year);
-			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10); 
+			IFileDataBase yearDb = new RHisFileDataBase(year);
+			yearDb.deleteDataBase();
+			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5); 
 			for(Map<String, Object> gp : gpList){
 				HisDataFindThread hisDataAddThread = new HisDataFindThread(gp, hisContext);
 				fixedThreadPool.execute(hisDataAddThread);
