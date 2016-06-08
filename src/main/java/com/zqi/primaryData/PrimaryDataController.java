@@ -236,6 +236,105 @@ public class PrimaryDataController extends BaseController{
 		return "导入成功！";
 	}
 	
+	@ResponseBody
+	@RequestMapping("/downLoadRHisData")
+	public Map<String, Object> downLoadRHisData(HttpServletRequest request){
+		String dateFrom = request.getParameter("dateFrom");
+		String dateTo;
+		String year = "";
+		Calendar calendar = Calendar.getInstance();
+		if(dateFrom!=null&&!"".equals(dateFrom)){
+			DateConverter dateConverter = new DateConverter();
+			Date dateObj = (Date)dateConverter.convert(Date.class, dateFrom);
+			calendar.setTime(dateObj);
+		}
+		int y = calendar.get(Calendar.YEAR);
+		year = ""+y;
+		calendar.set(Calendar.DAY_OF_YEAR, 1);
+		dateFrom = DateUtil.convertDateToString(calendar.getTime());
+		calendar.set(Calendar.YEAR, y+1);
+		calendar.set(Calendar.DAY_OF_YEAR, -1);
+		dateTo = DateUtil.convertDateToString(calendar.getTime());
+		try {
+			List<Map<String, Object>> gpList = findAGpDicList(null);
+			String delSql = "delete from daytable_all where period between '"+dateFrom+"' and '"+dateTo+"'";
+			zqiDao.excute(delSql);
+			
+			String dataCol = "period,code,name,type,settlement,open,high,low,close,volume,amount,changeprice,changepercent";
+			HisContext hisContext = new HisContext();
+			hisContext.setDateFrom(dateFrom);
+			hisContext.setDateTo(dateTo);
+			hisContext.setColArr(dataCol.split(","));
+			hisContext.setYear(year);
+			RHisFileDataBase yearDb = new RHisFileDataBase(year);
+			yearDb.deleteDataBase();
+			ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5); 
+			for(Map<String, Object> gp : gpList){
+				HisDataFindThread hisDataAddThread = new HisDataFindThread(gp, hisContext);
+				fixedThreadPool.execute(hisDataAddThread);
+			}
+			fixedThreadPool.shutdown();
+			while(!fixedThreadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)){
+			}
+			setMessage("下载"+year+"年度日数据成功！");
+		} catch (Exception e) {
+			setMessage("下载"+year+"年度日数据失败！");
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/importRHisData")
+	public Map<String, Object> importRHisData(HttpServletRequest request){
+		String dateFrom = request.getParameter("dateFrom");
+		String dateTo;
+		String year = "";
+		Calendar calendar = Calendar.getInstance();
+		if(dateFrom!=null&&!"".equals(dateFrom)){
+			DateConverter dateConverter = new DateConverter();
+			Date dateObj = (Date)dateConverter.convert(Date.class, dateFrom);
+			calendar.setTime(dateObj);
+		}
+		int y = calendar.get(Calendar.YEAR);
+		year = ""+y;
+		calendar.set(Calendar.DAY_OF_YEAR, 1);
+		dateFrom = DateUtil.convertDateToString(calendar.getTime());
+		calendar.set(Calendar.YEAR, y+1);
+		calendar.set(Calendar.DAY_OF_YEAR, -1);
+		dateTo = DateUtil.convertDateToString(calendar.getTime());
+		try {
+			List<Map<String, Object>> gpList = findAGpDicList(null);
+			String delSql = "delete from daytable_all where period between '"+dateFrom+"' and '"+dateTo+"'";
+			zqiDao.excute(delSql);
+			
+			RHisFileDataBase yearDb = new RHisFileDataBase(year);
+			RHisFileDataBase tempDb = new RHisFileDataBase("temp");
+			tempDb.deleteDataBase();
+			List<String> daytableList = new ArrayList<String>();
+			for(Map<String, Object> gp : gpList){
+				String code = gp.get("code").toString();
+				String daytable = gp.get("daytable").toString();
+				if(!daytableList.contains(daytable)){
+					daytableList.add(daytable);
+				}
+				String content  = yearDb.readStr(code);
+				tempDb.writeStr(daytable, content);
+			}
+			List<String> loadList = new ArrayList<String>();
+	        for(String daytable : daytableList){
+	        	String loadDataSql = tempDb.getLoadFileSql(daytable);
+	        	loadList.add(loadDataSql);
+	        }
+	        String[] loadSqls = loadList.toArray(new String[loadList.size()]);
+	        zqiDao.bathUpdate(loadSqls);
+	        setMessage("导入"+year+"年度日数据成功！");
+		} catch (Exception e) {
+			setMessage("导入"+year+"年度日数据失败！");
+			e.printStackTrace();
+		}
+		return resultMap;
+	}
 	
 	public void findTodayData(){
 		String code = "",symbol = "",period = DateUtil.getDateNow();

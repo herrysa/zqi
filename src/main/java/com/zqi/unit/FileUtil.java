@@ -1,11 +1,11 @@
  package com.zqi.unit;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 public class FileUtil {
@@ -19,7 +19,8 @@ public class FileUtil {
 
     public static String readFile( String filePath ) {
         File ds = null;
-        FileReader fr = null;
+        FileInputStream fis = null;
+        InputStreamReader isr=null;
         BufferedReader br = null;
         String fileContent = "";
         String temp = "";
@@ -27,8 +28,9 @@ public class FileUtil {
             ds = new File( filePath );
             if ( ds.exists() ) {
                 fileContent = "";
-                fr = new FileReader( ds );
-                br = new BufferedReader( fr );
+                fis = new FileInputStream( ds );
+                isr = new InputStreamReader(fis,"UTF-8");
+                br = new BufferedReader( isr );
                 temp = br.readLine();
                 while ( temp != null ) {
                     fileContent += temp;
@@ -44,8 +46,8 @@ public class FileUtil {
                 if ( br != null ) {
                     br.close();
                 }
-                if ( fr != null ) {
-                    fr.close();
+                if ( fis != null ) {
+                	fis.close();
                 }
             }
             catch ( Exception e ) {
@@ -55,7 +57,44 @@ public class FileUtil {
         }
         return fileContent;
     }
-    
+    public static String readFile( File ds ) {
+    	FileInputStream fis = null;
+    	InputStreamReader isr=null;
+        BufferedReader br = null;
+        String fileContent = "";
+        String temp = "";
+        try {
+            if ( ds.exists()&& ds.isFile() ) {
+                fileContent = "";
+                fis = new FileInputStream( ds );
+                isr = new InputStreamReader(fis,"UTF-8");
+                br = new BufferedReader( isr );
+                temp = br.readLine();
+                while ( temp != null ) {
+                    fileContent += temp;
+                    temp = br.readLine();
+                }
+            }
+        }
+        catch ( Exception e ) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if ( br != null ) {
+                    br.close();
+                }
+                if ( fis != null ) {
+                	fis.close();
+                }
+            }
+            catch ( Exception e ) {
+                e.printStackTrace();
+            }
+
+        }
+        return fileContent;
+    }
     /**
      * 文件读写方法
      * 

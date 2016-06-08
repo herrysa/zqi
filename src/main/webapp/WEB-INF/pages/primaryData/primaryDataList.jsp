@@ -69,11 +69,11 @@ $(function() {
 			}
 		});
 	});
-    $("#importHisDayData").click(function(){
+    $("#importYearHisData").click(function(){
 		var dateFrom = $("#dateFrom").val();
 		//var dateTo = $("#dateTo").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=date&dateFrom='+dateFrom+'&dateTo='+dateFrom,
+			url: 'primaryData/importRHisData?dateFrom='+dateFrom,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -81,14 +81,14 @@ $(function() {
 				//alertMsg.error("系统错误！");
 			},
 			success: function(data){
-				alert(data);
+				alert(data.message);
 			}
 		});
 	});
 	$("#downLoadYearHisData").click(function(){
 		var dateFrom = $("#dateFrom").val();
 		$.ajax({
-			url: 'primaryData/fillPrimaryData?fillType=year&dateFrom='+dateFrom,
+			url: 'primaryData/downLoadRHisData?dateFrom='+dateFrom,
 			type: 'post',
 			dataType: 'json',
 			async:false,
@@ -96,7 +96,7 @@ $(function() {
 				//alertMsg.error("系统错误！");
 			},
 			success: function(data){
-				alert(data);
+				alert(data.message);
 			}
 		});
 	});

@@ -3,16 +3,8 @@ package com.zqi.primaryData;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-
 import com.zqi.dataFinder.wy163.Finder163RHis;
-import com.zqi.frame.util.Tools;
-import com.zqi.primaryData.fileDataBase.IFileDataBase;
 import com.zqi.primaryData.fileDataBase.RHisFileDataBase;
-import com.zqi.unit.FileUtil;
-import com.zqi.unit.SpringContextHelper;
 
 public class HisDataFindThread implements Runnable{
 
@@ -39,7 +31,7 @@ public class HisDataFindThread implements Runnable{
 			String dataLine = getInsert(data);
 			insertbBuffer.append(dataLine);
 		}
-		IFileDataBase fdb = new RHisFileDataBase(hisContext.getYear());
+		RHisFileDataBase fdb = new RHisFileDataBase(hisContext.getYear());
 		fdb.writeStr(gp.get("code").toString(), insertbBuffer.toString());
 		/*String basePath = Tools.getResource("baseDir");
 		String rHisDataDir = Tools.getResource("rhisDir");
