@@ -104,7 +104,7 @@ public class FileUtil {
     public synchronized static void writeFile( String content, String filePath ) {
         mkParent( filePath );
         try {
-        	OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(filePath),"UTF-8");
+        	OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(filePath,true),"UTF-8");
             out.write( content );
             out.flush();
             out.close();

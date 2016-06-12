@@ -13,7 +13,7 @@ $(function() {
 		$("#dayDataContent").load("primaryData/primaryDataList");
 	});
 	$("#tradeData").click(function(){
-		$("#dayDataContent").load("primaryData/primaryDataList");
+		$("#tradeDataContent").load("tradeData/tradeDataList");
 	});
 	$("#bkData").click(function(){
 		$("#bkDataContent").load("bkData/bkDataList");
