@@ -143,6 +143,7 @@ public class ZqiDao implements IZqiDao{
                     operator = " like ";
                 }
                 else if ( pf.getMatchType().equals( MatchType.EQ ) ) {
+                	v = "'"+(String) pf.getMatchValue()+"'";
                 	operator = " = ";
                 }
                 else if ( pf.getMatchType().equals( MatchType.GE ) ) {

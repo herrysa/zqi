@@ -56,7 +56,8 @@ public class FinderSinaBk implements IFinderBk{
 				for(Map<String, String> gnbkgpData : gnbkgpDataList){
 					String symbol = gnbkgpData.get("code");
 					String gpName = gnbkgpData.get("name");
-					bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
+					//bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
+					bkData += symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
 				}
 			}
 			System.out.println("------"+bkCode+"--------");
@@ -82,7 +83,8 @@ public class FinderSinaBk implements IFinderBk{
 			for(Map<String, String> gnbkgpData : gnbkgpDataList){
 				String symbol = gnbkgpData.get("code");
 				String gpName = gnbkgpData.get("name");
-				bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
+				//bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
+				bkData += symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
 			}
 			System.out.println("------"+bkName+"--------");
 			i++;
@@ -108,7 +110,8 @@ public class FinderSinaBk implements IFinderBk{
 			for(Map<String, String> gnbkgpData : gnbkgpDataList){
 				String symbol = gnbkgpData.get("code");
 				String gpName = gnbkgpData.get("name");
-				bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
+				//bkData += period+"\t"+symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
+				bkData += symbol+"\t"+gpName+"\t"+bkCode+"\t"+bkName+"\n";
 			}
 			System.out.println("------"+bkName+"--------");
 			i++;

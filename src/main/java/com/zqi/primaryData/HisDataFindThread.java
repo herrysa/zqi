@@ -32,7 +32,7 @@ public class HisDataFindThread implements Runnable{
 			insertbBuffer.append(dataLine);
 		}
 		RHisFileDataBase fdb = new RHisFileDataBase(hisContext.getYear());
-		fdb.writeStr(gp.get("code").toString(), insertbBuffer.toString());
+		fdb.writeStr(gp.get("code").toString(), insertbBuffer.toString(),0);
 		/*String basePath = Tools.getResource("baseDir");
 		String rHisDataDir = Tools.getResource("rhisDir");
 		FileUtil.writeFile(insertbBuffer.toString(), basePath+rHisDataDir+daytable+".txt");

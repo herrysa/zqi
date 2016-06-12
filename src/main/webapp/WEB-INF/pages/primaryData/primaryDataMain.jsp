@@ -12,6 +12,15 @@ $(function() {
 	$("#dayData").click(function(){
 		$("#dayDataContent").load("primaryData/primaryDataList");
 	});
+	$("#tradeData").click(function(){
+		$("#dayDataContent").load("primaryData/primaryDataList");
+	});
+	$("#bkData").click(function(){
+		$("#bkDataContent").load("bkData/bkDataList");
+	});
+	$("#financeData").click(function(){
+		$("#dayDataContent").load("primaryData/primaryDataList");
+	});
 	$("#fhData").click(function(){
 		$("#fhDataContent").load("primaryData/fhDataList");
 	});
@@ -28,6 +37,16 @@ $(function() {
 					</a>
 				</li>
 				<li>
+					<a id="tradeData" href="#tradeDataContent" data-toggle="tab">
+						明细数据
+					</a>
+				</li>
+				<li>
+					<a id="bkData" href="#bkDataContent" data-toggle="tab">
+						板块数据
+					</a>
+				</li>
+				<li>
 					<a id="financeData" href="#financeDataContent" data-toggle="tab">
 						财务数据
 					</a>
@@ -40,6 +59,10 @@ $(function() {
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane fade in active" id="dayDataContent">
+				</div>
+				<div class="tab-pane fade" id="tradeDataContent">
+				</div>
+				<div class="tab-pane fade" id="bkDataContent">
 				</div>
 				<div class="tab-pane fade" id="financeDataContent">
 				</div>

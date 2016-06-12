@@ -1,6 +1,9 @@
 package com.zqi.primaryData.fileDataBase;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +21,7 @@ public class FileDataBase {
 	
 	public String readStr(String fileName) {
 		String filePath = getFilePath(fileName);
-		String content = FileUtil.readFile(filePath);
+		String content = readFile(filePath);
 		return content;
 	}
 	
@@ -27,10 +30,10 @@ public class FileDataBase {
 		return content;
 	}
 	
-	public void writeStr(String fileName, String content) {
+	public void writeStr(String fileName, String content,int type) {
 		String filePath = getFilePath(fileName);
 		File file = new File(filePath);
-		if(file.exists()){
+		if(type==0&&file.exists()){
 			file.delete();
 		}
 		FileUtil.writeFile(content, filePath);
@@ -66,4 +69,89 @@ public class FileDataBase {
 		}
 		return colStr;
 	}
+	
+	public static String readFile( String filePath ) {
+        File ds = null;
+        FileInputStream fis = null;
+        InputStreamReader isr=null;
+        BufferedReader br = null;
+        String fileContent = "";
+        String temp = "";
+        try {
+            ds = new File( filePath );
+            if ( ds.exists() ) {
+                fileContent = "";
+                fis = new FileInputStream( ds );
+                isr = new InputStreamReader(fis,"UTF-8");
+                br = new BufferedReader( isr );
+                temp = br.readLine();
+                while ( temp != null ) {
+                    fileContent += temp+"\n";
+                    temp = br.readLine();
+                }
+            }
+        }
+        catch ( Exception e ) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if ( br != null ) {
+                    br.close();
+                }
+                if ( fis != null ) {
+                	fis.close();
+                }
+            }
+            catch ( Exception e ) {
+                e.printStackTrace();
+            }
+
+        }
+        return fileContent;
+    }
+	
+	public static String readFile( String filePath ,String periodFrom , String periodTo) {
+        File ds = null;
+        FileInputStream fis = null;
+        InputStreamReader isr=null;
+        BufferedReader br = null;
+        String fileContent = "";
+        String temp = "";
+        try {
+            ds = new File( filePath );
+            if ( ds.exists() ) {
+                fileContent = "";
+                fis = new FileInputStream( ds );
+                isr = new InputStreamReader(fis,"UTF-8");
+                br = new BufferedReader( isr );
+                temp = br.readLine();
+                while ( temp != null ) {
+                	String period = temp.split("\t")[0];
+                	if(period.compareTo(periodFrom)>=0&&period.compareTo(periodTo)<0){
+                		fileContent += temp+"\n";
+                	}
+                    temp = br.readLine();
+                }
+            }
+        }
+        catch ( Exception e ) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                if ( br != null ) {
+                    br.close();
+                }
+                if ( fis != null ) {
+                	fis.close();
+                }
+            }
+            catch ( Exception e ) {
+                e.printStackTrace();
+            }
+
+        }
+        return fileContent;
+    }
 }
