@@ -50,4 +50,6 @@
         <!-- 后缀 -->
         <property name="suffix" value=".jsp" />
     </bean>
+    
+    <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" />
 </beans>
