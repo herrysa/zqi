@@ -15,6 +15,14 @@ public class FileDataBase {
 	protected String basePath = Tools.getResource("baseDir");
 	protected String databaseName = null;
 	
+	public String getDatabaseName() {
+		return databaseName;
+	}
+
+	public void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
+	}
+
 	public FileDataBase(String databaseName){
 		this.databaseName = databaseName;
 	}

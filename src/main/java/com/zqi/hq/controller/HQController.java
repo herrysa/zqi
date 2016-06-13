@@ -3,6 +3,7 @@ package com.zqi.hq.controller;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
@@ -12,32 +13,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.zqi.frame.controller.BaseController;
-import com.zqi.frame.dao.impl.ZqiDao;
+import com.zqi.frame.util.TestTimer;
+import com.zqi.frame.util.Tools;
 
 @Controller
 @RequestMapping("/hq")
 public class HQController extends BaseController{
-
-	private ZqiDao zqiDao; 
-	public ZqiDao getZqiDao() {
-		return zqiDao;
-	}
-
-	@Autowired
-	public void setZqiDao(ZqiDao zqiDao) {
-		this.zqiDao = zqiDao;
-	}
-
-	public HQController(){
-		// TODO Auto-generated constructor stub
-	}
 
 	@RequestMapping("/findHQ")
 	public String findHQ(){
@@ -48,21 +35,43 @@ public class HQController extends BaseController{
 	@ResponseBody
 	@RequestMapping("/findHQGridList")
 	public Map<String, Object> findHQGridList(){
-		String hqSql = "SELECT dic.code,dic.name,day.open,day.close,day.high,day.low,day.volume,day.turnover FROM d_gpdic dic LEFT JOIN (SELECT * FROM (";
-		SimpleDateFormat myFmt2=new SimpleDateFormat("yyyy-MM-dd");
-		Date nowDate=new Date();
-		String period = myFmt2.format(nowDate);
-		for(int i=1;i<=57;i++){
-			hqSql += "SELECT * FROM daytable"+i+" WHERE period = '"+period+"' UNION ";
+		TestTimer tt = new TestTimer("11");
+		tt.begin();
+		List<Map<String, Object>> gpDicList = findAGpDicList(null);
+		List<Map<String, Object>> dayHqData = new ArrayList<Map<String,Object>>();
+		String url = "http://hq.sinajs.cn/";
+		String listStr = "";
+		int i = 0;
+		for(Map<String, Object> gp : gpDicList){
+			if(i==500){
+				String result = Tools.getByHttpUrl(url+"list="+listStr);
+				listStr = "";
+				String[] rsArr = result.split("=")[1].split(",");
+				if(rsArr.length>1){
+					Map<String, Object> hqMap = new HashMap<String, Object>();
+					//hqMap.put("period", period);
+					//hqMap.put("code", code.toString());
+					hqMap.put("name", rsArr[0].substring(1));
+					hqMap.put("open", rsArr[1]);
+					hqMap.put("close", rsArr[3]);
+					hqMap.put("high", rsArr[4]);
+					hqMap.put("low", rsArr[5]);
+					hqMap.put("volume", rsArr[8]);
+					hqMap.put("turnover", rsArr[9]);
+					String yesterday = rsArr[2];
+					String now = rsArr[3];
+					dayHqData.add(hqMap);
+				}
+
+			}
+			listStr += gp.get("symbol").toString()+",";
+			i++;
 		}
-		hqSql = hqSql.substring(0, hqSql.lastIndexOf(" UNION "));
-		hqSql += ") day1) day ON dic.`code`=day.`code` ORDER BY dic.CODE ASC";
-		List<Map<String, Object>> hqList = zqiDao.findAll(hqSql);
-		this.resultMap.put("page_data", hqList);
-		this.resultMap.put("total_rows", hqList.size());
+		tt.done();
+		//this.resultMap.put("page_data", hqList);
+		//this.resultMap.put("total_rows", hqList.size());
 		return this.resultMap;
 	}
-	
 //	@ResponseBody
 //	@RequestMapping("/hqRk")
 //	public String hqRk(){

@@ -121,9 +121,4 @@ public class Finder163RHis implements IFinderRHis{
 		tt.done();
 		return dataList;
 	}
-	public static void main(String[] args) {
-		String urlTemp = "http://quotes.money.163.com/cjmx/2016/20160525/0600000.xls";
-		String result = Tools.getExcelByHttpUrl(urlTemp);
-		System.out.println();
-	}
 }
