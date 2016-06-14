@@ -1,5 +1,6 @@
 package com.zqi.hq;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,8 @@ public class InTimeHQThread implements Runnable{
 		String url = "http://hq.sinajs.cn/";
 		String result = Tools.getByHttpUrl(url+"list="+codeStr);
 		String datetime = DateUtil.getDateTimeNow();
-		Map<String, Map<String, Object>> lastHQmap = (Map<String, Map<String, Object>>)context.get("lastHQmap");
+		Map<String, Map<String, Object>> lastHqmap = (Map<String, Map<String, Object>>)context.get("lastHQmap");
+		Map<String, Map<String, Object>> hQStatusmap = (Map<String, Map<String, Object>>)context.get("hQStatusmap");
 		List<Map<String, Object>> unusualList = new ArrayList<Map<String,Object>>();
 		String[] resultArr = result.split(";");
 		for(String dataRow : resultArr){
@@ -35,13 +37,13 @@ public class InTimeHQThread implements Runnable{
 				hqMap.put("code", code);
 				hqMap.put("name", dataArr[0].substring(1));
 				hqMap.put("open", dataArr[1]);
+				hqMap.put("settlement", dataArr[2]);
 				hqMap.put("close", dataArr[3]);
 				hqMap.put("high", dataArr[4]);
 				hqMap.put("low", dataArr[5]);
 				hqMap.put("volume", dataArr[8]);
 				hqMap.put("turnover", dataArr[9]);
-				String yesterday = dataArr[2];
-				String now = dataArr[3];
+				
 				hqMap.put("b1",dataArr[11]); 
 				hqMap.put("bl1",dataArr[10]); 
 				hqMap.put("m1",dataArr[21]); 
@@ -63,6 +65,22 @@ public class InTimeHQThread implements Runnable{
 				hqMap.put("m5",dataArr[29]); 
 				hqMap.put("ml5",dataArr[28]); 
 				//dayHqData.add(hqMap);
+				Map<String, Object> lastHq = lastHqmap.get(code);
+				if(lastHq==null){
+					String yesterday = dataArr[2];
+					String now = dataArr[3];
+					if(yesterday!=null&&!yesterday.equals("")&&now!=null&&!now.equals("")){
+						BigDecimal y = new BigDecimal(yesterday);
+						BigDecimal limitPrice = y.multiply(new BigDecimal(0.1)).setScale(2, BigDecimal.ROUND_HALF_UP);
+						BigDecimal limitUpPrice = y.add(limitPrice);
+						BigDecimal limitDownPrice = y.subtract(limitPrice);
+						hqMap.put("limitUpPrice",limitUpPrice); 
+						hqMap.put("limitDownPrice",limitDownPrice); 
+						lastHqmap.put(code,hqMap);
+					}
+				}else{
+					
+				}
 			}		
 			
 		}
