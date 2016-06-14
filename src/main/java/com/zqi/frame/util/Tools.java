@@ -39,6 +39,7 @@ public class Tools {
 	public static String getResource(String key){
 		return resourceBundle.getString(key);
 	}
+	
 	/**
 	* 返回首字母
 	* @param strChinese

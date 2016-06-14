@@ -38,4 +38,15 @@
 	    <servlet-name>spring</servlet-name>
 	    <url-pattern>/</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+        <servlet-name>QuartzServlet</servlet-name>
+        <servlet-class>com.zqi.frame.quartz.QuartzServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>QuartzServlet</servlet-name>
+        <url-pattern>/QuartzServlet</url-pattern>
+    </servlet-mapping>
 </web-app>

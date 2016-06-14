@@ -46,6 +46,7 @@ public class HQController extends BaseController{
 			if(i==500){
 				String result = Tools.getByHttpUrl(url+"list="+listStr);
 				listStr = "";
+				String[] resultArr = result.split(";");
 				String[] rsArr = result.split("=")[1].split(",");
 				if(rsArr.length>1){
 					Map<String, Object> hqMap = new HashMap<String, Object>();

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JOBS>
+<JOB>
+<JOBID>hq</JOBID>
+<JOBNAME>行情分析</JOBNAME>
+<JOBGROUP>HQ</JOBGROUP>
+<JOBCRON>*/5 * * * * ?</JOBCRON>
+<JOBDESC></JOBDESC>
+<JOBCLASS>inTimeHQ</JOBCLASS>
+<PARAM1></PARAM1>
+<PARAM2></PARAM2>
+</JOB>
+</JOBS>

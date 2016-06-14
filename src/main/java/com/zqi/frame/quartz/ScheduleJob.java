@@ -14,7 +14,32 @@ public class ScheduleJob {
     private String cronExpression;
     /** 任务描述 */
     private String desc;
+    /** 任务执行类 */
+    private String jobClass;
+    /** 任务参数1 */
+    private String param1;
+    /** 任务参数2 */
+    private String param2;
     
+    
+	public String getJobClass() {
+		return jobClass;
+	}
+	public void setJobClass(String jobClass) {
+		this.jobClass = jobClass;
+	}
+	public String getParam1() {
+		return param1;
+	}
+	public void setParam1(String param1) {
+		this.param1 = param1;
+	}
+	public String getParam2() {
+		return param2;
+	}
+	public void setParam2(String param2) {
+		this.param2 = param2;
+	}
 	public String getJobId() {
 		return jobId;
 	}
