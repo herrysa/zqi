@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import com.zqi.frame.dao.impl.ZqiDao;
 import com.zqi.frame.quartz.Zjob;
 import com.zqi.frame.util.TestTimer;
-import com.zqi.primaryData.HisDataFindThread;
 
 @Service("inTimeHQ")
 public class InTimeHQ implements Zjob{
@@ -47,6 +46,7 @@ public class InTimeHQ implements Zjob{
 			i++;
 		}
 		
+		
 	}
 	@Override
 	public int execute() {
@@ -60,6 +60,7 @@ public class InTimeHQ implements Zjob{
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("codeStr", codeStr);
 			context.put("lastHQmap", lastHQmap);
+			context.put("dao", zqiDao);
 			InTimeHQThread inTimeHQThread = new InTimeHQThread(context);
 			fixedThreadPool.execute(inTimeHQThread);
 		}

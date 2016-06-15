@@ -5,5 +5,5 @@ import java.util.Map;
 
 public interface IHQFunc {
 
-	public List<Map<String, Object>> parse(Map<String, Object> param);
+	public void parse(Map<String, Object> hqData,Map<String, Object> lastHqData,List<Map<String, Object>> unusualList);
 }

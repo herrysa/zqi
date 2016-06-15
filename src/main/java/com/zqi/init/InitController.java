@@ -41,6 +41,7 @@ public class InitController extends BaseController{
 			createGpBkTable();
 			createGpInfoTable();
 			//findBkInfo();
+			createHqInfoTable();
 			createGpCwInfoTable();
 			createGpFhInfoTable();
 			creatReportTable();
@@ -190,6 +191,12 @@ public class InitController extends BaseController{
 		String infoSql = "create table i_gpinfo(period date,code varchar(20),name varchar(20),infoType varchar(20),info varchar(100));";
 		zqiDao.excute(infoSql);
 		System.out.println("--------------股票信息表建立完毕-----------------");
+	}
+	
+	private void createHqInfoTable(){
+		String infoSql = "create table i_hqRadar(datetime datetime,code varchar(20),name varchar(20),mtype varchar(10),ptype varchar(1),message varchar(50),info varchar(20),close decimal(10,3),changepercent decimal(10,3),volume decimal(10,3),amount decimal(10,3),turnoverrate decimal(10,3));";
+		zqiDao.excute(infoSql);
+		System.out.println("--------------股票行情雷达信息表建立完毕-----------------");
 	}
 	
 	private void findBkInfo() {
