@@ -44,7 +44,7 @@ public class TradeFileDataBase extends FileDataBase implements IFileDataBase{
                     Map<String, Object> data = new HashMap<String, Object>();
                     String[] tradeRow = temp.split("\t");
                     data.put("datetime", tradeRow[0]);
-                    data.put("settlement", tradeRow[1]);
+                    data.put("close", tradeRow[1]);
                     data.put("changeprice", tradeRow[2]);
                     data.put("volume", tradeRow[3]);
                     data.put("amount", tradeRow[4]);

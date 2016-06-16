@@ -28,7 +28,7 @@ public class InTimeHQThread implements Runnable{
 		String url = "http://hq.sinajs.cn/";
 		String result = Tools.getByHttpUrl(url+"list="+codeStr);
 		String datetime = DateUtil.getDateTimeNow();
-		lastHqmap = (Map<String, Map<String, Object>>)context.get("lastHQmap");
+		lastHqmap = (Map<String, Map<String, Object>>)context.get("lastHqmap");
 		List<Map<String, Object>> unusualList = new ArrayList<Map<String,Object>>();
 		String[] resultArr = result.split(";");
 		for(String dataRow : resultArr){
@@ -56,7 +56,7 @@ public class InTimeHQThread implements Runnable{
 					unusualMap.put("mtype", "0");
 					unusualMap.put("ptype", "0");
 					unusualMap.put("message", "停牌");
-					unusualList.add(unusualMap);
+					//unusualList.add(unusualMap);
 				}else{
 					hqMap.put("status", "-1");
 				}
@@ -97,7 +97,10 @@ public class InTimeHQThread implements Runnable{
 					String yesterday = dataArr[2];
 					String now = dataArr[3];
 					if(yesterday!=null&&!yesterday.equals("")&&now!=null&&!now.equals("")){
+						BigDecimal n = new BigDecimal(now.toString());
+						hqMap.put("now", n);
 						BigDecimal y = new BigDecimal(yesterday);
+						hqMap.put("settlement", y);
 						BigDecimal limitPrice = y.multiply(new BigDecimal(0.1)).setScale(2, BigDecimal.ROUND_HALF_UP);
 						BigDecimal limitUpPrice = y.add(limitPrice);
 						BigDecimal limitDownPrice = y.subtract(limitPrice);

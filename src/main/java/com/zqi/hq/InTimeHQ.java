@@ -18,7 +18,9 @@ import com.zqi.frame.util.TestTimer;
 @Service("inTimeHQ")
 public class InTimeHQ implements Zjob{
 
-	Map<String, Map<String, Object>> lastHQmap = new HashMap<String, Map<String,Object>>();
+	Map<String, Map<String, Object>> lastHqmap = new HashMap<String, Map<String,Object>>();
+	public static Map<String, Map<String, Object>> zsHqMap = new HashMap<String, Map<String,Object>>();
+	public static Map<String, Map<String, Object>> funcRuleMap = new HashMap<String, Map<String,Object>>();
 	static ZqiDao zqiDao;
 	public ZqiDao getZqiDao() {
 		return zqiDao;
@@ -34,7 +36,14 @@ public class InTimeHQ implements Zjob{
 		String gpdicSql = "select * from d_gpdic where type in ('0','1')";
 		List<Map<String, Object>> dicList = zqiDao.findAll(gpdicSql);
 		int i=0;
-		String gpCodeStr = "";
+		String zsStr = "sh000001,sz399001,sz399005,sz000300,sz399005";
+		String[] zsArr = zsStr.split(",");
+		for(String zs : zsArr){
+			Map<String, Object> szFuncRule = new HashMap<String, Object>();
+			funcRuleMap.put(zs,szFuncRule);
+			szFuncRule.put("limit", "0");
+		}
+		String gpCodeStr = zsStr;
 		for(Map<String, Object> gp : dicList){
 			String code = gp.get("symbol").toString();
 			if(i==500){
@@ -42,11 +51,9 @@ public class InTimeHQ implements Zjob{
 				gpCodeStr = "";
 				i=0;
 			}
-			gpCodeStr += code+",";
+			gpCodeStr += ","+code;
 			i++;
 		}
-		
-		
 	}
 	@Override
 	public int execute() {
@@ -59,7 +66,7 @@ public class InTimeHQ implements Zjob{
 		for(String codeStr : gpCodeStrList){
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("codeStr", codeStr);
-			context.put("lastHQmap", lastHQmap);
+			context.put("lastHqmap", lastHqmap);
 			context.put("dao", zqiDao);
 			InTimeHQThread inTimeHQThread = new InTimeHQThread(context);
 			fixedThreadPool.execute(inTimeHQThread);

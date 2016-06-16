@@ -3,7 +3,6 @@ package com.zqi.hq.controller;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
@@ -21,6 +20,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
+import com.zqi.hq.TradeHQ;
+import com.zqi.unit.SpringContextHelper;
 
 @Controller
 @RequestMapping("/hq")
@@ -232,5 +233,20 @@ public class HQController extends BaseController{
 		}*/
 		
 		return "rrr";
+	}
+	
+	@RequestMapping("/hqParse")
+	public String hqParse(){
+		
+		return "hq/hqPage";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/tradeParse")
+	public String tradeParse(){
+		TradeHQ tradeHQ = (TradeHQ)SpringContextHelper.getBean("tradeHQ");
+		tradeHQ.init();
+		tradeHQ.parse();
+		return "";
 	}
 }

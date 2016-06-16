@@ -194,7 +194,7 @@ public class InitController extends BaseController{
 	}
 	
 	private void createHqInfoTable(){
-		String infoSql = "create table i_hqRadar(datetime datetime,code varchar(20),name varchar(20),mtype varchar(10),ptype varchar(1),message varchar(50),info varchar(20),close decimal(10,3),changepercent decimal(10,3),volume decimal(10,3),amount decimal(10,3),turnoverrate decimal(10,3));";
+		String infoSql = "create table i_hqRadar(datetime datetime,code varchar(20),name varchar(20),mtype varchar(10),ptype varchar(1),message varchar(50),info varchar(20),close decimal(10,3),changepercent decimal(10,3),volume decimal(20,3),amount decimal(20,3),turnoverrate decimal(10,3));";
 		zqiDao.excute(infoSql);
 		System.out.println("--------------股票行情雷达信息表建立完毕-----------------");
 	}

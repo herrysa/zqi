@@ -127,6 +127,23 @@
 				    </div>
 				  </div>
 				</div>
+				<div class="panel-group" id="hqMenu" role="tablist" aria-multiselectable="true">
+				  <div class="panel panel-default">
+				    <div class="panel-heading" role="tab" id="hqMenu-head">
+				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="#accordion" href="#hqMenu-content" aria-expanded="false" aria-controls="hqMenu-content">
+							行情分析
+				        </a>
+				    </div>
+				    <div id="hqMenu-content" class="panel-collapse collapse" role="tabpanel" aria-labelledby="hqMenu-head">
+				      <div class="panel-body">
+						<ul class="nav nav-pills nav-stacked">
+							<li><a href="javaScript:menuClick('hq/tradeParse')">明细数据分析</a></li>
+							<li><a href="javaScript:menuClick('reportFunc/main')">报表函数定义</a></li>
+						</ul>
+				      </div>
+				    </div>
+				  </div>
+				</div>
 				<div class="panel-group" id="reportMenu" role="tablist" aria-multiselectable="true">
 				  <div class="panel panel-default">
 				    <div class="panel-heading" role="tab" id="reportMenu-head">
