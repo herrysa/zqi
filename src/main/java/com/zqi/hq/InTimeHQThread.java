@@ -16,6 +16,8 @@ public class InTimeHQThread implements Runnable{
 	Map<String, Object> context;
 	Map<String, Map<String, Object>> lastHqmap;
 	ZqiDao zqiDao;
+	String radarCol = "datetime,code,name,mtype,ptype,message,info,close,changepercent,volume,amount,turnoverrate";
+	String[] radarColArr = radarCol.split(",");
 	
 	public InTimeHQThread(Map<String, Object> context){
 		this.context = context;
@@ -116,11 +118,34 @@ public class InTimeHQThread implements Runnable{
 			}		
 			
 		}
-		zqiDao.addList(unusualList, "i_hqRadar");
+		//zqiDao.addList(unusualList, "i_hqRadar");
+		if(unusualList.size()>0){
+			StringBuilder valueBuilder = new StringBuilder();
+			valueBuilder.append("INSERT INTO i_hqRadar ("+radarCol+") VALUES ");
+			for(Map<String, Object> unsual : unusualList){
+				valueBuilder.append("(");
+				valueBuilder.append(getValues(unsual));
+				valueBuilder.append("),");
+			}
+			String insertSql = valueBuilder.substring(0, valueBuilder.length()-1);
+			zqiDao.excute(insertSql);
+		}
 	}
 	
 	synchronized private void synchonizHqMap(String code , Map<String, Object> hqData){
 		lastHqmap.put(code, hqData);
 	}
 
+	private String getValues(Map<String,Object> dataMap){
+		String dataLine = "";
+		for(String col : radarColArr){
+			if(dataMap.get(col)==null){
+				dataLine += "null,";
+			}else{
+				dataLine += "'"+dataMap.get(col)+"',";
+			}
+		}
+		dataLine = dataLine.substring(0,dataLine.length()-1);
+		return dataLine;
+	}
 }

@@ -21,10 +21,8 @@ public class InTimeHQ implements Zjob{
 	Map<String, Map<String, Object>> lastHqmap = new HashMap<String, Map<String,Object>>();
 	public static Map<String, Map<String, Object>> zsHqMap = new HashMap<String, Map<String,Object>>();
 	public static Map<String, Map<String, Object>> funcRuleMap = new HashMap<String, Map<String,Object>>();
-	static ZqiDao zqiDao;
-	public ZqiDao getZqiDao() {
-		return zqiDao;
-	}
+	public static ZqiDao zqiDao;
+	
 	@Autowired
 	public void setZqiDao(ZqiDao zqiDao) {
 		this.zqiDao = zqiDao;
@@ -62,7 +60,8 @@ public class InTimeHQ implements Zjob{
 		if(gpCodeStrList == null){
 			init();
 		}
-		ExecutorService fixedThreadPool = Executors.newFixedThreadPool(gpCodeStrList.size()); 
+		//ExecutorService fixedThreadPool = Executors.newFixedThreadPool(gpCodeStrList.size()); 
+		ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3); 
 		for(String codeStr : gpCodeStrList){
 			Map<String, Object> context = new HashMap<String, Object>();
 			context.put("codeStr", codeStr);

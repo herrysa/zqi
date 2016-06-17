@@ -8,7 +8,7 @@ public class ScheduleJob {
     private String jobName;
     /** 任务分组 */
     private String jobGroup;
-    /** 任务状态 0禁用 1启用 2删除*/
+    /** 任务状态 0停止 1启用 2删除*/
     private String jobStatus;
     /** 任务运行时间表达式 */
     private String cronExpression;
