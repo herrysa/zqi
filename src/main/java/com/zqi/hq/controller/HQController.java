@@ -249,4 +249,16 @@ public class HQController extends BaseController{
 		tradeHQ.parse();
 		return "";
 	}
+	
+	@RequestMapping("/dataAnalysisMain")
+	public String dataAnalysisMain(){
+		
+		return "hq/dataAnalysisMain";
+	}
+	
+	@RequestMapping("/dayDataAnalysisList")
+	public String dayDataAnalysisList(){
+		
+		return "hq/dayDataAnalysisList";
+	}
 }

@@ -137,7 +137,7 @@
 				    <div id="hqMenu-content" class="panel-collapse collapse" role="tabpanel" aria-labelledby="hqMenu-head">
 				      <div class="panel-body">
 						<ul class="nav nav-pills nav-stacked">
-							<li><a href="javaScript:menuClick('hq/tradeParse')">明细数据分析</a></li>
+							<li><a href="javaScript:menuClick('hq/dataAnalysisMain')">数据分析</a></li>
 							<li><a href="javaScript:menuClick('reportFunc/main')">报表函数定义</a></li>
 						</ul>
 				      </div>
