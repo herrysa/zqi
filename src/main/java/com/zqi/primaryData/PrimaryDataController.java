@@ -249,7 +249,7 @@ public class PrimaryDataController extends BaseController{
 					}
 				}
 				tempDb.writeStr("daytable_lastmonth", lastMonthContent,1);
-				tempDb.writeStr(daytable, content,0);
+				tempDb.writeStr(daytable, content,1);
 			}
 			List<String> loadList = new ArrayList<String>();
 	        for(String daytable : daytableList){

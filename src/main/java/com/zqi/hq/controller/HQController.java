@@ -21,6 +21,7 @@ import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.Tools;
 import com.zqi.hq.TradeHQ;
+import com.zqi.hq.dataAnalysis.DayDataAnalysis;
 import com.zqi.unit.SpringContextHelper;
 
 @Controller
@@ -260,5 +261,13 @@ public class HQController extends BaseController{
 	public String dayDataAnalysisList(){
 		
 		return "hq/dayDataAnalysisList";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/dayWaveAnalysis")
+	public Map<String, Object> dayWaveAnalysis(){
+		DayDataAnalysis dayDataAnalysis = (DayDataAnalysis)SpringContextHelper.getBean("dayDataAnalysis");
+		dayDataAnalysis.dayWaveAnalysis();
+		return resultMap;
 	}
 }
