@@ -10,7 +10,7 @@ $(function() {
 	$("#dayWaveAnalysis").click(function(){
 		var dayDAgpCode = $("#dayDAgpCode").val();
 		$.ajax({
-			url: 'dataAnalysis/dayWaveAnalysis?code='+dayDAgpCode,
+			url: 'hq/dayWaveAnalysis?code='+dayDAgpCode,
 			type: 'post',
 			dataType: 'json',
 			async:false,

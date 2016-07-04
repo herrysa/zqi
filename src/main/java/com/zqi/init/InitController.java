@@ -193,6 +193,12 @@ public class InitController extends BaseController{
 		System.out.println("--------------股票信息表建立完毕-----------------");
 	}
 	
+	private void createGpWaveTable(){
+		String infoSql = "create table i_gpwave(periodBegin date,periodEnd date,code varchar(20),name varchar(20),waveBegin decimal(10,3),waveEnd decimal(10,3),direct varchar(10),waveNum int,zf decimal(10,3));";
+		zqiDao.excute(infoSql);
+		System.out.println("--------------股票信息表建立完毕-----------------");
+	}
+	
 	private void createHqInfoTable(){
 		String infoSql = "create table i_hqRadar(datetime datetime,code varchar(20),name varchar(20),mtype varchar(10),ptype varchar(1),message varchar(50),info varchar(20),close decimal(10,3),changepercent decimal(10,3),volume decimal(20,3),amount decimal(20,3),turnoverrate decimal(10,3));";
 		zqiDao.excute(infoSql);

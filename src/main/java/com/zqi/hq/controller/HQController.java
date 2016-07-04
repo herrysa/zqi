@@ -267,7 +267,7 @@ public class HQController extends BaseController{
 	@RequestMapping("/dayWaveAnalysis")
 	public Map<String, Object> dayWaveAnalysis(){
 		DayDataAnalysis dayDataAnalysis = (DayDataAnalysis)SpringContextHelper.getBean("dayDataAnalysis");
-		dayDataAnalysis.dayWaveAnalysis();
+		dayDataAnalysis.dayAnalysis();
 		return resultMap;
 	}
 }
