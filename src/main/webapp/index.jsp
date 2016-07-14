@@ -181,6 +181,22 @@
 				    </div>
 				  </div>
 				</div>
+				<div class="panel-group" id="taskMenu" role="tablist" aria-multiselectable="true">
+				  <div class="panel panel-default">
+				    <div class="panel-heading" role="tab" id="taskMenu-head">
+				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="taskMenu" href="#taskMenu-content" aria-expanded="false" aria-controls="taskMenu-content">
+							任务管理
+				        </a>
+				    </div>
+				    <div id="taskMenu-content" class="panel-collapse collapse" role="tabpanel" aria-labelledby="taskMenu-head">
+				      <div class="panel-body">
+						<ul class="nav nav-pills nav-stacked">
+							<li><a href="javaScript:menuClick('task/taskList')">任务列表</a></li>
+						</ul>
+				      </div>
+				    </div>
+				  </div>
+				</div>
 			</div>
 			<div id="openClose" class="close">&nbsp;</div>
 			<div id="mainContent" class='mainContent'>
