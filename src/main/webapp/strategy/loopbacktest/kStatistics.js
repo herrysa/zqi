@@ -1,7 +1,7 @@
 //name:日k线统计策略
 code = '002142';
 
-start = '2015-01-01';
+start = '2016-05-01';
 end = '2016-07-14';
 
 codeData = Data.getAllGPData('close,@avg({close:[5,10,20,60]})','{start:"2015-01-01",end:"2016-07-14"}');

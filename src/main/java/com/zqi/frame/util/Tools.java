@@ -298,7 +298,7 @@ public class Tools {
 	}
 	
 	public static String findStr(String str,List<String> matcherList){
-		String pattern = "'.*'";
+		String pattern = "'(.| )+?'";
 		Pattern p = Pattern.compile(pattern);
 		Matcher matcher = p.matcher(str);
 		int matcherCount = 0;

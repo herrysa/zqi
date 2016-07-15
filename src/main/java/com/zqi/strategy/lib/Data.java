@@ -58,6 +58,7 @@ public class Data extends BaseLib{
 		String code = null;
 		if(option!=null){
 			try {
+				option = option.replaceAll("'", "");
 				optionJson = JSONObject.fromObject(option);
 				code = optionJson.getString("code");
 			} catch (Exception e) {
@@ -76,7 +77,7 @@ public class Data extends BaseLib{
 			}
 			gpList = zqiDao.findAll("select * from d_gpdic where code="+code);
 		}else{
-			gpList = zqiDao.findAll("select * from d_gpdic ");	
+			gpList = zqiDao.findAll("select * from d_gpdic where type in ('0','1')");	
 		}
 		Map<String, Map<String, Map<String, Object>>> codeDataMap = new HashMap<String, Map<String,Map<String,Object>>>();
 		Map<String, Map<String, Object>> dataMap = null;
@@ -105,10 +106,18 @@ public class Data extends BaseLib{
 		String start = null, end = null, ex_suspended =null,ex_new =null;
 		String code = gp.get("code").toString();
 		List<Map<String,Object>> codeList = null;
-		start = optionJson.getString("start");
-		end = optionJson.getString("end");
-		ex_suspended = optionJson.getString("ex_suspended");
-		ex_new = optionJson.getString("ex_new");
+		if(optionJson.containsKey("start")){
+			start = optionJson.getString("start");
+		}
+		if(optionJson.containsKey("end")){
+			end = optionJson.getString("end");
+		}
+		if(optionJson.containsKey("ex_suspended")){
+			ex_suspended = optionJson.getString("ex_suspended");
+		}
+		if(optionJson.containsKey("ex_new")){
+			ex_new = optionJson.getString("ex_new");
+		}
 		String dbCol = optionJson.getString("dbCol");
 		
 		String listDate = gp.get("listDate").toString();
@@ -134,7 +143,7 @@ public class Data extends BaseLib{
 		
 		String findSql = "select "+dbCol+" from daytable_all where code='"+code+"'";
 		if(start!=null&&end!=null){
-			findSql += " and period between "+start+" and "+end;
+			findSql += " and period between '"+start+"' and '"+end+"'";
 		}else if(start!=null){
 			findSql += " and period>='"+start+"'";
 		}else if(end!=null){
@@ -162,20 +171,26 @@ public class Data extends BaseLib{
 			if(cqDateObj!=null){
 				String period = cqDateObj.toString();
 				Map<String,Object> data = dataMap.get(period);
-				data.put("cq", "1");
+				if(data!=null){
+					data.put("cq", "1");
+				}
 			}
 			if(sgDateObj!=null){
 				String period = sgDateObj.toString();
 				Map<String,Object> data = dataMap.get(period);
-				data.put("sg", "1");
+				if(data!=null){
+					data.put("sg", "1");
+				}
 			}
 			if(zzDateObj!=null){
 				String period = zzDateObj.toString();
 				Map<String,Object> data = dataMap.get(period);
-				data.put("zz", "1");
+				if(data!=null){
+					data.put("zz", "1");
+				}
 			}
 		}
-		
+		System.out.println(code);
 		return codeList;
 	}
 	
@@ -253,7 +268,7 @@ public class Data extends BaseLib{
 			}
 			i++;
 		}
-		System.out.println();
+		//System.out.println();
 	}
 	
 	private String initCol(String col,List<String> extendCol){
