@@ -197,6 +197,31 @@
 				    </div>
 				  </div>
 				</div>
+				<div class="panel-group" id="tradeMenu" role="tablist" aria-multiselectable="true">
+				  <div class="panel panel-default">
+				    <div class="panel-heading" role="tab" id="tradeMenu-head">
+				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="tradeMenu" href="#tradeMenu-content" aria-expanded="false" aria-controls="tradeMenu-content">
+							交易管理
+				        </a>
+				    </div>
+				    <div id="tradeMenu-content" class="panel-collapse collapse" role="tabpanel" aria-labelledby="tradeMenu-head">
+				      <div class="panel-body">
+						<ul class="nav nav-pills nav-stacked">
+							<li><a href="javaScript:menuClick('trade/positionList')">持仓列表</a></li>
+						</ul>
+						<ul class="nav nav-pills nav-stacked">
+							<li><a href="javaScript:menuClick('trade/tradeList')">调仓列表</a></li>
+						</ul>
+						<ul class="nav nav-pills nav-stacked">
+							<li><a href="javaScript:menuClick('trade/tradeParse')">交易分析</a></li>
+						</ul>
+						<ul class="nav nav-pills nav-stacked">
+							<li><a href="javaScript:menuClick('trade/gpPool')">股票池</a></li>
+						</ul>
+				      </div>
+				    </div>
+				  </div>
+				</div>
 			</div>
 			<div id="openClose" class="close">&nbsp;</div>
 			<div id="mainContent" class='mainContent'>
