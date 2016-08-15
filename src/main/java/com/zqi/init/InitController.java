@@ -42,6 +42,7 @@ public class InitController extends BaseController{
 			createGpInfoTable();
 			//findBkInfo();
 			createHqInfoTable();
+			createGpWaveTable();
 			createGpCwInfoTable();
 			createGpFhInfoTable();
 			creatReportTable();
