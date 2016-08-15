@@ -73,7 +73,7 @@ public class DayDataAnalysis {
 				}
 				String lastPeriod = lastDayData.get("period").toString();
 				int directTemp = close.compareTo(lastClose);
-				if(directTemp>0){
+ 				if(directTemp>0){
 					if(direct==-1||direct==0){
 						boolean isEnd= isEnd(direct,i,lastClose,dayDataList);
 						if(isEnd){
@@ -84,6 +84,12 @@ public class DayDataAnalysis {
 							waveMap.put("periodEnd", lastPeriod);
 							waveMap.put("waveBegin", waveBegin);
 							waveMap.put("waveEnd", lastClose);
+							/*if(waveNum<3){
+								waveMap.put("state", "9");
+								lastDayData = dayData;
+							}else{
+								waveMap.put("state", "0");
+							}*/
 							waveMap.put("direct", direct);
 							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
@@ -93,7 +99,8 @@ public class DayDataAnalysis {
 							waveBegin = lastClose;
 							direct = 1;
 							i += 2;
-							waveNum = 0;
+							waveNum = 1;
+							lastDayData = dayData;
 						}
 					}else if(direct==1){
 						waveNum ++;
@@ -124,12 +131,19 @@ public class DayDataAnalysis {
 							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
 							waveMap.put("zf", zf);
+							/*if(waveNum<3){
+								waveMap.put("state", "9");
+								lastDayData = dayData;
+							}else{
+								waveMap.put("state", "0");
+							}*/
 							waveList.add(waveMap);
 							periodBegin = lastPeriod;
 							waveBegin = lastClose;
 							direct = 0;
 							i += 2;
-							waveNum = 0;
+							waveNum = 1;
+							lastDayData = dayData;
 						}
 					}else if(direct==0){
 						waveNum ++;
@@ -153,12 +167,19 @@ public class DayDataAnalysis {
 							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
 							waveMap.put("zf", zf);
+							/*if(waveNum<3){
+								waveMap.put("state", "9");
+								lastDayData = dayData;
+							}else{
+								waveMap.put("state", "0");
+							}*/
 							waveList.add(waveMap);
 							periodBegin = lastPeriod;
 							waveBegin = lastClose;
 							direct = -1;
 							i += 2;
-							waveNum = 0;
+							waveNum = 1;
+							lastDayData = dayData;
 						}
 					}else if(direct==-1){
 						waveNum ++;
