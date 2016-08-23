@@ -42,6 +42,7 @@ public class InitController extends BaseController{
 			createGpInfoTable();
 			//findBkInfo();
 			createHqInfoTable();
+			createGpWaveTable();
 			createGpCwInfoTable();
 			createGpFhInfoTable();
 			creatReportTable();
@@ -194,9 +195,12 @@ public class InitController extends BaseController{
 	}
 	
 	private void createGpWaveTable(){
-		String infoSql = "create table i_gpwave(periodBegin date,periodEnd date,code varchar(20),name varchar(20),waveBegin decimal(10,3),waveEnd decimal(10,3),direct varchar(10),waveNum int,zf decimal(10,3));";
+		String infoSql = "create table i_gpwave(periodBegin date,periodEnd date,code varchar(20),name varchar(20),waveBegin decimal(10,3),waveEnd decimal(10,3),direct varchar(10),waveNum int,zf decimal(10,3),waveHigh decimal(10,3),waveLow decimal(10,3));";
 		zqiDao.excute(infoSql);
-		System.out.println("--------------股票信息表建立完毕-----------------");
+		System.out.println("--------------股票波段信息表建立完毕-----------------");
+		infoSql = "create table i_gpwave_status(`code` varchar(20) DEFAULT NULL,`name` varchar(20) DEFAULT NULL,`waveBegin` decimal(10,3) DEFAULT NULL,`period` varchar(10) DEFAULT NULL,`direct` int(4) DEFAULT NULL,`waveNum` int(4) DEFAULT NULL,`waveHigh` decimal(10,3) DEFAULT NULL,`waveLow` decimal(10,3) DEFAULT NULL,`zf` decimal(10,3) DEFAULT NULL);";
+		zqiDao.excute(infoSql);
+		System.out.println("--------------股票波段状态表建立完毕-----------------");
 	}
 	
 	private void createHqInfoTable(){

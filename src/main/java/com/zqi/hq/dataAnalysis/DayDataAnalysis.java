@@ -26,54 +26,213 @@ public class DayDataAnalysis {
 	public void dayAnalysis(){
 		List<Map<String, Object>> gpDicList = zqiDao.findAll("select * from d_gpdic where type in ('0','1') order by code asc");
 		for(Map<String, Object> gp : gpDicList){
-			dayWaveAnalysis(gp);
+			toWaveAnalysis(gp);
 		}
 	}
 	
-	public void dayWaveAnalysis(Map<String, Object> gp){
+	public void toWaveAnalysis(Map<String, Object> gp){
 		String code = gp.get("code").toString();
 		String name = gp.get("name").toString();
-		List<Map<String, Object>> dayDataList = zqiDao.findAll("select * from daytable_all where code='"+code+"' order by period asc");
-		Map maxMap = new HashMap<String, BigDecimal>();
+		
+		//Map maxMap = new HashMap<String, BigDecimal>();
 		List<Map<String, Object>> waveList = new ArrayList<Map<String,Object>>();
 		Map<String, Object> lastDayData = null;
+		//BigDecimal waveZf = new BigDecimal(0);
+		//boolean horizWave = false;
 		String periodBegin = null;
-		BigDecimal waveBegin = null;
-		String waveHighPeriod = null;
+		//BigDecimal waveBegin = null;
+		//String waveHighPeriod = null;
 		BigDecimal waveHigh = null;
-		String waveLowPeriod = null;
+		//String waveLowPeriod = null;
 		BigDecimal waveLow = null;
-		String waveMaxVolPeriod = null;
-		BigDecimal waveMaxVol = null;
-		String waveMinVolPeriod = null;
-		BigDecimal waveMinVol = null;	//
-		BigDecimal waveAvgVol = null;	//平均量能
-		String waveMaxZfPeriod = null;
-		int waveNum = 0;
+		//String waveMaxVolPeriod = null;
+		//BigDecimal waveMaxVol = null;
+		//String waveMinVolPeriod = null;
+		//BigDecimal waveMinVol = null;	//
+		//BigDecimal waveAvgVol = null;	//平均量能
+		//String waveMaxZfPeriod = null;
+		int waveNum = 1;
+		
+		//Map<String, Object> waveMapA = null;
+		//Map<String, Object> waveMapB = null;
 		
 		int direct = 2;
-		for(int i=0;i<dayDataList.size();i++){
+		Map<String, Object> waveStatus = zqiDao.findFirst("select * from i_gpwave_status where code='"+code+"'");
+		String dataSql = "select * from daytable_all where code='"+code+"'";
+		String status_period = "";
+		if(!waveStatus.isEmpty()){
+			status_period = waveStatus.get("period").toString();
+			dataSql += " and period>='"+status_period+"'";
+			periodBegin = waveStatus.get("periodBegin").toString();
+			direct = Integer.parseInt(waveStatus.get("direct").toString());
+			waveNum = Integer.parseInt(waveStatus.get("waveNum").toString());
+			waveHigh = (BigDecimal)waveStatus.get("waveHigh");
+			waveLow = (BigDecimal)waveStatus.get("waveLow");
+		}
+		dataSql += " order by period asc";
+		List<Map<String, Object>> dayDataList = zqiDao.findAll(dataSql);
+		int i = 0;
+		if(!waveStatus.isEmpty()){
+			lastDayData = dayDataList.get(0);
+			i=1;
+		}
+		for(;i<dayDataList.size();i++){
 			Map<String, Object> dayData = dayDataList.get(i);
 			BigDecimal close = (BigDecimal)dayData.get("close");
 			BigDecimal high = (BigDecimal)dayData.get("high");
 			BigDecimal low = (BigDecimal)dayData.get("low");
 			BigDecimal amount = (BigDecimal)dayData.get("amount");
 			String period = dayData.get("period").toString();
+			System.out.println("处理的日期为:"+period+" 最高价格为："+high+" 最低价格为："+low);
 			if(lastDayData==null){
 				lastDayData = dayData;
 				periodBegin = period;
-				waveBegin = close;
+				//waveBegin = close;
 				waveHigh = high;
 				waveLow = low;
-				waveHigh = amount;
+				//waveHigh = amount;
 			}else{
 				BigDecimal lastClose = (BigDecimal)lastDayData.get("close");
 				if(lastClose.compareTo(new BigDecimal(0))==0){
 					continue;
 				}
 				String lastPeriod = lastDayData.get("period").toString();
-				int directTemp = close.compareTo(lastClose);
- 				if(directTemp>0){
+				System.out.println("上一日日期为:"+lastPeriod+" 价格为："+lastClose);
+				//int directTemp = close.compareTo(lastClose);
+				int directTemp = getDirect(direct,dayData,lastDayData);
+				System.out.println("当日价格方向："+directTemp+" 波段方向："+direct);
+				if(directTemp==1){
+					if(direct==-1){
+						boolean isEnd = true;
+						/*if(waveNum<3){
+							Map<String, Object> dayDataTemp = mergeKData(i,dayDataList);
+							directTemp = getDirect(direct,dayDataTemp,lastDayData);
+							if(directTemp==-1){
+								isEnd = false;
+							}
+						}*/
+						if(isEnd){
+						Map<String, Object> waveMap = new HashMap<String, Object>();
+						waveMap.put("code", code);
+						waveMap.put("name", name);
+						waveMap.put("periodBegin", periodBegin);
+						waveMap.put("periodEnd", lastPeriod);
+						//waveMap.put("waveBegin", waveBegin);
+						//waveMap.put("waveEnd", lastClose);
+						waveMap.put("waveHigh", waveHigh);
+						waveMap.put("waveLow", waveLow);
+						waveMap.put("direct", direct);
+						BigDecimal zf = waveHigh.subtract(waveLow).divide(waveHigh,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+						waveMap.put("waveNum", waveNum);
+						waveMap.put("zf", zf);
+						waveList.add(waveMap);
+						periodBegin = lastPeriod;
+						//waveBegin = lastClose;
+						waveHigh = high;
+						waveLow =low;
+						direct = 1;
+						//i += 2;
+						waveNum = 1;
+						lastDayData = dayData;
+						}
+					}else if(direct==1){
+						waveNum ++;
+						lastDayData = dayData;
+						if(high.compareTo(waveHigh)>0){
+							waveHigh = high;
+						}
+						if(low.compareTo(waveLow)<0){
+							waveLow = low;
+						}
+						if(i==dayDataList.size()-1){
+							zqiDao.excute("delete from i_gpwave_status where code='"+code+"'");
+							waveStatus = new HashMap<String, Object>();
+							waveStatus.put("code", code);
+							waveStatus.put("name", name);
+							waveStatus.put("periodBegin", periodBegin);
+							waveStatus.put("period", period);
+							waveStatus.put("direct", direct);
+							waveStatus.put("waveNum", waveNum);
+							waveStatus.put("waveHigh", waveHigh);
+							waveStatus.put("waveLow", waveLow);
+							BigDecimal zf = waveHigh.subtract(waveLow).divide(waveHigh,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+							waveStatus.put("zf", zf);
+							zqiDao.add(waveStatus, "i_gpwave_status");
+						}
+					}else{
+						waveNum ++;
+						lastDayData = dayData;
+						direct = directTemp;
+					}
+				}else if(directTemp==-1){
+					if(direct==1){
+						boolean isEnd = true;
+						/*if(waveNum<3){
+							Map<String, Object> dayDataTemp = mergeKData(i,dayDataList);
+							directTemp = getDirect(direct,dayDataTemp,lastDayData);
+							if(directTemp==1){
+								isEnd = false;
+							}
+						}*/
+						if(isEnd){
+						Map<String, Object> waveMap = new HashMap<String, Object>();
+						waveMap.put("code", code);
+						waveMap.put("name", name);
+						waveMap.put("periodBegin", periodBegin);
+						waveMap.put("periodEnd", lastPeriod);
+						//waveMap.put("waveBegin", waveBegin);
+						//waveMap.put("waveEnd", lastClose);
+						waveMap.put("waveHigh", waveHigh);
+						waveMap.put("waveLow", waveLow);
+						waveMap.put("direct", direct);
+						BigDecimal zf = waveHigh.subtract(waveLow).divide(waveLow,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+						waveMap.put("waveNum", waveNum);
+						waveMap.put("zf", zf);
+						waveList.add(waveMap);
+						periodBegin = lastPeriod;
+						//waveBegin = lastClose;
+						waveHigh = high;
+						waveLow =low;
+						direct = -1;
+						//i += 2;
+						waveNum = 1;
+						lastDayData = dayData;
+						}
+					}else if(direct==-1){
+						waveNum ++;
+						lastDayData = dayData;
+						if(high.compareTo(waveHigh)>0){
+							waveHigh = high;
+						}
+						if(low.compareTo(waveLow)<0){
+							waveLow = low;
+						}
+						if(i==dayDataList.size()-1){
+							zqiDao.excute("delete from i_gpwave_status where code='"+code+"'");
+							waveStatus = new HashMap<String, Object>();
+							waveStatus.put("code", code);
+							waveStatus.put("name", name);
+							waveStatus.put("periodBegin", periodBegin);
+							waveStatus.put("period", period);
+							waveStatus.put("direct", direct);
+							waveStatus.put("waveNum", waveNum);
+							waveStatus.put("waveHigh", waveHigh);
+							waveStatus.put("waveLow", waveLow);
+							BigDecimal zf = waveHigh.subtract(waveLow).divide(waveHigh,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+							waveStatus.put("zf", zf);
+							zqiDao.add(waveStatus, "i_gpwave_status");
+						}
+					}else{
+						waveNum ++;
+						lastDayData = dayData;
+						direct = directTemp;
+					}
+				}else{
+					waveNum ++;
+					lastDayData = dayData;
+					direct = directTemp;
+				}
+ 				/*if(directTemp>0){
 					if(direct==-1||direct==0){
 						boolean isEnd= isEnd(direct,i,lastClose,dayDataList);
 						if(isEnd){
@@ -84,12 +243,6 @@ public class DayDataAnalysis {
 							waveMap.put("periodEnd", lastPeriod);
 							waveMap.put("waveBegin", waveBegin);
 							waveMap.put("waveEnd", lastClose);
-							/*if(waveNum<3){
-								waveMap.put("state", "9");
-								lastDayData = dayData;
-							}else{
-								waveMap.put("state", "0");
-							}*/
 							waveMap.put("direct", direct);
 							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
@@ -101,6 +254,27 @@ public class DayDataAnalysis {
 							i += 2;
 							waveNum = 1;
 							lastDayData = dayData;
+							if(waveNum<3){
+								if(waveMapA==null){
+									waveMapA = waveMap;
+								}else if(waveMapB==null){
+									waveMapB = waveMap;
+								}else{
+									//合并这三个小于3的波段
+								}
+							}else{
+								if(waveMapA==null){
+									waveList.add(waveMap);
+								}else if(waveMapB==null){
+									//只有一段
+									waveList.add(waveMap);
+								}else{
+									
+									//合并这2小一大
+									waveList.add(waveMap);
+								}
+							}
+							
 						}
 					}else if(direct==1){
 						waveNum ++;
@@ -131,12 +305,12 @@ public class DayDataAnalysis {
 							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
 							waveMap.put("zf", zf);
-							/*if(waveNum<3){
+							if(waveNum<3){
 								waveMap.put("state", "9");
 								lastDayData = dayData;
 							}else{
 								waveMap.put("state", "0");
-							}*/
+							}
 							waveList.add(waveMap);
 							periodBegin = lastPeriod;
 							waveBegin = lastClose;
@@ -167,12 +341,12 @@ public class DayDataAnalysis {
 							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
 							waveMap.put("zf", zf);
-							/*if(waveNum<3){
+							if(waveNum<3){
 								waveMap.put("state", "9");
 								lastDayData = dayData;
 							}else{
 								waveMap.put("state", "0");
-							}*/
+							}
 							waveList.add(waveMap);
 							periodBegin = lastPeriod;
 							waveBegin = lastClose;
@@ -188,14 +362,98 @@ public class DayDataAnalysis {
 						waveNum ++;
 						direct = -1;
 					}
-				}
+				}*/
 			}
 		}
 		zqiDao.addList(waveList, "i_gpwave");
 		System.out.println();
 	}
 	
+	private int getDirect(int d,Map<String, Object> dayData,Map<String, Object> lastDayData){
+		
+		int direct = 0;
+		
+		BigDecimal high = (BigDecimal)dayData.get("high");
+		BigDecimal low = (BigDecimal)dayData.get("low");
+		
+		BigDecimal high2 = (BigDecimal)lastDayData.get("high");
+		BigDecimal low2 = (BigDecimal)lastDayData.get("low");
+		
+		int h = high.compareTo(high2);
+		int l = low.compareTo(low2);
+		if(h==1){
+			if(l==1){
+				direct = 1;
+			}else if(l==-1){
+				if(d==1){
+					dayData.put("low",low2);
+				}else if(d==-1){
+					dayData.put("high",high2);
+				}
+				direct = d;
+			}else{
+				if(d==-1){
+					dayData.put("high",high2);
+				}
+				direct = d;
+			}
+		}else if(h==-1){
+			if(l==1){
+				if(d==1){
+					dayData.put("high",high2);
+				}else if(d==-1){
+					dayData.put("low",low2);
+				}
+				direct = d;
+			}else if(l==-1){
+				direct = -1;
+			}else{
+				if(d==1){
+					dayData.put("high",high2);
+				}
+				direct = d;
+			}
+		}else{
+			if(l==1){
+				if(d==-1){
+					dayData.put("low",low2);
+				}
+			}else if(l==-1){
+				if(d==1){
+					dayData.put("low",low2);
+				}
+			}
+			direct = d;
+		}
+		
+		return direct;
+	}
 	
+	private Map<String, Object> mergeKData(int i,List<Map<String, Object>> dayDataList){
+		
+		Map<String, Object> cloneData = new HashMap<String, Object>();
+		Map<String, Object> currentData = dayDataList.get(i);
+		Map<String, Object> nextData = dayDataList.get(i);
+		cloneData.putAll(currentData);
+		
+		BigDecimal high = (BigDecimal)cloneData.get("high");
+		BigDecimal low = (BigDecimal)cloneData.get("low");
+		
+		BigDecimal high2 = (BigDecimal)nextData.get("high");
+		BigDecimal low2 = (BigDecimal)nextData.get("low");
+		
+		int h = high.compareTo(high2);
+		int l = low.compareTo(low2);
+		
+		if(h==-1){
+			cloneData.put("high", high2);
+			
+		}
+		if(l==1){
+			cloneData.put("low", low2);
+		}
+		return cloneData;
+	}
 		
 	private boolean isEnd(int direct,int i,BigDecimal lastClose,List<Map<String, Object>> dayDataList){
 		boolean waveEnd = false;
@@ -227,5 +485,9 @@ public class DayDataAnalysis {
 		}
 		
 		return waveEnd;
+	}
+	
+	public void dayWaveAnalysis(Map<String, Object> wave){
+		
 	}
 }
