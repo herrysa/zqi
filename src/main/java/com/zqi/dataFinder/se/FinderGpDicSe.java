@@ -242,10 +242,13 @@ public class FinderGpDicSe implements IFinderGpDic{
 				result += line;
 			}
 			result = result.replaceAll("<tr  class='cls-data-tr' bgcolor='#FFFFFF'>", "\t\n");
+			result = result.replaceAll("<tr  class='cls-data-tr' bgcolor='#ffffff'>", "\t\n");
 			result = result.replaceAll("<tr  class='cls-data-tr' bgcolor='#F8F8F8'>", "\t\n");
 			result = result.replaceAll("</tr>", "");
 			result = result.replaceAll("<td  class='cls-data-td'  align='center' >", "\t");
+			result = result.replaceAll("<td  class='cls-data-td' null align='center' >", "\t");
 			result = result.replaceAll("<td  class='cls-data-td'  align='left' >", "\t");
+			result = result.replaceAll("<td  class='cls-data-td' null align='left' >", "\t");
 			result = result.replaceAll("<td  class='cls-data-td' style='mso-number-format:\\\\@' align='center' >", "");
 			result = result.replaceAll("</td>", "");
 			result = result.substring(result.lastIndexOf("公司网址")+6);

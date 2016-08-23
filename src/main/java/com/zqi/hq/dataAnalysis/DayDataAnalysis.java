@@ -244,16 +244,17 @@ public class DayDataAnalysis {
 							waveMap.put("waveBegin", waveBegin);
 							waveMap.put("waveEnd", lastClose);
 							waveMap.put("direct", direct);
-							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+							BigDecimal zf = lastClose.subtract(waveBegin).divide(waveBegin,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
 							waveMap.put("zf", zf);
 							waveList.add(waveMap);
 							periodBegin = lastPeriod;
 							waveBegin = lastClose;
 							direct = 1;
-							i += 2;
+							//i += 2;
 							waveNum = 1;
 							lastDayData = dayData;
+<<<<<<< HEAD
 							if(waveNum<3){
 								if(waveMapA==null){
 									waveMapA = waveMap;
@@ -275,6 +276,11 @@ public class DayDataAnalysis {
 								}
 							}
 							
+=======
+						}else{
+							waveNum ++;
+							lastDayData = dayData;
+>>>>>>> d0bd8c85fa7e44f1be59e69e551818bb532b5681
 						}
 					}else if(direct==1){
 						waveNum ++;
@@ -302,7 +308,7 @@ public class DayDataAnalysis {
 							waveMap.put("waveBegin", waveBegin);
 							waveMap.put("waveEnd", lastClose);
 							waveMap.put("direct", direct);
-							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+							BigDecimal zf = lastClose.subtract(waveBegin).divide(waveBegin,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
 							waveMap.put("zf", zf);
 							if(waveNum<3){
@@ -315,8 +321,11 @@ public class DayDataAnalysis {
 							periodBegin = lastPeriod;
 							waveBegin = lastClose;
 							direct = 0;
-							i += 2;
+							//i += 2;
 							waveNum = 1;
+							lastDayData = dayData;
+						}else{
+							waveNum ++;
 							lastDayData = dayData;
 						}
 					}else if(direct==0){
@@ -338,7 +347,7 @@ public class DayDataAnalysis {
 							waveMap.put("waveBegin", waveBegin);
 							waveMap.put("waveEnd", lastClose);
 							waveMap.put("direct", direct);
-							BigDecimal zf = lastClose.divide(lastClose).divide(lastClose,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+							BigDecimal zf = lastClose.subtract(waveBegin).divide(waveBegin,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 							waveMap.put("waveNum", waveNum);
 							waveMap.put("zf", zf);
 							if(waveNum<3){
@@ -351,8 +360,11 @@ public class DayDataAnalysis {
 							periodBegin = lastPeriod;
 							waveBegin = lastClose;
 							direct = -1;
-							i += 2;
+							//i += 2;
 							waveNum = 1;
+							lastDayData = dayData;
+						}else{
+							waveNum ++;
 							lastDayData = dayData;
 						}
 					}else if(direct==-1){
@@ -487,7 +499,124 @@ public class DayDataAnalysis {
 		return waveEnd;
 	}
 	
-	public void dayWaveAnalysis(Map<String, Object> wave){
+	
+	public void dayWaveShapeAnalysis(Map<String, Object> gp){
+		String code = gp.get("code").toString();
+		String name = gp.get("name").toString();
+		List<Map<String, Object>> dayWaveDataList = zqiDao.findAll("select * from i_gpwave where code='"+code+"' order by periodBegin asc");
 		
+		String waveShape = "";
+		String periodBegin = "";
+		String periodEnd = "";
+		BigDecimal waveHigh = null;
+		BigDecimal waveLow = null;
+		BigDecimal lastWaveHigh = null;
+		BigDecimal lastWaveLow = null;
+		boolean nearFloor = false;
+		boolean nearCeil = false;
+		int shapeNum = 0;
+		for(int i=0;i<dayWaveDataList.size();i++){
+			Map<String, Object> dayWaveData = dayWaveDataList.get(i);
+			String directStr = dayWaveData.get("direct").toString();
+			int direct = Integer.parseInt(directStr);
+			String waveNumStr = dayWaveData.get("waveNum").toString();
+			int waveNum = Integer.parseInt(waveNumStr);
+			BigDecimal waveBegin = (BigDecimal)dayWaveData.get("waveBegin");
+			BigDecimal waveEnd = (BigDecimal)dayWaveData.get("waveEnd");
+			BigDecimal zf = (BigDecimal)dayWaveData.get("zf");
+			String wavePeriodBegin = dayWaveData.get("periodBegin").toString();
+			String wavePeriodEnd = dayWaveData.get("wavePeriodEnd").toString();
+			
+			
+			if(direct==1){
+				if("".equals(waveShape)){
+					if(waveNum<3){
+						waveShape = "震荡";
+					}else{
+						if(zf.compareTo(new BigDecimal(10))>0){
+							waveShape = "上涨";
+						}else{
+							waveShape = "震荡";
+						}
+					}
+					waveHigh = waveBegin;
+					waveLow = waveEnd;
+					lastWaveHigh = waveBegin;
+					lastWaveLow = waveEnd;
+					periodBegin = wavePeriodBegin;
+					shapeNum += waveNum;
+				}else{
+					if("上涨".equals(waveShape)){
+						int higherLastWaveHigh = waveEnd.compareTo(lastWaveHigh);
+						if(higherLastWaveHigh>=0){
+							lastWaveHigh = waveEnd;
+							lastWaveLow = waveBegin;
+							waveHigh = waveEnd;
+						}else{
+							//波段结束，形态为震荡
+							nearFloor = true;
+							lastWaveHigh = waveEnd;
+							lastWaveLow = waveBegin;
+						}
+					}
+				}
+			}else if(direct==-1){
+				if("".equals(waveShape)){
+					if(waveNum<3){
+						waveShape = "震荡";
+					}else{
+						if(zf.compareTo(new BigDecimal(-10))<0){
+							waveShape = "下跌";
+						}else{
+							waveShape = "震荡";
+						}
+					}
+					waveHigh = waveEnd;
+					waveLow = waveBegin;
+					lastWaveHigh = waveEnd;
+					lastWaveLow = waveBegin;
+					periodBegin = wavePeriodBegin;
+					shapeNum += waveNum;
+				}else{
+					if("上涨".equals(waveShape)){
+						int lowerLastWaveLow = waveEnd.compareTo(lastWaveLow);
+						if(lowerLastWaveLow<=0){
+							//波段结束，形态为下跌
+							lastWaveHigh = waveBegin;
+							lastWaveLow = waveEnd;
+						}else{
+							nearFloor = true;
+							lastWaveHigh = waveBegin;
+							lastWaveLow = waveEnd;
+						}
+					}else if("下跌".equals(waveShape)){
+						int lowerLastWaveLow = waveEnd.compareTo(lastWaveLow);
+						
+						
+					}else if("震荡".equals(waveShape)){
+						int lowerLastWaveLow = waveEnd.compareTo(waveLow);
+						if(lowerLastWaveLow<0){
+							Map<String, Object> waveMap = new HashMap<String, Object>();
+							waveMap.put("code", code);
+							waveMap.put("name", name);
+							waveMap.put("periodBegin", periodBegin);
+							waveMap.put("periodEnd", wavePeriodEnd);
+							waveMap.put("waveHigh", waveHigh);
+							waveMap.put("waveLow", waveLow);
+							waveMap.put("waveShape", waveShape);
+
+							waveShape = "下跌";
+						}
+						
+					}
+				}
+			}else if(direct==0){
+				if(waveNum<3){
+					waveShape = "横盘";
+				}else{
+					waveShape = "横盘";
+				}
+			}
+		}
 	}
 }
