@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -617,6 +619,50 @@ public class DayDataAnalysis {
 					waveShape = "横盘";
 				}
 			}
+		}
+	}
+	
+	public void waveClass(){
+		List<Map<String, Object>> gpDicList = zqiDao.findAll("select * from d_gpdic where type in ('0','1') order by code asc");
+		Map<String, Integer> waveNumFirst = new HashMap<String, Integer>();
+		Map<String, Integer> waveNumSecond = new HashMap<String, Integer>();
+		for(Map<String, Object> gp : gpDicList){
+			String code = gp.get("code").toString();
+			Map<String, Object> lastWave = null;
+			List<Map<String, Object>> waveList = zqiDao.findAll("select * from i_gpwave where code='"+code+"' order by periodBegin asc");
+			for(Map<String, Object> wave : waveList){
+				if(lastWave==null){
+					lastWave = wave;
+				}else{
+					String lastWaveNum = lastWave.get("waveNum").toString();
+					String nowWaveNum = wave.get("waveNum").toString();
+					Integer num = waveNumFirst.get(lastWaveNum);
+					Integer num2 = waveNumSecond.get(lastWaveNum+"_"+nowWaveNum);
+					if(num==null){
+						num = 0;
+					}else{
+						num++;
+					}
+					if(num2==null){
+						num2 = 0;
+					}else{
+						num2++;
+					}
+					waveNumFirst.put(lastWaveNum,num);
+					waveNumSecond.put(lastWaveNum+"_"+nowWaveNum,num2);
+				}
+			}
+		}
+		Set<String> keySet = waveNumSecond.keySet();
+		TreeSet<String> keyTreeSet = new TreeSet<String>(keySet);
+		for(String key :keyTreeSet){
+			String key1 = key.split("_")[0];
+			Integer firstWave = waveNumFirst.get(key1);
+			Integer secWave = waveNumSecond.get(key);
+			BigDecimal fistNum = new BigDecimal(firstWave);
+			BigDecimal secNum = new BigDecimal(secWave);
+			secNum = secNum.divide(fistNum,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+			System.out.println(key+":"+secNum);
 		}
 	}
 }

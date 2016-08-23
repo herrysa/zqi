@@ -270,4 +270,12 @@ public class HQController extends BaseController{
 		dayDataAnalysis.dayAnalysis();
 		return resultMap;
 	}
+	
+	@ResponseBody
+	@RequestMapping("/waveClass")
+	public Map<String, Object> waveClass(){
+		DayDataAnalysis dayDataAnalysis = (DayDataAnalysis)SpringContextHelper.getBean("dayDataAnalysis");
+		dayDataAnalysis.waveClass();
+		return resultMap;
+	}
 }

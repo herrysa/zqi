@@ -22,6 +22,21 @@ $(function() {
 			}
 		});
 	});
+	$("#dayWaveClass").click(function(){
+		var dayDAgpCode = $("#dayDAgpCode").val();
+		$.ajax({
+			url: 'hq/waveClass?code='+dayDAgpCode,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data);
+			}
+		});
+	});
 });
 </script>
 </head>
@@ -48,7 +63,7 @@ $(function() {
 				<ul class="dropdown-menu">
 					<li><a id="importTodayData">日数据分析</a></li>
 					<li><a id="dayWaveAnalysis">日数据波段分析</a></li>
-					<li><a id="importYearHisData">导入年度数据</a></li>
+					<li><a id="dayWaveClass">日数据波段分类</a></li>
 				</ul>
 			</div>
 			</form>
