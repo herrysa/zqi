@@ -201,6 +201,12 @@ public class InitController extends BaseController{
 		infoSql = "create table i_gpwave_status(`code` varchar(20) DEFAULT NULL,`name` varchar(20) DEFAULT NULL,`waveBegin` decimal(10,3) DEFAULT NULL,`period` varchar(10) DEFAULT NULL,`direct` int(4) DEFAULT NULL,`waveNum` int(4) DEFAULT NULL,`waveHigh` decimal(10,3) DEFAULT NULL,`waveLow` decimal(10,3) DEFAULT NULL,`zf` decimal(10,3) DEFAULT NULL);";
 		zqiDao.excute(infoSql);
 		System.out.println("--------------股票波段状态表建立完毕-----------------");
+		infoSql = "create table i_gpwavecenter(centerBegin date,centerEnd date,code varchar(20),name varchar(20),centerHigh decimal(10,3),centerLow decimal(10,3),centerHigh2 decimal(10,3),centerLow2 decimal(10,3),centerNum int,centerZf decimal(10,3)),periodEdge date,waveEdge decimal(10,3),direct int(4),left char(1),waveNum int,waveZf decimal(10,3));";
+		zqiDao.excute(infoSql);
+		System.out.println("--------------股票中枢信息表建立完毕-----------------");
+		infoSql = "create table i_gpwavecenter_status(code varchar(20) ,name varchar(20),waveBegin decimal(10,3),periodBegin varchar(10),direct int(4),waveNum int(4),`waveHigh` decimal(10,3) DEFAULT NULL,`waveLow` decimal(10,3) DEFAULT NULL,`zf` decimal(10,3) DEFAULT NULL);";
+		zqiDao.excute(infoSql);
+		System.out.println("--------------股票中枢状态表建立完毕-----------------");
 	}
 	
 	private void createHqInfoTable(){

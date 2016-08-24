@@ -622,6 +622,50 @@ public class DayDataAnalysis {
 		}
 	}
 	
+	public void centerAnalysis(){
+		List<Map<String, Object>> gpDicList = zqiDao.findAll("select * from d_gpdic where type in ('0','1') order by code asc");
+		for(Map<String, Object> gp : gpDicList){
+			String code = gp.get("code").toString();
+			List<Map<String, Object>> waveList = zqiDao.findAll("select * from i_gpwave where code='"+code+"' order by periodBegin asc");
+			int i = 0 ;
+			for(;i<waveList.size();i=i+2){
+				Map<String, Object> wave1 = waveList.get(i);
+				Map<String, Object> wave2 = waveList.get(i+1);
+				Map<String, Object> wave3 = waveList.get(i+2);
+				
+				String direct1 = wave1.get("direct").toString();
+				String direct2 = wave2.get("direct").toString();
+				String direct3 = wave3.get("direct").toString();
+				
+				BigDecimal waveHigh1 = (BigDecimal)wave1.get("waveHigh");
+				BigDecimal waveHigh2 = (BigDecimal)wave2.get("waveHigh");
+				BigDecimal waveHigh3 = (BigDecimal)wave3.get("waveHigh");
+				
+				BigDecimal waveLow1 = (BigDecimal)wave1.get("waveLow");
+				BigDecimal waveLow2 = (BigDecimal)wave2.get("waveLow");
+				BigDecimal waveLow3 = (BigDecimal)wave3.get("waveLow");
+				
+				
+				if("1".equals(direct1)){
+					BigDecimal backPercent1 = waveHigh2.subtract(waveLow2).divide(waveHigh1.subtract(waveLow1),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+					BigDecimal backPercent2 = waveHigh3.subtract(waveLow3).divide(waveHigh2.subtract(waveLow2),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+					int compare10 = backPercent1.compareTo(new BigDecimal(1));
+					if(compare10==1){
+						//反转情况，第三波收回一波高点，生成中枢，否则生成二波单边和一个中枢
+					}else{
+						//形成中枢，三波低点低于一波，三波为单边，否则一波单边
+						int compare3 = backPercent1.compareTo(new BigDecimal(0.3));
+						if(compare3==1){
+							
+						}else{
+							int compare5 = backPercent1.compareTo(new BigDecimal(0.5));
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	public void waveClass(){
 		List<Map<String, Object>> gpDicList = zqiDao.findAll("select * from d_gpdic where type in ('0','1') order by code asc");
 		Map<String, Integer> waveNumFirst = new HashMap<String, Integer>();
