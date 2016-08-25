@@ -627,38 +627,62 @@ public class DayDataAnalysis {
 		for(Map<String, Object> gp : gpDicList){
 			String code = gp.get("code").toString();
 			List<Map<String, Object>> waveList = zqiDao.findAll("select * from i_gpwave where code='"+code+"' order by periodBegin asc");
+			Map<String, Object> center = null;
 			int i = 0 ;
 			for(;i<waveList.size();i=i+2){
-				Map<String, Object> wave1 = waveList.get(i);
-				Map<String, Object> wave2 = waveList.get(i+1);
-				Map<String, Object> wave3 = waveList.get(i+2);
+				Map<String, Object> waveA = waveList.get(i);
+				Map<String, Object> waveB = waveList.get(i+1);
+				Map<String, Object> waveC = waveList.get(i+2);
 				
-				String direct1 = wave1.get("direct").toString();
-				String direct2 = wave2.get("direct").toString();
-				String direct3 = wave3.get("direct").toString();
+				String directA = waveA.get("direct").toString();
+				String directB = waveB.get("direct").toString();
+				String directC = waveC.get("direct").toString();
 				
-				BigDecimal waveHigh1 = (BigDecimal)wave1.get("waveHigh");
-				BigDecimal waveHigh2 = (BigDecimal)wave2.get("waveHigh");
-				BigDecimal waveHigh3 = (BigDecimal)wave3.get("waveHigh");
+				BigDecimal waveHighA = (BigDecimal)waveA.get("waveHigh");
+				BigDecimal waveHighB = (BigDecimal)waveB.get("waveHigh");
+				BigDecimal waveHighC = (BigDecimal)waveC.get("waveHigh");
 				
-				BigDecimal waveLow1 = (BigDecimal)wave1.get("waveLow");
-				BigDecimal waveLow2 = (BigDecimal)wave2.get("waveLow");
-				BigDecimal waveLow3 = (BigDecimal)wave3.get("waveLow");
+				BigDecimal waveLowA = (BigDecimal)waveA.get("waveLow");
+				BigDecimal waveLowB = (BigDecimal)waveB.get("waveLow");
+				BigDecimal waveLowC = (BigDecimal)waveC.get("waveLow");
 				
 				
-				if("1".equals(direct1)){
-					BigDecimal backPercent1 = waveHigh2.subtract(waveLow2).divide(waveHigh1.subtract(waveLow1),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
-					BigDecimal backPercent2 = waveHigh3.subtract(waveLow3).divide(waveHigh2.subtract(waveLow2),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
-					int compare10 = backPercent1.compareTo(new BigDecimal(1));
-					if(compare10==1){
-						//反转情况，第三波收回一波高点，生成中枢，否则生成二波单边和一个中枢
-					}else{
-						//形成中枢，三波低点低于一波，三波为单边，否则一波单边
-						int compare3 = backPercent1.compareTo(new BigDecimal(0.3));
-						if(compare3==1){
-							
+				if("1".equals(directA)){
+					BigDecimal backPercentB_A = waveHighB.subtract(waveLowB).divide(waveHighA.subtract(waveLowA),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+					BigDecimal backPercentC_B = waveHighC.subtract(waveLowC).divide(waveHighB.subtract(waveLowB),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+					int compareB_A_1 = backPercentB_A.compareTo(new BigDecimal(1));
+					if(compareB_A_1==1){
+						//反转情况
+						int compareC_B_1 = backPercentC_B.compareTo(new BigDecimal(1));
+						if(compareC_B_1==1){
+							//第三波收回一波高点，生成A_B中枢,单边为3波
 						}else{
-							int compare5 = backPercent1.compareTo(new BigDecimal(0.5));
+							int compareCg_Ad = waveHighC.compareTo(waveLowA);
+							if(compareCg_Ad==1){
+								//形成一个A_B中枢，没有单边
+							}else{
+								//生成二波单边和一个B-C中枢,单边left：1
+							}
+						}
+					}else{
+						//形成A_B中枢
+						BigDecimal backPercentC_A = waveHighC.subtract(waveLowC).divide(waveHighA.subtract(waveLowA),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+						int compareC_A_1 = backPercentC_A.compareTo(new BigDecimal(1));
+						if(compareC_A_1==1){
+							//三波长大于一波长 ，三波为单边
+						}else{
+							//否则一波单边
+						}
+						int compareB_A_03 = backPercentB_A.compareTo(new BigDecimal(0.66));
+						if(compareB_A_03==1){
+							//弱中枢
+						}else{
+							int compareB_A_02 = backPercentB_A.compareTo(new BigDecimal(0.5));
+							if(compareB_A_02==1){
+								//一般中枢
+							}else{
+								//若中枢
+							}
 						}
 					}
 				}
