@@ -627,7 +627,7 @@ public class DayDataAnalysis {
 		for(Map<String, Object> gp : gpDicList){
 			String code = gp.get("code").toString();
 			List<Map<String, Object>> waveList = zqiDao.findAll("select * from i_gpwave where code='"+code+"' order by periodBegin asc");
-			Map<String, Object> center = null;
+			//Map<String, Object> center = null;
 			int i = 0 ;
 			for(;i<waveList.size();i=i+2){
 				Map<String, Object> waveA = waveList.get(i);
@@ -646,6 +646,8 @@ public class DayDataAnalysis {
 				BigDecimal waveLowB = (BigDecimal)waveB.get("waveLow");
 				BigDecimal waveLowC = (BigDecimal)waveC.get("waveLow");
 				
+				Map<String, Object> center = new HashMap<String, Object>();
+				
 				
 				if("1".equals(directA)){
 					BigDecimal backPercentB_A = waveHighB.subtract(waveLowB).divide(waveHighA.subtract(waveLowA),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -656,12 +658,24 @@ public class DayDataAnalysis {
 						int compareC_B_1 = backPercentC_B.compareTo(new BigDecimal(1));
 						if(compareC_B_1==1){
 							//第三波收回一波高点，生成A_B中枢,单边为3波
+							center.put("centerBegin", "");
+							center.put("centerEnd", "");
+							center.put("code", "");
+							center.put("name", "");
+							center.put("centerHigh", "");
+							center.put("centerLow", "");
+							center.put("centerHigh2", "");
+							center.put("centerLow2", "");
+							center.put("centerNum", "");
+							center.put("centerZf", "");
+							center.put("periodEdge", "");
+							center.put("waveEdge", "");
 						}else{
 							int compareCg_Ad = waveHighC.compareTo(waveLowA);
 							if(compareCg_Ad==1){
 								//形成一个A_B中枢，没有单边
 							}else{
-								//生成二波单边和一个B-C中枢,单边left：1
+								//生成二波单边,单边left：1
 							}
 						}
 					}else{
@@ -681,7 +695,7 @@ public class DayDataAnalysis {
 							if(compareB_A_02==1){
 								//一般中枢
 							}else{
-								//若中枢
+								//弱中枢
 							}
 						}
 					}
