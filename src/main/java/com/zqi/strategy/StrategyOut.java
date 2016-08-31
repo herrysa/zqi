@@ -1,5 +1,6 @@
 package com.zqi.strategy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StrategyOut {
@@ -27,5 +28,10 @@ public class StrategyOut {
 		this.values = values;
 	}
 	
-	
+	public void addValues(List<Object> values) {
+		if(this.values==null){
+			this.values = new ArrayList<Object>();
+		}
+		this.values.addAll(values);
+	}
 }

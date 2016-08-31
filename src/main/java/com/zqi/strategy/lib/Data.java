@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import com.google.gson.Gson;
 import com.zqi.frame.dao.impl.ZqiDao;
 import com.zqi.frame.util.Tools;
 import com.zqi.unit.DateUtil;
@@ -49,11 +50,13 @@ public class Data extends BaseLib{
 			String period = data.get("period").toString();
 			dataMap.put(period, data);
 		}
+		Gson aa = new Gson();
+		String aaa = aa.toJson(dataMap);
 		JSONObject dataJsonObject = JSONObject.fromObject(dataMap);
 		String dataStr = dataJsonObject.toString();
 		return dataStr;
 	}
-	public String getAllGPData(String col,String option){
+	public Map<String, Map<String, Map<String, Object>>> getAllGPData(String col,String option){
 		JSONObject optionJson = null;
 		String code = null;
 		if(option!=null){
@@ -69,7 +72,6 @@ public class Data extends BaseLib{
 		List<String> extendCol = new ArrayList<String>();
 		String dbCol = initCol(col,extendCol);
 		optionJson.put("dbCol", dbCol);
-		JSONObject dataJsonObject = null;
 		List<Map<String,Object>> gpList = null;
 		if(code!=null){
 			if(!code.startsWith("'")){
@@ -92,14 +94,8 @@ public class Data extends BaseLib{
 			}
 			codeDataMap.put(gpCode, dataMap);
 		}
-		if(code!=null){
-			dataJsonObject = JSONObject.fromObject(codeDataMap);
-		}else{
-			dataJsonObject = JSONObject.fromObject(dataMap);
-		}
+		return codeDataMap;
 		
-		String dataStr = dataJsonObject.toString();
-		return dataStr;
 	}
 	
 	public List<Map<String,Object>> gpDataFactory(Map<String,Object> gp,JSONObject optionJson){

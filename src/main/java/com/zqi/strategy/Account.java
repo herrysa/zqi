@@ -1,6 +1,7 @@
 package com.zqi.strategy;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ public class Account {
 	private List<Map<String, Object>> transaction = null;
 	private List<Map<String, Object>> position = null;
 	private List<Map<String, Object>> blotter = null;
-	private List<Map<String, Object>> xData = null;
+	private List<Map<String, Object>> dataList = null;
 	private Map code = null;
 	private List<Map<String, Object>> capital = null;
 	private List<Map<String, Object>> assets = null;
@@ -35,28 +36,63 @@ public class Account {
 			BigDecimal cpCap = (BigDecimal)c_p.get("cap");
 			if(cpCode.equals(pCode)){
 				cpAmount = cpAmount.add(pAmount);
-				//c_p.cap = c_p.amount.mul(p.price);
 				cpCap = cpAmount.multiply(pPrice);
 				positioned =true;
 				positionChanged = true;
 				break;
 			}
 		}
-		/*if(!positioned){
-			var amount = p.amount;
-			if(amount>0){
-				var cap = p.amount.mul(p.price);
-				p.cap = cap;
-				this.position.push(p);
+		if(!positioned){
+			if(pAmount.compareTo(new BigDecimal(0))==1){
+				BigDecimal cap = pAmount.multiply(pPrice);
+				p.put("cap", cap);
+				this.position.add(p);
 				positionChanged = true;
 			}
 		}
 		if(positionChanged){
-			var changeCash = p.amount.mul(p.price);
-			var trans = {period:this.current_date,code:p.code,amount:p.amount,price:p.price,cap:changeCash};
-			this.transaction.push(trans);
-			this.cash -= changeCash;
-		}*/
+			BigDecimal changeCash = pAmount.multiply(pPrice);;
+			Map trans = new HashMap<String, Object>();
+			trans.put("period", this.current_date);
+			trans.put("code", pCode);
+			trans.put("amount", pAmount);
+			trans.put("price", pPrice);
+			trans.put("cap", changeCash);
+			this.transaction.add(trans);
+			this.cash = this.cash.subtract(changeCash);
+		}
 		
+	}
+	
+	public void balance(){
+		/*BigDecimal sum = this.cash;
+		for(Map<String, Object> c_p : this.position){
+			var price = this.code.data[this.current_date].close;
+			var cap = c_p.amount.mul(price);
+			sum = sum.add(cap);
+		}
+		this.assets.push(sum);
+		var yield_rate = sum.sub(this.capital_base).div(this.capital_base).mul(100);
+		this.current_yield_rate = yield_rate;
+		this.yield_rate.push(yield_rate);*/
+	}
+	
+	public void order(String code,BigDecimal amount,BigDecimal price,String otype){
+		//amount = amount.s
+		if(amount.compareTo(new BigDecimal(0))==0){
+			return ;
+		}
+		BigDecimal changeCash = amount.multiply(price);
+		BigDecimal remainCash = this.cash.subtract(changeCash);
+		int r = remainCash.compareTo(new BigDecimal(0));
+		if(r>=0){
+			Map<String,Object> p = new HashMap<String,Object>();
+			p.put("code", code);
+			p.put("amount", amount);
+			p.put("price", price);
+			this.changePosition(p);
+		}else{
+			
+		}
 	}
 }

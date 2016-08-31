@@ -1,25 +1,25 @@
-//name:日k线统计策略
-code = '002142';
 
-start = '2016-05-01';
-end = '2016-07-14';
+code = '000001';
+start = '2016-01-01';
+end = '2016-09-14';
 
-codeData = Data.getAllGPData('close,@avg({close:[5,10,20,60]})','{start:"2015-01-01",end:"2016-07-14"}');
-
+codeData = Data.getAllGPData('changepercent','{code:"000001",start:"2016-01-01",end:"2016-09-01"}');
+xData = '';
 result = {};
-out = {upNum:'line'};
+out = {upNum:'accu'};
+wholeOut = {};
 //init
-var uNum = 0, dNum = 0;
-for(var code in codeData){
-	var codeData = codeData[code];
-	var beforeChangepercent = -99;
-	for(var period in codeData){
-		var data = codeData[period];
-		var changepercent = data.changepercent;
-		if(beforeChangepercent = -99){
-			
-		}
+var uNum = 0, dNum = 0 , sum = 0;
+for(var x in xData){
+	var period = xData[x];
+	var data = codeData[period];
+	var changepercent = data.changepercent;
+	if(changepercent >0){
+		uNum++;
+	}else if(changepercent <0){
+		dNum++;
 	}
+	sum++;
 }
-result['upNum'] = [uNum,dNum];
+result['upNum'] = {uNum:uNum,dNum:dNum,sum:sum};
 result = json2str(result);

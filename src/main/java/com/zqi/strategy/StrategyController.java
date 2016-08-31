@@ -85,7 +85,10 @@ public class StrategyController extends BaseController{
 	public String strategyResult(HttpServletRequest request,ModelMap model){
 		String code = request.getParameter("code");
 		model.put("code", code);
-		List<Object> categoryData = new ArrayList<Object>();
+		StrategyQuarz quarz = (StrategyQuarz)SpringContextHelper.getBean("strategyQuarz");
+		quarz.init("loopbacktest/"+code+".js");
+		quarz.run();
+		/*List<Object> categoryData = new ArrayList<Object>();
 		List<String> indiLegendList = new ArrayList<String>();
 		List<Series> indiSeries = new ArrayList<Series>();
 		StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
@@ -120,7 +123,7 @@ public class StrategyController extends BaseController{
 		}
 		GsonOption strategyOption = getKCahrtOption(name,indiLegendList,categoryData);
 		strategyOption.series(indiSeries);
-		model.put("strategyOption", strategyOption.toString());
+		model.put("strategyOption", strategyOption.toString());*/
 		return "strategy/strategyResult";
 	}
 	

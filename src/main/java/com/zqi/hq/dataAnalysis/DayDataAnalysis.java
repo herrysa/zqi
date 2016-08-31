@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -59,6 +60,7 @@ public class DayDataAnalysis {
 		//Map<String, Object> waveMapB = null;
 		
 		int direct = 2;
+		List<Map<String, Object>> waveTrans = new ArrayList<Map<String,Object>>();
 		Map<String, Object> waveStatus = zqiDao.findFirst("select * from i_gpwave_status where code='"+code+"'");
 		String dataSql = "select * from daytable_all where code='"+code+"'";
 		String status_period = "";
@@ -127,7 +129,8 @@ public class DayDataAnalysis {
 						BigDecimal zf = waveHigh.subtract(waveLow).divide(waveHigh,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 						waveMap.put("waveNum", waveNum);
 						waveMap.put("zf", zf);
-						waveList.add(waveMap);
+						//waveList.add(waveMap);
+						waveTrans.add(waveMap);
 						periodBegin = lastPeriod;
 						//waveBegin = lastClose;
 						waveHigh = high;
@@ -136,6 +139,11 @@ public class DayDataAnalysis {
 						//i += 2;
 						waveNum = 1;
 						lastDayData = dayData;
+						waveTrans.add(waveMap);
+						if(waveTrans.size()==3){
+							//List<Map<String, Object>> waveTransTemp = center1Analysis(waveTrans);
+							//waveList.addAll(waveTransTemp);
+						}
 						}
 					}else if(direct==1){
 						waveNum ++;
@@ -234,149 +242,6 @@ public class DayDataAnalysis {
 					lastDayData = dayData;
 					direct = directTemp;
 				}
- 				/*if(directTemp>0){
-					if(direct==-1||direct==0){
-						boolean isEnd= isEnd(direct,i,lastClose,dayDataList);
-						if(isEnd){
-							Map<String, Object> waveMap = new HashMap<String, Object>();
-							waveMap.put("code", code);
-							waveMap.put("name", name);
-							waveMap.put("periodBegin", periodBegin);
-							waveMap.put("periodEnd", lastPeriod);
-							waveMap.put("waveBegin", waveBegin);
-							waveMap.put("waveEnd", lastClose);
-							waveMap.put("direct", direct);
-							BigDecimal zf = lastClose.subtract(waveBegin).divide(waveBegin,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
-							waveMap.put("waveNum", waveNum);
-							waveMap.put("zf", zf);
-							waveList.add(waveMap);
-							periodBegin = lastPeriod;
-							waveBegin = lastClose;
-							direct = 1;
-							//i += 2;
-							waveNum = 1;
-							lastDayData = dayData;
-<<<<<<< HEAD
-							if(waveNum<3){
-								if(waveMapA==null){
-									waveMapA = waveMap;
-								}else if(waveMapB==null){
-									waveMapB = waveMap;
-								}else{
-									//合并这三个小于3的波段
-								}
-							}else{
-								if(waveMapA==null){
-									waveList.add(waveMap);
-								}else if(waveMapB==null){
-									//只有一段
-									waveList.add(waveMap);
-								}else{
-									
-									//合并这2小一大
-									waveList.add(waveMap);
-								}
-							}
-							
-=======
-						}else{
-							waveNum ++;
-							lastDayData = dayData;
->>>>>>> d0bd8c85fa7e44f1be59e69e551818bb532b5681
-						}
-					}else if(direct==1){
-						waveNum ++;
-						if(high.compareTo(waveHigh)>0){
-							waveHigh = high;
-						}
-						if(low.compareTo(waveLow)<0){
-							waveLow = low;
-						}
-						lastDayData = dayData;
-						
-					}else{
-						waveNum ++;
-						direct = 1;
-					}
-				}else if(directTemp==0){
-					if(direct==-1||direct==1){
-						boolean isEnd= isEnd(direct,i,lastClose,dayDataList);
-						if(isEnd){
-							Map<String, Object> waveMap = new HashMap<String, Object>();
-							waveMap.put("code", code);
-							waveMap.put("name", name);
-							waveMap.put("periodBegin", periodBegin);
-							waveMap.put("periodEnd", lastPeriod);
-							waveMap.put("waveBegin", waveBegin);
-							waveMap.put("waveEnd", lastClose);
-							waveMap.put("direct", direct);
-							BigDecimal zf = lastClose.subtract(waveBegin).divide(waveBegin,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
-							waveMap.put("waveNum", waveNum);
-							waveMap.put("zf", zf);
-							if(waveNum<3){
-								waveMap.put("state", "9");
-								lastDayData = dayData;
-							}else{
-								waveMap.put("state", "0");
-							}
-							waveList.add(waveMap);
-							periodBegin = lastPeriod;
-							waveBegin = lastClose;
-							direct = 0;
-							//i += 2;
-							waveNum = 1;
-							lastDayData = dayData;
-						}else{
-							waveNum ++;
-							lastDayData = dayData;
-						}
-					}else if(direct==0){
-						waveNum ++;
-						lastDayData = dayData;
-					}else{
-						waveNum ++;
-						direct = 0;
-					}
-				}else if(directTemp<0){
-					if(direct==1||direct==0){
-						boolean isEnd= isEnd(direct,i,lastClose,dayDataList);
-						if(isEnd){
-							Map<String, Object> waveMap = new HashMap<String, Object>();
-							waveMap.put("code", code);
-							waveMap.put("name", name);
-							waveMap.put("periodBegin", periodBegin);
-							waveMap.put("periodEnd", lastPeriod);
-							waveMap.put("waveBegin", waveBegin);
-							waveMap.put("waveEnd", lastClose);
-							waveMap.put("direct", direct);
-							BigDecimal zf = lastClose.subtract(waveBegin).divide(waveBegin,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
-							waveMap.put("waveNum", waveNum);
-							waveMap.put("zf", zf);
-							if(waveNum<3){
-								waveMap.put("state", "9");
-								lastDayData = dayData;
-							}else{
-								waveMap.put("state", "0");
-							}
-							waveList.add(waveMap);
-							periodBegin = lastPeriod;
-							waveBegin = lastClose;
-							direct = -1;
-							//i += 2;
-							waveNum = 1;
-							lastDayData = dayData;
-						}else{
-							waveNum ++;
-							lastDayData = dayData;
-						}
-					}else if(direct==-1){
-						waveNum ++;
-						lastDayData = dayData;
-					}else{
-						waveNum ++;
-						direct = -1;
-					}
-				}*/
 			}
 		}
 		zqiDao.addList(waveList, "i_gpwave");
@@ -620,6 +485,115 @@ public class DayDataAnalysis {
 				}
 			}
 		}
+	}
+	
+/*	public List<Map<String, Object>> center1Analysis(Map<String, WaveShape> waveFactory){
+		for(int i=0;i<10;i++){
+			WaveShape waveShape = waveFactory.get(i);
+			List<Map<String, Object>> wavequeue = waveShape.getWaveQueue();
+			if(wavequeue!=null&&wavequeue.size()==3){//可以升级，wave或center数等于3
+				//1.判断中枢及两边(l1)
+				List<Map<String, Object>> centerList = centerAnalysis(wavequeue);
+				//2.和同级比较
+				
+			}
+		}
+	}*/
+	public List<Map<String, Object>> centerAnalysis(List<Map<String, Object>> wavequeue){
+		Map<String, Object> waveA = wavequeue.get(0);
+		Map<String, Object> waveB = wavequeue.get(1);
+		Map<String, Object> waveC = wavequeue.get(2);
+		
+		String code = waveA.get("code").toString();
+		String name = waveA.get("name").toString();
+		
+		String directA = waveA.get("direct").toString();
+		String directB = waveB.get("direct").toString();
+		String directC = waveC.get("direct").toString();
+		
+		BigDecimal waveHighA = (BigDecimal)waveA.get("waveHigh");
+		BigDecimal waveHighB = (BigDecimal)waveB.get("waveHigh");
+		BigDecimal waveHighC = (BigDecimal)waveC.get("waveHigh");
+		
+		BigDecimal waveLowA = (BigDecimal)waveA.get("waveLow");
+		BigDecimal waveLowB = (BigDecimal)waveB.get("waveLow");
+		BigDecimal waveLowC = (BigDecimal)waveC.get("waveLow");
+		
+		Map<String, Object> center = new HashMap<String, Object>();
+		List<Map<String, Object>> waveTransTemp = new ArrayList<Map<String,Object>>();
+		List<Map<String, Object>> centerTemp = new ArrayList<Map<String,Object>>();
+		
+		if("1".equals(directA)){
+			BigDecimal backPercentB_A = waveHighB.subtract(waveLowB).divide(waveHighA.subtract(waveLowA),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+			BigDecimal backPercentC_B = waveHighC.subtract(waveLowC).divide(waveHighB.subtract(waveLowB),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+			int compareB_A_1 = backPercentB_A.compareTo(new BigDecimal(1));
+			if(compareB_A_1==1){
+				//反转情况
+				int compareC_B_1 = backPercentC_B.compareTo(new BigDecimal(1));
+				if(compareC_B_1==1){
+					//第三波收回一波高点，生成A_B中枢,单边为3波
+					BigDecimal high = (BigDecimal)waveB.get("high");
+					BigDecimal low = (BigDecimal)waveB.get("low");
+					BigDecimal high2 = (BigDecimal)waveC.get("high");
+					BigDecimal low2 = low;
+					Map<String, Object> centerMap = new HashMap<String, Object>();
+					centerMap.put("code", code);
+					centerMap.put("name", name);
+					centerMap.put("periodBegin", waveB.get("periodBegin"));
+					centerMap.put("periodEnd", waveB.get("periodEnd"));
+					centerMap.put("high", high);
+					centerMap.put("low", low);
+					centerMap.put("high2", high2);
+					centerMap.put("low2", low2);
+					centerMap.put("level", 1);
+					BigDecimal zf = high.subtract(low).divide(low,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+					centerMap.put("zf", zf);
+					BigDecimal zf2 = high2.subtract(low2).divide(low2,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+					centerMap.put("zf2", zf2);
+					centerMap.put("num", waveB.get("num"));
+					
+					waveA.put("level", "0");
+					waveB.put("level", "0");
+					waveC.put("level", "1");
+					
+					centerTemp.add(centerMap);
+					centerTemp.add(waveC);
+
+					waveTransTemp.add(waveC);
+					
+					wavequeue = waveTransTemp;
+					return centerTemp;
+				}else{
+					int compareCg_Ad = waveHighC.compareTo(waveLowA);
+					if(compareCg_Ad==1){
+						//形成一个A_B中枢，没有单边
+					}else{
+						//生成二波单边,单边left：1
+					}
+				}
+			}else{
+				//形成A_B中枢
+				BigDecimal backPercentC_A = waveHighC.subtract(waveLowC).divide(waveHighA.subtract(waveLowA),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+				int compareC_A_1 = backPercentC_A.compareTo(new BigDecimal(1));
+				if(compareC_A_1==1){
+					//三波长大于一波长 ，三波为单边
+				}else{
+					//否则一波单边
+				}
+				int compareB_A_03 = backPercentB_A.compareTo(new BigDecimal(0.66));
+				if(compareB_A_03==1){
+					//弱中枢
+				}else{
+					int compareB_A_02 = backPercentB_A.compareTo(new BigDecimal(0.5));
+					if(compareB_A_02==1){
+						//一般中枢
+					}else{
+						//弱中枢
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 	public void centerAnalysis(){

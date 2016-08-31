@@ -47,6 +47,10 @@ public class Strategy {
 		this.context = context;
 	}
 
+	public String getInitParam(String name ){
+		return initMap.get(name);
+	}
+	
 	public void setInitParam(String name , String param){
 		initMap.put(name, param);
 	}
@@ -209,15 +213,29 @@ public class Strategy {
 					String replaceStr = "";
 					if(func.startsWith("indicator.")||func.startsWith("lib.")){
 						replaceStr = dataFromJsLib(func);
-					}else {
+						initMap.put(varName, replaceStr);
+					}else if(func.startsWith("Data.")){
 						replaceStr = dataFromJavaLib(func);
+						initMap.put(varName, replaceStr);
 					}
-					initMap.put(varName, replaceStr);
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public Map<String, Map<String, Map<String, Object>>> getCodeData(){
+		try {
+			String func = initMap.get("codeData");
+			if(func!=null&&func.contains(".")){
+				func = func.trim();
+				return (Map<String, Map<String, Map<String, Object>>>)getDataFromJavaLib(func);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public String getStrategyScript(){
@@ -261,6 +279,11 @@ public class Strategy {
 							valueList.add(o);
 						}
 						strategyOut.setValues(valueList);
+					}else if("accu".equals(type)){
+						JSONObject outValueStr = (JSONObject)outValue;
+						List<Object> valueList = new ArrayList<Object>();
+						valueList.add(outValueStr);
+						strategyOut.setValues(valueList);
 					}else{
 						JSONArray outValueStr = (JSONArray)outValue;
 						Object[] valueArr = (Object[])JSONArray.toArray(outValueStr);
@@ -294,6 +317,7 @@ public class Strategy {
 	}
 	
 	private void dealOut(String out){
+		outList.clear();
 		if(out.startsWith("{")){
 			JSONObject outObject = JSONObject.fromObject(out);
 			Iterator outIt = outObject.keys();
@@ -325,11 +349,10 @@ public class Strategy {
 		}
 	}
 	
-	private String dataFromJavaLib(String func){
-		String rsStr = "";
+	private Object getDataFromJavaLib(String func){
 		try{
 			String parenthesesStr = Tools.findParentheses(func);
-			if(parenthesesStr!=null){
+			if(parenthesesStr!=null&&!"".equals(parenthesesStr)){
 				String funcName = func.replace(parenthesesStr, "");
 				String funcParam = parenthesesStr.substring(1, parenthesesStr.length()-1);
 				String[] funcArr = funcName.split("\\.");
@@ -347,7 +370,7 @@ public class Strategy {
 				paramTypeObject = paramTypeList.toArray(new Class[paramTypeList.size()]);
 				Method method = StrategyLib.getMethod(methodName,paramTypeObject);
 				Object result = method.invoke(strategyLib,paramObject);
-				rsStr = result.toString();
+				return result;
 			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -362,6 +385,18 @@ public class Strategy {
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private String dataFromJavaLib(String func){
+		String rsStr = "";
+		try{
+			Object result = getDataFromJavaLib(func);
+			JSONObject dataJsonObject = JSONObject.fromObject(result);;
+			rsStr = dataJsonObject.toString();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return rsStr;
