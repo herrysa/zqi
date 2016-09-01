@@ -5,9 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,9 +16,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
+import com.google.gson.Gson;
 import com.zqi.frame.dao.impl.ZqiDao;
 import com.zqi.frame.util.Tools;
 import com.zqi.unit.FileUtil;
@@ -60,8 +56,10 @@ public class Strategy {
 	}
 
 	public void setxData(List<Object> xData) {
-		JSONArray xArr = JSONArray.fromObject(xData);
-		String xDataStr = xArr.toString();
+		//JSONArray xArr = JSONArray.fromObject(xData);
+		Gson gson = new Gson();
+		String xDataStr = gson.toJson(xData);
+		//String xDataStr = xArr.toString();
 		initMap.put("xData", xDataStr);
 	}
 
@@ -225,9 +223,9 @@ public class Strategy {
 		}
 	}
 	
-	public Map<String, Map<String, Map<String, Object>>> getCodeData(){
+	public Map<String, Map<String, Map<String, Object>>> getDataMap(String code){
 		try {
-			String func = initMap.get("codeData");
+			String func = initMap.get(code);
 			if(func!=null&&func.contains(".")){
 				func = func.trim();
 				return (Map<String, Map<String, Map<String, Object>>>)getDataFromJavaLib(func);
@@ -265,31 +263,18 @@ public class Strategy {
 			String evalStr = getStrategyScript();
 			engine.eval(evalStr,bindings);
 			Object result = bindings.get("result");
-			System.out.println(result.toString());
-			JSONObject resultJson = JSONObject.fromObject(result);
+			//System.out.println(result.toString());
+			Gson gson = new Gson();
+			Map<String, Object> rsMap = gson.fromJson(result.toString(), Map.class);
 			for(StrategyOut strategyOut : outList){
 				String name = strategyOut.getName();
 				String type = strategyOut.getType();
-				Object outValue = resultJson.get(name);
+				Object outValue = rsMap.get(name);
 				if(outValue!=null){
-					if("table".equals(type)){
-						JSONArray outValueStr = (JSONArray)outValue;
-						List<Object> valueList = new ArrayList<Object>();
-						for(Object o : outValueStr){
-							valueList.add(o);
-						}
-						strategyOut.setValues(valueList);
-					}else if("accu".equals(type)){
-						JSONObject outValueStr = (JSONObject)outValue;
-						List<Object> valueList = new ArrayList<Object>();
-						valueList.add(outValueStr);
-						strategyOut.setValues(valueList);
+					if("accu".equals(type)){
+						strategyOut.addValue((Map)outValue);
 					}else{
-						JSONArray outValueStr = (JSONArray)outValue;
-						Object[] valueArr = (Object[])JSONArray.toArray(outValueStr);
-						List<Object> valueList = new ArrayList<Object>();
-						Collections.addAll(valueList, valueArr);
-						strategyOut.setValues(valueList);
+						strategyOut.setValues((List)outValue);
 					}
 				}
 			}
@@ -319,13 +304,13 @@ public class Strategy {
 	private void dealOut(String out){
 		outList.clear();
 		if(out.startsWith("{")){
-			JSONObject outObject = JSONObject.fromObject(out);
-			Iterator outIt = outObject.keys();
-			while(outIt.hasNext()){
-				String key = outIt.next().toString();
-				String type = outObject.get(key).toString();
+			Gson gson = new Gson();
+			Map<String,String> outMap = gson.fromJson(out, Map.class);
+			Set<String> outKeySet = outMap.keySet();
+			for(String outKey : outKeySet){
+				String type = outMap.get(outKey);
 				StrategyOut strategyOut = new StrategyOut();
-				strategyOut.setName(key);
+				strategyOut.setName(outKey);
 				strategyOut.setType(type);
 				outList.add(strategyOut);
 			}
@@ -394,8 +379,9 @@ public class Strategy {
 		String rsStr = "";
 		try{
 			Object result = getDataFromJavaLib(func);
-			JSONObject dataJsonObject = JSONObject.fromObject(result);;
-			rsStr = dataJsonObject.toString();
+			//JSONObject dataJsonObject = JSONObject.fromObject(result);
+			Gson gson = new Gson();
+			rsStr = gson.toJson(gson);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

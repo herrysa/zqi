@@ -3,7 +3,7 @@ package com.zqi.strategy;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StrategyOut {
+public class StrategyOut implements Cloneable{
 
 	private String name;
 	private String type;
@@ -28,10 +28,34 @@ public class StrategyOut {
 		this.values = values;
 	}
 	
+	public void clearValues(){
+		if(this.values!=null){
+			this.values.clear();
+		}
+	}
+	
+	public void addValue(Object value) {
+		if(this.values==null){
+			this.values = new ArrayList<Object>();
+		}
+		this.values.add(value);
+	}
+	
 	public void addValues(List<Object> values) {
 		if(this.values==null){
 			this.values = new ArrayList<Object>();
 		}
 		this.values.addAll(values);
+	}
+	
+	@Override
+	public StrategyOut clone() {
+		StrategyOut o = null;
+		try {
+			o = (StrategyOut) super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		return o;
 	}
 }

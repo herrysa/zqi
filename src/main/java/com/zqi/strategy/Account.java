@@ -1,6 +1,7 @@
 package com.zqi.strategy;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,17 +10,25 @@ public class Account {
 
 	private BigDecimal capital_base = new BigDecimal(1000000);
 	private BigDecimal cash = new BigDecimal(0);
-	private String current_date = null;
-	private List<Map<String, Object>> transaction = null;
-	private List<Map<String, Object>> position = null;
-	private List<Map<String, Object>> blotter = null;
-	private List<Map<String, Object>> dataList = null;
-	private Map code = null;
-	private List<Map<String, Object>> capital = null;
-	private List<Map<String, Object>> assets = null;
+	private String current_date;
+	private List<Map<String, Object>> transaction;
+	private List<Map<String, Object>> position;
+	private List<Map<String, Object>> blotter;
+	private List<Map<String, Object>> capital;
+	private List<Map<String, Object>> assets;
 	private int interrupt = 0;
-	private BigDecimal current_yield_rate = null;
-	private List<BigDecimal> yield_rate = null;
+	private BigDecimal current_yield_rate;
+	private List<BigDecimal> yield_rate;
+	
+	public Account(){
+		
+	}
+	
+	public Account(Long capital){
+		capital_base = new BigDecimal(capital);
+		transaction = new ArrayList<Map<String,Object>>();
+		position = new ArrayList<Map<String,Object>>();
+	}
 	
 	public void init(){
 		this.cash = this.capital_base;

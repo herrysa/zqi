@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.json.JSONObject;
@@ -33,7 +33,6 @@ import com.github.abel533.echarts.json.GsonOption;
 import com.github.abel533.echarts.series.Line;
 import com.github.abel533.echarts.series.Series;
 import com.github.abel533.echarts.style.TextStyle;
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion.Static;
 import com.zqi.frame.controller.BaseController;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.JQueryPager;
@@ -87,14 +86,10 @@ public class StrategyController extends BaseController{
 		model.put("code", code);
 		StrategyQuarz quarz = (StrategyQuarz)SpringContextHelper.getBean("strategyQuarz");
 		quarz.init("loopbacktest/"+code+".js");
-		quarz.run();
-		/*List<Object> categoryData = new ArrayList<Object>();
+		Strategy strategy = quarz.run();
+		List<Object> categoryData = new ArrayList<Object>();
 		List<String> indiLegendList = new ArrayList<String>();
 		List<Series> indiSeries = new ArrayList<Series>();
-		StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
-		Strategy strategy = strategyFactoy.getStrategy("loopbacktest/"+code+".js");
-		strategy.addLib("lib/account.js");
-		strategy.eval();
 		List<StrategyOut> outList = strategy.getOutList();
 		for(StrategyOut strategyOut :outList){
 			String outNname = strategyOut.getName();
@@ -102,11 +97,11 @@ public class StrategyController extends BaseController{
 			List<Object> values = strategyOut.getValues();
 			if("xData".equals(outNname)){
 				categoryData = values;
-			}else if("trans".equals(outNname)){
-				model.put("trans",listMapToStr(strategyOut.getValues())); 
+			}else if("table".equals(outType)){
+				
 			}else if("line".equals(outType)){
 				String lineName = outNname;
-					indiLegendList.add(lineName);
+				indiLegendList.add(lineName);
 				Line line = new Line();
 				line.setSmooth(true);
 				line.setName(lineName);
@@ -123,7 +118,8 @@ public class StrategyController extends BaseController{
 		}
 		GsonOption strategyOption = getKCahrtOption(name,indiLegendList,categoryData);
 		strategyOption.series(indiSeries);
-		model.put("strategyOption", strategyOption.toString());*/
+		model.put("strategyOption", strategyOption.toString());
+		
 		return "strategy/strategyResult";
 	}
 	
