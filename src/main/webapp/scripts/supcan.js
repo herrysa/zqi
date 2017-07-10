@@ -25,6 +25,8 @@ function OnReady( id ){
 	}
 }
 function OnEvent( id, Event, p1, p2, p3, p4){
+	//console.log(id);
+	//console.log(Event);
 	var supcanGrid = supcanGridMap[id];
 	if(supcanGrid){
 		var eventMap = supcanGrid.event;
@@ -36,6 +38,23 @@ function OnEvent( id, Event, p1, p2, p3, p4){
 		}
 	}
 }
+
+function insertTreeListToDiv(divId,id, para){
+	jQuery("#"+divId).append(bldStr("BCV1.TreeList",id, para, (arguments.length > 3) ? arguments[3]:"100%")) ;
+}
+function insertReportToDiv(divId,id, para){
+	jQuery("#"+divId).append(bldStr("LuxForm",id, para, (arguments.length > 3) ? arguments[3]:"100%")) ;
+}
+function insertFreeFormToDiv(divId,id,para){
+	jQuery("#"+divId).append(bldStr("BCV1.FreeForm",id, para, (arguments.length > 3) ? arguments[3]:"100%")) ;
+}
+function insertTreeToDiv(divId,id,para){
+	jQuery("#"+divId).append(bldStr("BCV1.Tree",		id, para, (arguments.length > 3) ? arguments[3]:"100%")) ;
+}
+function insertFormDesignerToDiv(divId,id,para){
+	jQuery("#"+divId).append( bldStr("BCV4.FormDesigner",	id, para, (arguments.length > 3) ? arguments[3]:"100%") ) ;
+}
+
 /*硕正字符串格式化*/
 function parseBuildString(buildStr){
 	if(buildStr){

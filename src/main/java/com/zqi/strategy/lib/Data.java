@@ -1,9 +1,7 @@
 package com.zqi.strategy.lib;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.sf.json.JSONArray;
@@ -19,7 +18,6 @@ import net.sf.json.JSONObject;
 import com.google.gson.Gson;
 import com.zqi.frame.dao.impl.ZqiDao;
 import com.zqi.frame.util.Tools;
-import com.zqi.unit.DateUtil;
 
 public class Data extends BaseLib{
 
@@ -56,88 +54,166 @@ public class Data extends BaseLib{
 		String dataStr = dataJsonObject.toString();
 		return dataStr;
 	}
-	public Map<String, Map<String, Map<String, Object>>> getAllGPData(String col,String option){
-		JSONObject optionJson = null;
-		String code = null;
+
+	@SuppressWarnings("unchecked")
+	public Map<String,Object> getGPData(String option){
+		Map<String,String> optionMap = null;
 		if(option!=null){
 			try {
 				option = option.replaceAll("'", "");
-				optionJson = JSONObject.fromObject(option);
-				code = optionJson.getString("code");
+				Gson gson = new Gson();
+				optionMap = gson.fromJson(option, Map.class);
 			} catch (Exception e) {
 			}
 		}else{
-			optionJson = new JSONObject();
+			optionMap = new HashMap<String, String>();
+		}
+		String code = null,col = null,gpNum = null,random = null;
+		code = optionMap.get("code");
+		List<Map<String,Object>> gpListTemp = null;
+		boolean multiCode = false;
+		if(code!=null){
+			if(",".equals(code)){
+				String[] codeArr = code.split(",");
+				String codeSql = "(";
+				for(String c : codeArr){
+					codeSql += "'"+c+"',";
+				}
+				if("(".equals(codeSql)){
+					codeSql += ")";
+				}else{
+					codeSql = codeSql.substring(0,codeSql.length()-1);
+					codeSql += ")";
+				}
+				multiCode = true;
+				gpListTemp = zqiDao.findAll("select * from d_gpdic where code in "+codeSql);
+			}else{
+				if(!code.startsWith("'")){
+					code = "'"+code+"'";
+				}
+				gpListTemp = zqiDao.findAll("select * from d_gpdic where code="+code);
+			}
+		}else{
+			multiCode = true;
+			gpListTemp = zqiDao.findAll("select * from d_gpdic where type in ('0','1')");	
+		}
+		if(optionMap.containsKey("col")){
+			col = optionMap.get("col");
+		}else{
+			col = "close";
 		}
 		List<String> extendCol = new ArrayList<String>();
 		String dbCol = initCol(col,extendCol);
-		optionJson.put("dbCol", dbCol);
-		List<Map<String,Object>> gpList = null;
-		if(code!=null){
-			if(!code.startsWith("'")){
-				code = "'"+code+"'";
-			}
-			gpList = zqiDao.findAll("select * from d_gpdic where code="+code);
+		optionMap.put("dbCol", dbCol);
+		
+		if(optionMap.containsKey("gpNum")){
+			gpNum = optionMap.get("gpNum");
 		}else{
-			gpList = zqiDao.findAll("select * from d_gpdic where type in ('0','1')");	
+			gpNum = "100";
 		}
-		Map<String, Map<String, Map<String, Object>>> codeDataMap = new HashMap<String, Map<String,Map<String,Object>>>();
-		Map<String, Map<String, Object>> dataMap = null;
-		for(Map<String,Object> gp : gpList){
-			String gpCode = gp.get("code").toString();
-			List<Map<String,Object>> codeList = gpDataFactory(gp,optionJson);
-			getExendColData(codeList,extendCol);
-			dataMap = new HashMap<String, Map<String,Object>>();
-			for(Map<String,Object> data : codeList){
-				String period = data.get("period").toString();
-				dataMap.put(period, data);
+		if(optionMap.containsKey("random")){
+			random = optionMap.get("random");
+		}
+		List<Map<String,Object>> gpList = new ArrayList<Map<String,Object>>();
+		if("1".equals(random)){
+			if("-1".equals(gpNum)){
+				gpList = gpListTemp;
+			}else{
+				int gpNumi = Integer.parseInt(gpNum);
+				for(int i=0;i<gpNumi;i++){
+					int randomi =(int) (Math.random()*gpListTemp.size()+1);
+					gpList.add(gpListTemp.get(randomi-1));
+				}
 			}
-			codeDataMap.put(gpCode, dataMap);
+		}else{
+			if("-1".equals(gpNum)){
+				gpList = gpListTemp;
+			}else{
+				int gpNumi = Integer.parseInt(gpNum);
+				if(gpNumi<gpListTemp.size()){
+					gpList = gpListTemp.subList(0, gpNumi-1);
+				}else{
+					gpList = gpListTemp;
+				}
+			}
+		}
+		
+		//Map<String, Map<String, Map<String, Object>>> codeDataMap = new HashMap<String, Map<String,Map<String,Object>>>();
+		Map<String, Object> codeDataMap = new TreeMap<String, Object>();
+		//Map<String, Map<String, Object>> dataMap = null;
+		String hasData = null;
+		if(optionMap.containsKey("hasData")){
+			hasData = optionMap.get("hasData");
+		}
+		String key = null;
+		if(optionMap.containsKey("key")){
+			key = optionMap.get("key");
+		}
+		for(Map<String,Object> gp : gpList){
+			if("0".equals(hasData)){
+				String gpCode = gp.get("code").toString();
+				codeDataMap.put(gpCode, gp);
+				continue;
+			}
+			List<Map<String,Object>> codeList = gpDataFactory(gp,optionMap);
+			getExendColData(codeList,extendCol);
+			//dataMap = new HashMap<String, Map<String,Object>>();
+			for(Map<String,Object> data : codeList){
+				if("code".equals(key)){
+					String gpCode = gp.get("code").toString();
+					codeDataMap.put(gpCode, codeList);
+				}else{
+					String period = data.get("period").toString();
+					Object codeDataObj= codeDataMap.get(period);
+					if(codeDataObj==null){
+						if(multiCode){
+							List<Map<String, Object>> codeDataList = new ArrayList<Map<String, Object>>();
+							codeDataList.add(data);
+							codeDataMap.put(period,codeDataList);
+						}else{
+							codeDataMap.put(period, data);
+						}
+					}else{
+						if(multiCode){
+							List<Map<String, Object>> codeDataList = (List<Map<String, Object>>)codeDataObj;
+							codeDataList.add(data);
+						}
+					}
+					//dataMap.put(period, data);
+				}
+				}
+				
+			//codeDataMap.put(gpCode, dataMap);
 		}
 		return codeDataMap;
 		
 	}
-	
-	public List<Map<String,Object>> gpDataFactory(Map<String,Object> gp,JSONObject optionJson){
+	@SuppressWarnings("unchecked")
+	public List<Map<String,Object>> gpDataFactory(String code,Map<String, String> optionMap){
 		String start = null, end = null, ex_suspended =null,ex_new =null;
-		String code = gp.get("code").toString();
 		List<Map<String,Object>> codeList = null;
-		if(optionJson.containsKey("start")){
-			start = optionJson.getString("start");
+		if(optionMap.containsKey("start")){
+			start = optionMap.get("start");
 		}
-		if(optionJson.containsKey("end")){
-			end = optionJson.getString("end");
+		if(optionMap.containsKey("end")){
+			end = optionMap.get("end");
 		}
-		if(optionJson.containsKey("ex_suspended")){
-			ex_suspended = optionJson.getString("ex_suspended");
+		if(optionMap.containsKey("ex_suspended")){
+			ex_suspended = optionMap.get("ex_suspended");
 		}
-		if(optionJson.containsKey("ex_new")){
-			ex_new = optionJson.getString("ex_new");
+		if(optionMap.containsKey("ex_new")){
+			ex_new = optionMap.get("ex_new");
 		}
-		String dbCol = optionJson.getString("dbCol");
+		String dbCol = optionMap.get("dbCol");
 		
-		String listDate = gp.get("listDate").toString();
-		Calendar calendar = Calendar.getInstance();
-		try {
-			calendar.setTime(DateUtil.convertStringToDate(listDate));
-			int dayOfyear = calendar.get(Calendar.DAY_OF_YEAR);
-			calendar.set(Calendar.DAY_OF_YEAR,dayOfyear+90);
-			if(start==null){
-				start = DateUtil.convertDateToString(calendar.getTime());
-			}else{
-				Calendar cdStart = Calendar.getInstance();
-				cdStart.setTime(DateUtil.convertStringToDate(start));
-				int d = calendar.compareTo(cdStart);
-				if(d>0){
-					start = DateUtil.convertDateToString(calendar.getTime());
-				}
-			}
-			
-		} catch (ParseException e) {
-			e.printStackTrace();
+		String findSql = null;
+		if("all".equals(code)){
+			findSql = "select "+dbCol+" from daytable_all where 1=1 ";
+		}else if(",".equals(code)){
+			findSql = "select "+dbCol+" from daytable_all where code in "+code;
+		}else{
+			findSql = "select "+dbCol+" from daytable_all where code="+code;
 		}
-		
-		String findSql = "select "+dbCol+" from daytable_all where code='"+code+"'";
 		if(start!=null&&end!=null){
 			findSql += " and period between '"+start+"' and '"+end+"'";
 		}else if(start!=null){
@@ -145,15 +221,89 @@ public class Data extends BaseLib{
 		}else if(end!=null){
 			findSql += " and period<='"+end+"'";
 		}
-		if("0".equals(ex_suspended)){
+		if(!"0".equals(ex_suspended)){
 			findSql += " and close<>0";
 		}
-		findSql += " order by period asc";
+		if(!"0".equals(ex_new)){
+			findSql += " and invalid=0";
+		}
+		findSql += " order by period asc,code asc";
 		codeList = zqiDao.findAll(findSql);
 		if(codeList==null){
 			codeList = new ArrayList<Map<String,Object>>();
 		}
-		Map<String, Map<String, Object>> dataMap = new HashMap<String, Map<String,Object>>();;
+		return codeList;
+	}
+	@SuppressWarnings("unchecked")
+	public List<Map<String,Object>> gpDataFactory(Map<String,Object> gp,Map<String, String> optionMap){
+		String start = null, end = null, ex_suspended =null,ex_new =null;
+		String code = gp.get("code").toString();
+		String daytable = gp.get("daytable").toString();
+		List<Map<String,Object>> codeList = null;
+		if(optionMap.containsKey("start")){
+			start = optionMap.get("start");
+			if(start.contains("'")){
+				start = start.replaceAll("'", "");
+			}
+		}
+		if(optionMap.containsKey("end")){
+			end = optionMap.get("end");
+			if(end.contains("'")){
+				end = end.replaceAll("'", "");
+			}
+		}
+		if(optionMap.containsKey("ex_suspended")){
+			ex_suspended = optionMap.get("ex_suspended");
+		}
+		if(optionMap.containsKey("ex_new")){
+			ex_new = optionMap.get("ex_new");
+		}
+		String dbCol = optionMap.get("dbCol");
+		
+/*		String listDate = gp.get("listDate").toString();
+		Calendar calendar = Calendar.getInstance();
+		try {
+			if(listDate!=null&&!"null".equals(listDate)){
+				calendar.setTime(DateUtil.convertStringToDate(listDate));
+				int dayOfyear = calendar.get(Calendar.DAY_OF_YEAR);
+				calendar.set(Calendar.DAY_OF_YEAR,dayOfyear+90);
+				if(start==null){
+					start = DateUtil.convertDateToString(calendar.getTime());
+				}else{
+					Calendar cdStart = Calendar.getInstance();
+					cdStart.setTime(DateUtil.convertStringToDate(start));
+					int d = calendar.compareTo(cdStart);
+					if(d>0){
+						start = DateUtil.convertDateToString(calendar.getTime());
+					}
+				}
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}*/
+		
+		String findSql = "select "+dbCol+" from "+daytable+" where code='"+code+"'";
+		if(start!=null&&end!=null){
+			findSql += " and period between '"+start+"' and '"+end+"'";
+		}else if(start!=null){
+			findSql += " and period>='"+start+"'";
+		}else if(end!=null){
+			findSql += " and period<='"+end+"'";
+		}
+		if(!"0".equals(ex_suspended)){
+			findSql += " and close<>0";
+		}
+		
+		if(!"0".equals(ex_new)){
+			findSql += " and invalid=0";
+		}
+		findSql += " order by period asc";
+		
+		codeList = zqiDao.findAll(findSql);
+		if(codeList==null){
+			codeList = new ArrayList<Map<String,Object>>();
+		}
+		/*Map<String, Map<String, Object>> dataMap = new HashMap<String, Map<String,Object>>();;
 		for(Map<String,Object> data : codeList){
 			String period = data.get("period").toString();
 			dataMap.put(period, data);
@@ -185,8 +335,8 @@ public class Data extends BaseLib{
 					data.put("zz", "1");
 				}
 			}
-		}
-		System.out.println(code);
+		}*/
+		System.out.println("get "+code+" data over!");
 		return codeList;
 	}
 	

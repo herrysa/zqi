@@ -14,7 +14,7 @@ else {
 function bldStr(ctlType, id, para, height)
 {
  //!!!!组件版本号，升级后须修改!!!
- var ctlver = '1.0.92.5';
+ var ctlver = '1.0.99.6';
 
  //取得组件包的绝对路径(假设和dynaloadNG.js部署在同一个目录)
  var SupcanPath="", arrScript = document.getElementsByTagName("script");
@@ -54,8 +54,10 @@ function bldStr(ctlType, id, para, height)
   zipurl += "," +SupcanPath+ ($is64 ? "LuxForm.x64.bin" : "LuxForm.bin");
  else if(ctlType.indexOf("BCV4")>=0)
   zipurl += "," +SupcanPath+ ($is64 ? "BCV4.x64.bin" : "BCV4.bin");
- else if(ctlType.indexOf("Gantt")>=0)
+ else if(ctlType.indexOf("Gantt")>=0) {
+  zipurl += "," +SupcanPath+ ($is64 ? "LuxForm.x64.bin" : "LuxForm.bin");
   zipurl += "," +SupcanPath+ ($is64 ? "Gantt.x64.bin" : "Gantt.bin");
+ }
  
  var str = '<Object id=' +id+ ' Width=100% height=' +height+ ' ' +typeid+ '>';
  str += '<param Name="CtlName" Value="' +ctlType+ '">';

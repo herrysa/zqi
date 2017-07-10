@@ -62,8 +62,26 @@ function saveReportFunc(searchAreaId,gridId) {
 					<label class="col-sm-2 control-label">函数类别:</label>
 					<div class="col-sm-4">
 						<select class="form-control" name="type">
+							<option value="sql">sql</option>
+							<option value="java">java</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">返回值类别:</label>
+					<div class="col-sm-4">
+						<select class="form-control" name="rsType">
 							<option value="1">单值</option>
 							<option value="2">多值</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label">返回值类型:</label>
+					<div class="col-sm-4">
+						<select class="form-control" name="returnType">
+							<option value="string">string</option>
+							<option value="duble">duble</option>
 						</select>
 					</div>
 				</div>

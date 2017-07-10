@@ -22,3 +22,5 @@
 
 <script type="text/javascript" src="${ctx}/scripts/echarts/echarts.min.js"></script>
 
+<script type="text/javascript" src="${ctx}/scripts/json-js/json2.js"></script>
+

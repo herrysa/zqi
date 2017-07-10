@@ -6,7 +6,6 @@ import java.util.Map;
 import com.zqi.frame.controller.filter.PropertyFilter;
 import com.zqi.frame.controller.pagers.BSPager;
 import com.zqi.frame.controller.pagers.JQueryPager;
-import com.zqi.frame.util.SQLUtil;
 
 public interface IZqiDao {
 
@@ -45,6 +44,8 @@ public interface IZqiDao {
      * @return  
      */  
     public List findAll(String sql);
+    
+    public List findAll(String sql,Class T);
     
     public Map<String, Object> findFirst(String sql);
     

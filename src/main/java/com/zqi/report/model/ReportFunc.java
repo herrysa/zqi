@@ -8,6 +8,8 @@ public class ReportFunc {
 	String name;
 	String func;
 	String type;
+	String rsType;
+	String returnType;
 	Object[] para;
 	List<Object> paraList;
 	String value="";
@@ -60,5 +62,17 @@ public class ReportFunc {
 	}
 	public void setType(String type) {
 		this.type = type;
+	}
+	public String getRsType() {
+		return rsType;
+	}
+	public void setRsType(String rsType) {
+		this.rsType = rsType;
+	}
+	public String getReturnType() {
+		return returnType;
+	}
+	public void setReturnType(String returnType) {
+		this.returnType = returnType;
 	}
 }

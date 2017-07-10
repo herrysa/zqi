@@ -141,7 +141,7 @@ public class FinderGpDicSe implements IFinderGpDic{
 		}else{
 			String period = DateUtil.getDateNow();
 			String[] rowArr = result.split("\t\n");
-			for(String row : rowArr){
+ 			for(String row : rowArr){
 				String codeValue = "",daytable = "daytable",nameValue = "";
 				Map<String, Object> data = new HashMap<String, Object>();
 				String[] cellArr = row.split("\t");
@@ -241,16 +241,17 @@ public class FinderGpDicSe implements IFinderGpDic{
 			while ((line = in.readLine()) != null) {
 				result += line;
 			}
-			result = result.replaceAll("<tr  class='cls-data-tr' bgcolor='#FFFFFF'>", "\t\n");
-			result = result.replaceAll("<tr  class='cls-data-tr' bgcolor='#ffffff'>", "\t\n");
+			result = result.replaceAll("<tr bgcolor='#ffffff' >", "\t\n");
+			result = result.replaceAll("<tr bgcolor='#F8F8F8' >", "\t\n");
 			result = result.replaceAll("<tr  class='cls-data-tr' bgcolor='#F8F8F8'>", "\t\n");
 			result = result.replaceAll("</tr>", "");
-			result = result.replaceAll("<td  class='cls-data-td'  align='center' >", "\t");
-			result = result.replaceAll("<td  class='cls-data-td' null align='center' >", "\t");
-			result = result.replaceAll("<td  class='cls-data-td'  align='left' >", "\t");
-			result = result.replaceAll("<td  class='cls-data-td' null align='left' >", "\t");
+			result = result.replaceAll("<td  align='center'  >", "");
+			result = result.replaceAll("<td  align='left'  >", "");
+			result = result.replaceAll("<td  class='cls-data-td'  align='left' >", "");
+			result = result.replaceAll("<td  class='cls-data-td' null align='left' >", "");
 			result = result.replaceAll("<td  class='cls-data-td' style='mso-number-format:\\\\@' align='center' >", "");
-			result = result.replaceAll("</td>", "");
+			result = result.replaceAll("</td>", "\t");
+			result = result.replaceAll("</th>", "");
 			result = result.substring(result.lastIndexOf("公司网址")+6);
 			//System.out.println(result);
 		} catch (Exception e) {

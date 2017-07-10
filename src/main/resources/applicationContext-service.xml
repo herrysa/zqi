@@ -50,6 +50,36 @@
         <!-- 后缀 -->
         <property name="suffix" value=".jsp" />
     </bean>
-    
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+        <property name="defaultEncoding" value="utf-8"></property>   
+        <property name="maxUploadSize" value="10485760000"></property>  
+        <property name="maxInMemorySize" value="40960"></property>  
+   </bean>  
     <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" />
+    
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="300" /> <!-- 最大能够保持idel状态的对象数  -->
+		<property name="maxTotal" value="60000" /> <!-- 最大分配的对象数 -->
+		<property name="testOnBorrow" value="true" /> <!-- 当调用borrow Object方法时，是否进行有效性检查 -->
+	</bean>
+	
+	<bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+		<constructor-arg index="0" ref="jedisPoolConfig" />
+		<constructor-arg index="1" value="localhost" />
+		<constructor-arg index="2" value="6379" type="int" />
+	</bean>
+	
+	<!-- ehCache 配置管理器 -->
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="classpath:ehcache.xml" />
+        <!--true:单例，一个cacheManager对象共享；false：多个对象独立  -->
+        <property name="shared" value="true" />
+        <property name="cacheManagerName" value="ehcacheManager" />
+    </bean>
+
+    <!-- ehCache 操作对象 -->
+    <bean id="ehCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+       <property name="cacheName" value="ehCache"/>
+       <property name="cacheManager" ref="cacheManager"/>
+    </bean>
 </beans>

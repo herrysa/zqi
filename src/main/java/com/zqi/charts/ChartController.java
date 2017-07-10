@@ -32,8 +32,8 @@ import com.github.abel533.echarts.series.Line;
 import com.github.abel533.echarts.series.Series;
 import com.github.abel533.echarts.style.TextStyle;
 import com.zqi.frame.controller.BaseController;
-import com.zqi.strategy.Strategy;
-import com.zqi.strategy.StrategyFactoy;
+import com.zqi.strategy.StrategyJs;
+import com.zqi.strategy.StrategyJsFactoy;
 import com.zqi.strategy.StrategyOut;
 import com.zqi.strategy.lib.Data;
 import com.zqi.unit.SpringContextHelper;
@@ -210,19 +210,19 @@ public class ChartController extends BaseController{
 		List<String> indiLegendList = new ArrayList<String>();
 		List<Series> indiSeries = new ArrayList<Series>();
 		for(String indi : indicatorArr){
-			StrategyFactoy strategyFactoy = (StrategyFactoy)SpringContextHelper.getBean("strategyFactoy");
-			Strategy strategy = strategyFactoy.getStrategy("indicatorChart/"+indicator+".js");
-			strategy.setCode(code);
+			StrategyJsFactoy strategyFactoy = (StrategyJsFactoy)SpringContextHelper.getBean("strategyFactoy");
+			StrategyJs strategy = strategyFactoy.getStrategy("indicatorChart/"+indicator+".js");
+			strategy.setJavaParam("code",code);
 			strategy.setxData(categoryData);
-			strategy.setInitParam("start",null);
-			strategy.setInitParam("end",null);
+			strategy.setJavaParam("start",null);
+			strategy.setJavaParam("end",null);
 			strategy.eval();
 			List<StrategyOut> outList = strategy.getOutList();
 			for(StrategyOut strategyOut :outList){
 				String outNname = strategyOut.getName();
-				String outType = strategyOut.getType();
+				StrategyOut.OUTTYPE outType = strategyOut.getType();
 				List<Object> values = strategyOut.getValues();
-				if("line".equals(outType)){
+				if(outType==StrategyOut.OUTTYPE.line){
 					String lineName = outNname;
  					indiLegendList.add(lineName);
 					Line line = new Line();
@@ -230,7 +230,7 @@ public class ChartController extends BaseController{
 					line.setName(lineName);
 					line.setData(values);
 					indiSeries.add(line);
-				}else if("bar".equals(outType)){
+				}else if(outType==StrategyOut.OUTTYPE.bar){
 					
 				}
 			}

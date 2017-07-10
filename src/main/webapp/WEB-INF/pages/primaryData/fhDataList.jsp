@@ -69,6 +69,65 @@ $(function() {
 			}
 		});
 	});
+    $("#markFhToRHQ").click(function(){
+    	var fhYear = $("#fhYear").val();
+		$.ajax({
+			url: 'primaryData/markFhToRHQ?year='+fhYear,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				alert("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
+			}
+		});
+	});
+    $("#perRHQ").click(function(){
+    	var rightCol = $("#rightCol").val();
+		$.ajax({
+			url: 'primaryData/perRHQ?rightCol='+rightCol,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				alert("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
+			}
+		});
+	});
+    $("#afterRHQ").click(function(){
+		$.ajax({
+			url: 'primaryData/afterRHQ',
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				alert("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
+			}
+		});
+	});
+    $("#cacheFhData").click(function(){
+    	var fhYear = $("#fhYear").val();
+		$.ajax({
+			url: 'primaryData/cacheFhData?year='+fhYear,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				alert("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
+			}
+		});
+	});
     $("#importTenDayData").click(function(){
 		var dateFrom = $("#dateFrom").val();
 		$.ajax({
@@ -172,6 +231,28 @@ $(function() {
 			</button>
 			<button id="importFhData" type="button" class="btn btn-primary" >
 				更新分红数据
+			</button>
+			<select id="rightCol">
+				<option value="close">close</option>
+				<option value="settlement">settlement</option>
+				<option value="open">open</option>
+				<option value="high">high</option>
+				<option value="low">low</option>
+			</select>
+			<div id="hisDayDataBtn" class="btn-group">
+				<button type="button" class="btn btn-primary dropdown-toggle" 
+					data-toggle="dropdown">
+					分红处理
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a id="markFhToRHQ">更新分红状态</a></li>
+					<li><a id="perRHQ">前复权数据</a></li>
+					<li><a id="afterRHQ">后复权数据</a></li>
+				</ul>
+			</div>
+			<button id="cacheFhData" type="button" class="btn btn-primary" >
+				缓存分红数据
 			</button>
 		</div>
 	</form>

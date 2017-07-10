@@ -1,4 +1,4 @@
-//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Firefox / Chrome / IE(X86/X64)
+//Çø·Öä¯ÀÀÆ÷£ºFirefox / Chrome / IE(X86/X64)
 var $agnt=navigator.userAgent.toLowerCase();
 var $isChrome = false, $isFirefox = false, $is64 = false;
 var $isIE = ($agnt.indexOf("msie")>0 || $agnt.indexOf("trident")>0) ? true : false;
@@ -13,14 +13,13 @@ else {
 //private:
 function bldStr(ctlType, id, para, height)
 {
- //!!!!ï¿½ï¿½ï¿½ï¿½æ±¾ï¿½Å£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¸ï¿½!!!
- var ctlver = '1.0.92.5';
+ var ctlver = '1.0.101.0';
 
- //È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½Â·ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½dynaload.jsï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬Ò»ï¿½ï¿½Ä¿Â¼)
+ //È¡µÃ×é¼þ°üµÄ¾ø¶ÔÂ·¾¶(¼ÙÉèºÍdynaload.js²¿ÊðÔÚÍ¬Ò»¸öÄ¿Â¼)
  var SupcanPath="", arrScript = document.getElementsByTagName("script");
  for(var i=0; i<arrScript.length; i++) {
 	var src = arrScript[i].src;
-	var index = src.indexOf('dynaload.js');		//ï¿½ï¿½ï¿½ï¿½dynaload.jsï¿½Ä¼ï¿½ï¿½ï¿½Ã»ï¿½ï¿½
+	var index = src.indexOf('dynaload.js');
 	if(index >= 0) {
 		SupcanPath = src.substring(0, index);
 		if(SupcanPath.charAt(0) == '/') {
@@ -48,7 +47,7 @@ function bldStr(ctlType, id, para, height)
   if($isFirefox) typeid += ' Codebase="' +SupcanPath+ 'supcan.xpi"';
  }
  
- //ï¿½ï¿½ï¿½ï¿½ï¿½URL
+ //×é¼þ°üURL
  var zipurl = SupcanPath + ($is64 ? "BCV1.x64.bin" : "BCV1.bin");
  if(ctlType=="LuxForm")
   zipurl += "," +SupcanPath+ ($is64 ? "LuxForm.x64.bin" : "LuxForm.bin");
@@ -75,16 +74,7 @@ function insertChart(id, para)		{ document.write( bldStr("BCV1.Chart",		id, para
 function insertUpload(id, para)		{ document.write( bldStr("BCV1.Upload",		id, para, (arguments.length > 2) ? arguments[2]:"100%") )}
 function insertFormDesigner(id, para)	{ document.write( bldStr("BCV4.FormDesigner",	id, para, (arguments.length > 2) ? arguments[2]:"100%") )}
 
-function insertTreeListToDiv(divId,id, para){
-	jQuery("#"+divId).append(bldStr("BCV1.TreeList",id, para, (arguments.length > 3) ? arguments[3]:"100%")) ;
-}
-function insertReportToDiv(divId,id, para){
-	jQuery("#"+divId).append(bldStr("LuxForm",id, para, (arguments.length > 3) ? arguments[3]:"100%")) ;
-}
-function insertFreeFormToDiv(divId,id,para){
-	jQuery("#"+divId).append(bldStr("BCV1.FreeForm",id, para, (arguments.length > 3) ? arguments[3]:"100%")) ;
-}
-//ï¿½ï¿½ï¿½ï¿½Äºï¿½ï¿½ï¿½(ï¿½Ø¼ï¿½ï¿½á·´ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½Í¾:ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½)
+//±ØÐèµÄº¯Êý(¿Ø¼þ»á·´Ïòµ÷ÓÃ£¬ÓÃÍ¾:ÇÐ»»½¹µã)
 function focusIE(obj_or_id)
 {
  if($isIE==false) {

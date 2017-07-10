@@ -104,6 +104,21 @@ $(function() {
 			}
 		});
 	});
+	$("#downLoadTempTradeData").click(function(){
+    	var period = $("#tradePeriod").val();
+		$.ajax({
+			url: 'tradeData/downLoadTradeData?temp=1&period='+period,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				alert("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
+			}
+		});
+	});
 
 	
     var searchFormHeight = $("#bkDataSearchForm").height();
@@ -127,9 +142,18 @@ $(function() {
 			<button id="reloadTradeDataGrid" type="button" class="btn btn-primary" >
 					查询
 			</button>
-			<button id="downLoadTradeData" type="button" class="btn btn-primary" >
-				下载明细数据
-			</button>
+			<div class="btn-group">
+				<button type="button" class="btn btn-primary dropdown-toggle" 
+					data-toggle="dropdown">
+					下载明细数据
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a id="downLoadTempTradeData">下载临时日期明细数据</a></li>
+					<li><a id="downLoadTradeData">下载日期明细数据</a></li>
+					<li><a id="downLoadYearTradeData">下载年度明细数据</a></li>
+				</ul>
+			</div>
 		</div>
 	</form>
 	<div id="trade_grid_div" style="margin:2px;">

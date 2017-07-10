@@ -126,8 +126,6 @@
 				      </div>
 				    </div>
 				  </div>
-				</div>
-				<div class="panel-group" id="hqMenu" role="tablist" aria-multiselectable="true">
 				  <div class="panel panel-default">
 				    <div class="panel-heading" role="tab" id="hqMenu-head">
 				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="#accordion" href="#hqMenu-content" aria-expanded="false" aria-controls="hqMenu-content">
@@ -143,9 +141,7 @@
 				      </div>
 				    </div>
 				  </div>
-				</div>
-				<div class="panel-group" id="reportMenu" role="tablist" aria-multiselectable="true">
-				  <div class="panel panel-default">
+				<div class="panel panel-default">
 				    <div class="panel-heading" role="tab" id="reportMenu-head">
 				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="#accordion" href="#reportMenu-content" aria-expanded="false" aria-controls="reportMenu-content">
 							报表系统
@@ -156,17 +152,13 @@
 						<ul class="nav nav-pills nav-stacked">
 							<li><a href="javaScript:menuClick('report/reportMain')">报表定义</a></li>
 							<li><a href="javaScript:menuClick('reportFunc/main')">报表函数定义</a></li>
-							<li><a href="#">Java核心API</a></li>
-							<li><a href="#">JavaEE</a></li>
 						</ul>
 				      </div>
 				    </div>
 				  </div>
-				</div>
-				<div class="panel-group" id="strategyMenu" role="tablist" aria-multiselectable="true">
 				  <div class="panel panel-default">
 				    <div class="panel-heading" role="tab" id="strategyMenu-head">
-				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="strategyMenu" href="#strategyMenu-content" aria-expanded="false" aria-controls="strategyMenu-content">
+				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="#accordion" href="#strategyMenu-content" aria-expanded="false" aria-controls="strategyMenu-content">
 							策略分析
 				        </a>
 				    </div>
@@ -174,17 +166,15 @@
 				      <div class="panel-body">
 						<ul class="nav nav-pills nav-stacked">
 							<li><a href="javaScript:menuClick('report/reportMain')">选股</a></li>
-							<li><a href="javaScript:menuClick('strategy/strategyList')">历史回测</a></li>
-							<li><a href="javaScript:menuClick('report/reportMain')"></a></li>
+							<li><a href="javaScript:menuClick('strategy/strategyList')">策略回测</a></li>
+							<li><a href="javaScript:menuClick('strategy/hisStrategyList')">回测历史</a></li>
 						</ul>
 				      </div>
 				    </div>
 				  </div>
-				</div>
-				<div class="panel-group" id="taskMenu" role="tablist" aria-multiselectable="true">
 				  <div class="panel panel-default">
 				    <div class="panel-heading" role="tab" id="taskMenu-head">
-				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="taskMenu" href="#taskMenu-content" aria-expanded="false" aria-controls="taskMenu-content">
+				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="#accordion" href="#taskMenu-content" aria-expanded="false" aria-controls="taskMenu-content">
 							任务管理
 				        </a>
 				    </div>
@@ -196,11 +186,9 @@
 				      </div>
 				    </div>
 				  </div>
-				</div>
-				<div class="panel-group" id="tradeMenu" role="tablist" aria-multiselectable="true">
 				  <div class="panel panel-default">
 				    <div class="panel-heading" role="tab" id="tradeMenu-head">
-				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="tradeMenu" href="#tradeMenu-content" aria-expanded="false" aria-controls="tradeMenu-content">
+				        <a class="accordion-head" role="button" data-toggle="collapse" data-parent="#accordion" href="#tradeMenu-content" aria-expanded="false" aria-controls="tradeMenu-content">
 							交易管理
 				        </a>
 				    </div>

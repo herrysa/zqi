@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import com.zqi.unit.FileUtil;
+
 public class NIOFileUtil {
 
 	public static void writeFile(String content,String file){
 	    FileOutputStream fos = null;
 	    FileChannel fc = null;
 	    ByteBuffer buf = null;
+	    FileUtil.mkParent( file );
 		try {
 			fos = new FileOutputStream(file);
 			fc = fos.getChannel();

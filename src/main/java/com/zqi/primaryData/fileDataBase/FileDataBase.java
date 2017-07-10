@@ -4,9 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
 
+import com.zqi.frame.util.NIOFileUtil;
 import com.zqi.frame.util.Tools;
 import com.zqi.unit.FileUtil;
 
@@ -45,6 +44,15 @@ public class FileDataBase {
 			file.delete();
 		}
 		FileUtil.writeFile(content, filePath);
+	}
+	
+	public void writeWithNIO(String fileName, String content,int type) {
+		String filePath = getFilePath(fileName);
+		File file = new File(filePath);
+		if(type==0&&file.exists()){
+			file.delete();
+		}
+		NIOFileUtil.writeFile(content, filePath);
 	}
 	
 	public String getFilePath(String fileName){

@@ -18,7 +18,21 @@ $(function() {
 				//alertMsg.error("系统错误！");
 			},
 			success: function(data){
-				alert(data);
+				alert(data.message);
+			}
+		});
+	});
+	$("#exeSql").click(function(){
+		$.ajax({
+			url: 'init/exeSql',
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
 			}
 		});
 	});
@@ -31,6 +45,9 @@ $(function() {
 		<div class="pageContent">
 		<button id="createTable" type="button" class="btn btn-primary"">
 					建表
+		</button>
+		<button id="exeSql" type="button" class="btn btn-primary"">
+					exeSql
 		</button>
 		</div>
 	</div>

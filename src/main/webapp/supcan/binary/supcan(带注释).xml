@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- Supcan的默认值 -->
-<!-- 本文件相当于是 supcan.xml 的使用指导，本文件不会被下载，真正会被自动下载的是 supcan.xml 文件 -->
-<!-- 允许修改元素的值、允许仅保留修改过的元素(但XML树的结构不能变) -->
+<!-- 1.本文件相当于是 supcan.xml 的使用指导，本文件不会被下载，真正会被自动下载的是 supcan.xml 文件 -->
+<!-- 2.允许修改元素的值、允许仅保留修改过的元素 -->
+<!-- 3.从性能考虑，建议您将仅需要改动的条项添加到 supcan.xml 中，须注意不得串位、不得修改XML树的结构 -->
 <root>
 <!-- 全局默认值 -->
 <global>
@@ -20,6 +21,9 @@
 
 	<!-- 用于Freeform、小型页面控件的默认背景色, "context"-从页面上下文环境辨认; 也可以是如"#00ffaa"这样的颜色串 -->
 	<bgColor>context</bgColor>
+	
+	<!-- 当前选中单元格，投射到标尺上的灰暗程度，通常为负数，负数越大表示越暗 -->
+	<RulerSelDark>-15</RulerSelDark>
 
 	<!-- 是否允许从浏览器的缓存中读取http的请求，可用值及含义为：-->
 	<!--  "Cache" - 允许，http响应的内容受浏览器控制，静态内容未必能保证及时刷新；-->
@@ -68,7 +72,7 @@
 	<chartcolors></chartcolors>
 
 
-	<!-- 打印预览中采用的颜色, "detect" - 检测当前打印机的颜色支持能力，在预览时尽可能与之一致(但不一定能做到完全一致)；"color" - 预览一律采用彩色 -->
+	<!-- 打印和预览中采用的颜色, "detect" - 检测当前打印设备的颜色支持能力，但由于驱动程序原因，不一定能检测到完全一致；"color" - 一律把打印机都当作有颜色支持能力的设备看待 -->
 	<printPreviewColor>detect</printPreviewColor>
 
 	<!-- 分瓶冻结的分隔条宽度和颜色,  其中的颜色分别是普通色、高亮色和低亮色-->
@@ -103,10 +107,14 @@
 <Treelist>
 	<!-- 右键菜单，未选入的还有 "language"-语言切换; "printall"-打印全部(用于分页显示); "exportall"-转换输出全部(用于分页显示) -->
 	<!-- 部分项解释："pasteNewrow"-粘贴到新行; "deleteMore"-删除更多; "addSort"-加入多重排序;"selectCol"-自定义显示隐藏列; "hue"-色调; "separate"-分屏冻结; "displayAs"-以数/列表展现; "enter"-回车键行为-->
-	<menu>copy,paste,pasteNewrow,delete,deleteMore,insert,selectCol,print,addSort,export,import,hue,showruler,separate,expandTree,displayAs,enter</menu>
+	<menu>copy,paste,pasteNewrow,delete,deleteMore,insert,curselmode,selectCol,print,addSort,export,import,hue,showruler,separate,expandTree,displayAs,enter</menu>
 
-	<!-- 不可编辑的列，是否允许被“粘帖” -->
-	<pasteAbleWhenUnEditAble>false</pasteAbleWhenUnEditAble>
+	<paste>
+		<!-- 不可编辑的列，是否允许被“粘帖” -->
+		<pasteAbleWhenUnEditAble>false</pasteAbleWhenUnEditAble>
+		<!-- CurselMode="excel" 时, Ctrl+V的快捷粘帖范围是否允许扩展到当前单元格外 -->
+		<RangeExtendAble>false</RangeExtendAble>
+	</paste>
 
 	<Properties>
 		<!-- 修改过单元格醒目标记, "true"-是; "false"-否; "editAble"-取editAble -->
@@ -116,7 +124,7 @@
 		<!-- 是否允许拖拽为多层表头 -->
 		<multiLayerAble>true</multiLayerAble>
 		<!-- 默认行高 -->
-		<rowHeight>19</rowHeight>
+		<rowHeight>22</rowHeight>
 		<!-- 表头(标题)高 -->
 		<headerHeight>24</headerHeight>
 		<!-- 表头(标题)字体 -->
@@ -178,7 +186,7 @@
 		<!-- 下拉内容: 为 asData/asDisplay/asDataDisplay，分别表示 纯数据/显示内容/按 “纯数据 - 显示内容” 格式 -->
 		<dropdownMask>asData</dropdownMask>
 		<!-- 是否包含头部的标题, none/name/title, 分别表示无标题/列名/列标题 -->
-		<IncludeHead>none</IncludeHead>
+		<IncludeHead>name</IncludeHead>
 		<!-- 是否包含隐藏行列 -->
 		<isIncludeHide>false</isIncludeHide>
 	</convertDataCopy>
@@ -221,12 +229,27 @@
 	<fadeInStep>5</fadeInStep>
 	<!-- 全屏显示时，全屏窗口的打开模式, "TopMost" - 位于最前端; "Normal" - 不是最前端、鼠标可切换的。默认是 topMost -->
 	<fullScreen>TopMost</fullScreen>
-	<!-- 图片单元格，当URL无效时的显示内容, "Text"-显示文本; "none"-空白 -->
-	<DrawInvalidPicture>Text</DrawInvalidPicture>
+
+	<!-- 图片单元格，当URL无效时的显示内容, "Text"-显示文本; "none"-空白, 默认是 none -->
+	<DrawInvalidPicture>None</DrawInvalidPicture>
 	<!-- 报表保存时，XML 中 TR 的各个 TD 的生成方式: "col" - 包含 col 列序、且不保存空单元格; "sequence" - 顺序排列, 无 col 标记, 所有单元格全部保存; "full" - 顺序排列且包含 col 列序, 所有单元格全部保存； "auto" - 内部自动优化 -->
 	<OptimizeTD>auto</OptimizeTD>
+	<!-- 报表保存时，是否优化字体(自动剔除未被使用的字体), true 或 false, 默认true -->
+	<OptimizeFont>true</OptimizeFont>
 	<!-- 计算消息框中，最多保留错误条数 -->
 	<ErrorStackSize>50</ErrorStackSize>
+	<!-- 添加图片时，宽和高均超过某个数时，会自动弹出提示，询问你是否调整图片大小. 如下2个像素数，分别用于添加图片、设置背景图. -->
+	<MaxPictureSize>300,1000</MaxPictureSize>
+	<!-- 添加图片时，会弹出压缩图片的对话框, 在此设定弹出对话框的前提：压缩后的JPG图片和原图片的文件尺寸百分比。例如 "60" 表示压缩后最多达到原图的60%的尺寸才弹出对话框，否则不弹出； "0" - 不弹出对话框、也不对图片进行压缩. -->
+	<compressPicture>90</compressPicture>
+	
+	<!-- 粘帖行为 -->
+	<Paste>
+		<!-- 粘帖选项是否随 “选择性粘帖” 对话框而改变 -->
+		<FollowDialog>true</FollowDialog>
+		<!-- 粘帖范围是否允许扩展到当前单元格外 -->
+		<RangeExtendAble>true</RangeExtendAble>
+	</Paste>
 
 	<!-- 报表的转换输出(数据文件)的默认选项-->
 	<convertData>

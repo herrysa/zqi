@@ -1,11 +1,13 @@
 package com.zqi.hq.dataAnalysis;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.zqi.frame.dao.impl.ZqiDao;
+import com.zqi.unit.DateUtil;
 
 @Component("dayDataAnalysis")
 public class DayDataAnalysis {
@@ -29,7 +32,215 @@ public class DayDataAnalysis {
 	public void dayAnalysis(){
 		List<Map<String, Object>> gpDicList = zqiDao.findAll("select * from d_gpdic where type in ('0','1') order by code asc");
 		for(Map<String, Object> gp : gpDicList){
-			toWaveAnalysis(gp);
+			dayDataFq(gp);
+			dayDataExNew(gp);
+			//toWaveAnalysis(gp);
+		}
+	}
+	
+	public void dayDataFq(Map<String, Object> gp){
+		String code = gp.get("code").toString();
+		String daytable = gp.get("daytable").toString();
+		System.out.println(code);
+		
+		List<Map<String, Object>> gpFhList = zqiDao.findAll("select * from i_gpFh where code='"+code+"' and fhYear not like '%(预*)' order by fhYear desc");
+		int i = 0 ;
+		for(Map<String, Object> fhMap : gpFhList){
+			//eachFh(gp,fhMap,i);
+			String cqDate = null;
+			if(fhMap.get("cqDate")!=null){
+				cqDate = fhMap.get("cqDate").toString();
+				zqiDao.update("update "+daytable+" set isFh='1' where code='"+code+"' and period='"+cqDate+"'");
+				continue;
+			}
+			if(fhMap.get("zzdz")!=null){
+				cqDate = fhMap.get("zzdz").toString();
+				zqiDao.update("update "+daytable+" set isFh='1' where code='"+code+"' and period='"+cqDate+"'");
+				continue;
+			}
+			if(fhMap.get("sgdz")!=null){
+				cqDate = fhMap.get("sgdz").toString();
+				zqiDao.update("update "+daytable+" set isFh='1' where code='"+code+"' and period='"+cqDate+"'");
+				continue;
+			}
+			if(fhMap.get("pgdz")!=null){
+				cqDate = fhMap.get("pgdz").toString();
+				zqiDao.update("update "+daytable+" set isFh='1' where code='"+code+"' and period='"+cqDate+"'");
+				continue;
+			}
+			i++;
+		}
+		
+		
+	}
+	
+	
+	public void eachFh(Map<String, Object> gp,Map<String, Object> fhBean,int fhTime){
+		String code = gp.get("code").toString();
+		String daytable = gp.get("daytable").toString();
+		
+		Map<String, String> fhMap = new HashMap<String, String>();
+		String fhcode = fhBean.get("code").toString();
+		//String ggDate = fhBean.get("ggDate").toString();
+		Object fhObj = fhBean.get("fh");
+		Object zzObj = fhBean.get("zz");
+		Object sgObj = fhBean.get("sg");
+		Object pgObj = fhBean.get("pg");
+		Object pgpriceObj = fhBean.get("pgprice");
+		String cqDate = null;
+		
+		BigDecimal fh = new BigDecimal(0);
+		BigDecimal zz = new BigDecimal(0);
+		BigDecimal sg = new BigDecimal(0);
+		BigDecimal pg = new BigDecimal(0);
+		BigDecimal pgprice = new BigDecimal(0);
+		
+		if(fhObj!=null){
+			cqDate = fhBean.get("cqDate").toString();
+			fh = (BigDecimal)fhObj;
+			//String cqDateObj = fhBean.get("cqDate").toString();
+			//fhMap.put(fhcode+"_fh_"+cqDateObj,fhObj.toString());
+		}
+		
+		if(zzObj!=null){
+			cqDate = fhBean.get("zzdz").toString();
+			zz = (BigDecimal)zzObj;
+			/*Object cqDateObj = fhBean.get("zzdz");
+			String cqStr = null;
+			if(cqDateObj != null){
+				cqStr = cqDateObj.toString();
+			}else{
+				cqDateObj = fhBean.get("zzss");
+				if(cqDateObj!=null){
+					cqStr = cqDateObj.toString();
+				}
+			}
+			if(cqStr!=null){
+				fhMap.put(fhcode+"_zz_"+cqStr,zzObj.toString());
+			}*/
+		}
+
+		if(sgObj!=null){
+			cqDate = fhBean.get("sgdz").toString();
+			sg = (BigDecimal)sgObj;
+			/*Object cqDateObj = fhBean.get("sgdz");
+			String cqStr = null;
+			if(cqDateObj != null){
+				cqStr = cqDateObj.toString();
+			}else{
+				cqDateObj = fhBean.get("sgss");
+				if(cqDateObj!=null){
+					cqStr = cqDateObj.toString();
+				}
+			}
+			if(cqStr!=null){
+				fhMap.put(fhcode+"_ss_"+cqStr,sgObj.toString());
+			}*/
+		}
+		if(pgObj!=null){
+			cqDate = fhBean.get("pgdz").toString();
+			pg = (BigDecimal)pgObj;
+			pgprice = (BigDecimal)pgpriceObj;
+			/*String cqDateObj = fhBean.get("pgdz").toString();
+			String cqStr = null;
+			if(cqDateObj != null){
+				cqStr = cqDateObj.toString();
+			}else{
+				pgpriceObj = fhBean.get("pgss");
+				if(pgpriceObj!=null){
+					cqStr = cqDateObj.toString();
+				}
+			}
+			if(cqStr!=null){
+				fhMap.put(fhcode+"_pg_"+cqStr,pgObj.toString()+"_"+pgpriceObj.toString());
+			}*/
+		}
+		Date cqDate1 = null;
+		try {
+			cqDate1 = DateUtil.convertStringToDate(cqDate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		String dataSql = null;
+		if(fhTime>0){
+			dataSql = "select * from "+daytable+" where code='"+code+"' and period<"+cqDate+" order by period desc";
+		}else{
+			dataSql = "select * from "+daytable+" where code='"+code+"' order by period desc";
+		}
+		List<Map<String, Object>> dayDataList = zqiDao.findAll(dataSql);
+		List<String> updateList = new ArrayList<String>();
+		for(int i=0;i<dayDataList.size();i++){
+			Map<String, Object> dayData = dayDataList.get(i);
+			String period = dayData.get("period").toString();
+			BigDecimal settlement = null;
+			BigDecimal open = null;
+			BigDecimal close = null;
+			BigDecimal high = null;
+			BigDecimal low = null;
+			
+			if(fhTime>0){
+				settlement = (BigDecimal)dayData.get("settlement_p");
+				open = (BigDecimal)dayData.get("open_p");
+				close = (BigDecimal)dayData.get("close_p");
+				high = (BigDecimal)dayData.get("high_p");
+				low = (BigDecimal)dayData.get("low_p");
+			}else{
+				settlement = (BigDecimal)dayData.get("settlement");
+				open = (BigDecimal)dayData.get("open");
+				close = (BigDecimal)dayData.get("close");
+				high = (BigDecimal)dayData.get("high");
+				low = (BigDecimal)dayData.get("low");
+			}
+			
+			//[(复权前价格-现金红利)＋配(新)股价格×流通股份变动比例]÷(1＋流通股份变动比例)
+			Date dataPeriod = null;
+			try {
+				dataPeriod = DateUtil.convertStringToDate(period);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			int cqBefore = dataPeriod.compareTo(cqDate1);
+			if(cqBefore==-1){
+				settlement = (settlement.subtract(fh.divide(new BigDecimal(10))).add((pgprice.multiply(pg.divide(new BigDecimal(10)))))).divide(zz.add(sg).divide(new BigDecimal(10)).add(new BigDecimal(1)),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+				if(open.compareTo(new BigDecimal(0))!=0){
+					open = (open.subtract(fh.divide(new BigDecimal(10))).add((pgprice.multiply(pg.divide(new BigDecimal(10)))))).divide(zz.add(sg).divide(new BigDecimal(10)).add(new BigDecimal(1)),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+				}
+				if(close.compareTo(new BigDecimal(0))!=0){
+					close = (close.subtract(fh.divide(new BigDecimal(10))).add((pgprice.multiply(pg.divide(new BigDecimal(10)))))).divide(zz.add(sg).divide(new BigDecimal(10)).add(new BigDecimal(1)),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+				}
+				if(high.compareTo(new BigDecimal(0))!=0){
+					high = (high.subtract(fh.divide(new BigDecimal(10))).add((pgprice.multiply(pg.divide(new BigDecimal(10)))))).divide(zz.add(sg).divide(new BigDecimal(10)).add(new BigDecimal(1)),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+				}
+				if(low.compareTo(new BigDecimal(0))!=0){
+					low = (low.subtract(fh.divide(new BigDecimal(10))).add((pgprice.multiply(pg.divide(new BigDecimal(10)))))).divide(zz.add(sg).divide(new BigDecimal(10)).add(new BigDecimal(1)),10,BigDecimal.ROUND_HALF_DOWN).setScale(2, BigDecimal.ROUND_HALF_UP);
+				}
+			}
+			
+			String updateSql = "update "+daytable+" set settlement_p="+settlement+",open_p="+open+",close_p="+close+",high_p="+high+",low_p="+low+",prefq='1' where code='"+code+"' and period='"+period+"'";
+			updateList.add(updateSql);
+		}
+		String[] updateArr = updateList.toArray(new String[updateList.size()]);
+		if(updateArr.length>0){
+			zqiDao.bathUpdate(updateArr);
+		}
+	}
+	
+	public void dayDataExNew(Map<String, Object> gp){
+		String code = gp.get("code").toString();
+		String daytable = gp.get("daytable").toString();
+		String listDate = gp.get("listDate").toString();
+		Calendar calendar = Calendar.getInstance();
+		try {
+			if(listDate!=null&&!"null".equals(listDate)){
+				calendar.setTime(DateUtil.convertStringToDate(listDate));
+				int dayOfyear = calendar.get(Calendar.DAY_OF_YEAR);
+				calendar.set(Calendar.DAY_OF_YEAR,dayOfyear+90);
+				String validPeriod = DateUtil.convertDateToString(calendar.getTime());
+				String updateSql = "update "+daytable+" set isNew='1' where code='"+code+"' and period<='"+validPeriod+"'";
+				zqiDao.update(updateSql);
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -720,5 +931,9 @@ public class DayDataAnalysis {
 			secNum = secNum.divide(fistNum,10,BigDecimal.ROUND_HALF_DOWN).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
 			System.out.println(key+":"+secNum);
 		}
+	}
+	
+	public static void main(String[] args) {
+		
 	}
 }

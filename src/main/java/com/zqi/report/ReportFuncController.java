@@ -20,7 +20,7 @@ import com.zqi.frame.util.SQLUtil;
 @RequestMapping("/reportFunc")
 public class ReportFuncController extends BaseController{
 	
-	private SQLUtil sQLUtil = new SQLUtil(new String[]{"code","name","category","type","params","funcSql","remark"}, "r_reportFunc", "code", "");
+	private SQLUtil sQLUtil = new SQLUtil(new String[]{"code","name","category","type","rsType","returnType","params","funcSql","remark"}, "r_reportFunc", "code", "");
 	
 	@RequestMapping("/main")
 	public String reportFuncMain(){

@@ -101,6 +101,60 @@ $(function() {
 		});
 	});
 	
+	$("#cacheRHQData").click(function(){
+		var cacheYear = $("#cacheYear").val();
+		//var dateTo = $("#dateTo").val();
+		$.ajax({
+			url: 'primaryData/cacheRHQData?year='+cacheYear,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
+			}
+		});
+	});
+	
+	$("#cachePeriodHQData").click(function(){
+		var cacheYear = $("#cacheYear").val();
+		var url = 'primaryData/cachePeriodHQData?year='+cacheYear;
+		url = encodeURI(url);
+		$.ajax({
+			url: url,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
+			}
+		});
+	});
+	$("#computeIndexData").click(function(){
+		var cacheYear = $("#cacheYear").val();
+		var cacheIndex = $("#cacheIndex").val();
+		//var dateTo = $("#dateTo").val();
+		var url = 'primaryData/computeIndexData?year='+cacheYear+'&index='+cacheIndex;
+		url = encodeURI(url);
+		$.ajax({
+			url: url,
+			type: 'post',
+			dataType: 'json',
+			async:false,
+			error: function(data){
+				//alertMsg.error("系统错误！");
+			},
+			success: function(data){
+				alert(data.message);
+			}
+		});
+	});
+	
     var searchFormHeight = $("#primaryDataSearchForm").height();
     var contentHeight = $("#mainContent").height();
     var contentWidth = $("#mainContent").width();
@@ -134,6 +188,26 @@ $(function() {
 					<li><a id="importTodayData">导入当日数据</a></li>
 					<li><a id="downLoadYearHisData">下载年度数据</a></li>
 					<li><a id="importYearHisData">导入年度数据</a></li>
+				</ul>
+			</div>
+			<label>年度：</label><input id="cacheYear" name="cacheYear" type="text" style="width:100px"/>
+			<label>指标：</label><select id="cacheIndex" name="cacheIndex">
+									<option value="">----</option>
+									<option value="{name:'ema',param:{col:['close'],value:[5,10,20,30,60,250]}}">ema</option>
+								</select>
+		
+			<button id="computeIndexData" type="button" class="btn btn-primary" >
+					计算年度指标
+			</button>
+			<div id="cacheDayDataBtn" class="btn-group">
+				<button type="button" class="btn btn-primary dropdown-toggle" 
+					data-toggle="dropdown">
+					缓存数据
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a id="cacheRHQData">缓存年度日数据</a></li>
+					<li><a id="cachePeriodHQData">缓存年度期间数据</a></li>
 				</ul>
 			</div>
 		</div>

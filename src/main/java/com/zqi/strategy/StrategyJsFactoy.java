@@ -3,7 +3,6 @@ package com.zqi.strategy;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,13 +14,15 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.zqi.frame.dao.impl.ZqiDao;
 import com.zqi.unit.FileUtil;
 
 @Component("strategyFactoy")
-public class StrategyFactoy {
+@Scope("prototype")
+public class StrategyJsFactoy {
 
 	private ZqiDao zqiDao;
 	public ZqiDao getZqiDao() {
@@ -35,7 +36,7 @@ public class StrategyFactoy {
 	
 	Map<String, Object> context;
 	
-	public StrategyFactoy(){
+	public StrategyJsFactoy(){
 		String basePath = "E:/git/zqi/src/main/webapp/strategy/";
 		String utilName = "util.js";
 		
@@ -55,9 +56,9 @@ public class StrategyFactoy {
 		
 	}
 	
-	public Strategy getStrategy(String fileName){
+	public StrategyJs getStrategy(String fileName){
 		context.put("dao", zqiDao);
-		Strategy strategy = new Strategy();
+		StrategyJs strategy = new StrategyJs();
 		strategy.init(context,fileName);
 		return strategy;
 	}

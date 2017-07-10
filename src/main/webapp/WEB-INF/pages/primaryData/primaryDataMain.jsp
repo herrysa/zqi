@@ -24,6 +24,9 @@ $(function() {
 	$("#fhData").click(function(){
 		$("#fhDataContent").load("primaryData/fhDataList");
 	});
+	$("#redisData").click(function(){
+		$("#redisDataContent").load("primaryData/redisDataList");
+	});
 }); 
 </script>
 </head>
@@ -56,6 +59,11 @@ $(function() {
 						历史分红
 					</a>
 				</li>
+				<li>
+					<a id="redisData" href="#redisDataContent" data-toggle="tab">
+						缓存数据
+					</a>
+				</li>
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane fade in active" id="dayDataContent">
@@ -67,6 +75,8 @@ $(function() {
 				<div class="tab-pane fade" id="financeDataContent">
 				</div>
 				<div class="tab-pane fade" id="fhDataContent">
+				</div>
+				<div class="tab-pane fade" id="redisDataContent">
 				</div>
 			</div>
 		</div>

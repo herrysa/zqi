@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.springframework.stereotype.Controller;
@@ -36,7 +37,7 @@ import com.zqi.frame.util.SQLUtil;
 import com.zqi.frame.util.TestTimer;
 import com.zqi.frame.util.XMLUtil;
 import com.zqi.report.model.ReportFunc;
-import com.zqi.unit.DateUtil;
+import com.zqi.unit.SupcanUtil;
 
 @Controller
 @RequestMapping("/report")
@@ -195,18 +196,20 @@ public class ReportController extends BaseController{
 		return resultMap;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@ResponseBody
 	@RequestMapping("/getDataSourceBySql")
 	public List<Map<String, Object>> getDataSourceBySql(HttpServletRequest request){
 		String sql = request.getParameter("sql");
-		sql = replaceVari(request,sql);
-		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+		//sql = replaceVari(request,sql);
+		/*List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 		JQueryPager pagedRequests = null;
 		pagedRequests = (JQueryPager) pagerFactory.getPager(
 				PagerFactory.JQUERYTYPE, request);
 		pagedRequests.setPageSize(500);
 		pagedRequests = zqiDao.findWithFilter(pagedRequests, sql, filters);
-		List<Map<String, Object>> rsList = pagedRequests.getList();
+		List<Map<String, Object>> rsList = pagedRequests.getList();*/
+		List<Map<String, Object>> rsList = zqiDao.findAll(sql);
 		return rsList;
 	}
 	
@@ -307,7 +310,7 @@ public class ReportController extends BaseController{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}  
-		System.out.println(funcList.size());
+		//System.out.println(funcList.size());
 		tt.done();
 		return null;
 	}
@@ -325,10 +328,17 @@ public class ReportController extends BaseController{
 			func.setName(funcName);
 			
 			Map<String, Object> reprotFunc = funcMap.get(funcName);
+			if(reprotFunc==null){
+				continue;
+			}
 			String funcBody = reprotFunc.get("funcSql").toString();
 			if(funcBody!=null&&!"".equals(funcBody)){
 				String funcType = reprotFunc.get("type").toString();
+				String rsType = reprotFunc.get("rsType").toString();
+				String returnType = reprotFunc.get("returnType").toString();
 				func.setType(funcType);
+				func.setRsType(rsType);
+				func.setReturnType(returnType);
 				String funcParam = reprotFunc.get("params").toString();
 				String[] paramArr = funcParam.split(";");
 				List<String> paramNameList = new ArrayList<String>();
@@ -358,12 +368,18 @@ public class ReportController extends BaseController{
 					if(funcBody.contains("%"+paramName+"%")){
 						String filterStr = getFilterStr(funcBody,paramName);
 						String paramValue = paramMap.get(paramName);
+						/*if(paramValue==null){
+							paramValue = "";
+						}*/
 						if(!"".equals(filterStr)){
 							if(paramValue==null){
 								funcBody.replace(filterStr, "");
 							}else{
 								funcBody.replace(filterStr, filterStr.substring(1, filterStr.length()-1));
 							}
+						}
+						if(paramValue==null){
+							paramValue = "";
 						}
 						funcBody = funcBody.replaceAll("%"+paramName+"%", paramValue);
 					}
@@ -470,5 +486,129 @@ public class ReportController extends BaseController{
 			matcherCount++;
 		}
 		System.out.println(matcherCount);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@ResponseBody
+	@RequestMapping("/getReportFunctionXml")
+	public String getReportFunctionXml(HttpServletRequest request,HttpServletResponse response){
+		try {
+			Document document = XMLUtil.createDocument();
+			Element root = document.addElement("root");
+			Element functionsE = root.addElement("functions");
+			List<Map<String, Object>> functions = zqiDao.findAll("select * from r_reportfunc");
+			//Map<String,List<ReportFunction>> funcCategoryMap = new HashMap<String, List<ReportFunction>>();
+			Map<String, Element> categoryMap = new HashMap<String, Element>();
+			/*Element categoryESy = functionsE.addElement("category");
+			categoryESy.addAttribute("name", "系统函数");
+			categoryMap.put("系统函数", categoryESy);
+			Element functionESv = categoryESy.addElement("function");
+			functionESv.addAttribute("name", "sv");
+			Element paraESv = functionESv.addElement("para");
+			paraESv.setText("含有系统变量的字符串");
+			Element returnDatatypeESv = functionESv.addElement("returnDatatype");
+			returnDatatypeESv.setText("string");
+			Element runAtESv = functionESv.addElement("runAt");
+			runAtESv.setText("Local");*/
+			
+			for(Map<String, Object> function : functions){
+				String code = function.get("code").toString();
+				//String name = function.get("name").toString();
+				Object category = function.get("category");
+				if(category==null||"".equals(category.toString())){
+					category = "其他函数";
+				}
+				if(!categoryMap.containsKey(category)){
+					Element categoryE = functionsE.addElement("category");
+					categoryE.addAttribute("name", category.toString());
+					categoryMap.put(category.toString(), categoryE);
+				}
+				Element categoryE = categoryMap.get(category);
+				Element functionE = categoryE.addElement("function");
+				functionE.addAttribute("name", code);
+				String params = function.get("params").toString();
+				if(params!=null&&!"".equals(params)){
+					String[] paramArr = params.split(",");
+					for(String param : paramArr){
+						Element para = functionE.addElement("para");
+						para.setText(param);
+					}
+				}
+				Element returnDatatype = functionE.addElement("returnDatatype");
+				returnDatatype.setText(function.get("returnType")==null?"string":function.get("returnType").toString());
+			}
+			
+			String funcXml = XMLUtil.xmltoString(document);
+			//设置编码  
+			response.setCharacterEncoding("UTF-8");  
+			response.setContentType("text/xml;charset=utf-8");  
+			response.setHeader("Cache-Control", "no-cache");  
+			PrintWriter out = response.getWriter();  
+			out.write(funcXml);  
+			out.flush();  
+			out.close(); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/getXml")
+	public String getXml(HttpServletRequest request,HttpServletResponse response){
+		String xmlStr = null;
+		try {
+			String xmlPath = request.getParameter("xmlPath");
+			if(StringUtils.isNotEmpty(xmlPath)){
+	        	HttpSession session = request.getSession();
+	        	String xmlFilePath = session.getServletContext().getRealPath("/report/"+xmlPath);
+				File file = new File(xmlFilePath);
+				Document document = XMLUtil.read(file);
+				xmlStr = XMLUtil.xmltoString(document);
+			}
+			//设置编码  
+			response.setCharacterEncoding("UTF-8");  
+			response.setContentType("text/xml;charset=utf-8");  
+			response.setHeader("Cache-Control", "no-cache");  
+			PrintWriter out = response.getWriter();  
+			out.write(xmlStr);  
+			out.flush();  
+			out.close(); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@ResponseBody
+	@RequestMapping("/getDataXml")
+	public String getDataXml(HttpServletRequest request,HttpServletResponse response){
+		try {
+			String dataType = request.getParameter("dataType");
+			String sql = request.getParameter("sql");
+			String xml = "";
+			if(StringUtils.isNotEmpty(sql)){
+				List<Map<String, Object>>datas = zqiDao.findAll(sql);
+				if("item".equals(dataType)){
+					xml = SupcanUtil.makeItemDataXml(datas);
+				}else if("col".equals(dataType)){
+					xml = SupcanUtil.makeColsXml(datas);
+				}else{
+					xml = SupcanUtil.makeDataXml(datas);
+				}
+			}
+			//设置编码  
+			response.setCharacterEncoding("UTF-8");  
+			response.setContentType("text/xml;charset=utf-8");  
+			response.setHeader("Cache-Control", "no-cache");  
+			PrintWriter out = response.getWriter();  
+			out.write(xml);  
+			out.flush();  
+			out.close(); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

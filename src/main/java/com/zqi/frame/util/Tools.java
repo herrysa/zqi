@@ -2,13 +2,13 @@ package com.zqi.frame.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,6 +23,9 @@ import java.util.regex.Pattern;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.commons.beanutils.BeanComparator;
+import org.apache.commons.collections.ComparatorUtils;
+import org.apache.commons.collections.comparators.ComparableComparator;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -35,6 +38,11 @@ import com.zqi.unit.DateUtil;
 public class Tools {
 
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("zqi");
+	
+	public static ResourceBundle getResourceBundle(String bundleName){
+		ResourceBundle resourceBundle = ResourceBundle.getBundle(bundleName);
+		return resourceBundle;
+	}
 	
 	public static String getResource(String key){
 		return resourceBundle.getString(key);
@@ -297,6 +305,7 @@ public class Tools {
 		return matcherStr;
 	}
 	
+	//获取''字符串
 	public static String findStr(String str,List<String> matcherList){
 		String pattern = "'(.| )+?'";
 		Pattern p = Pattern.compile(pattern);
@@ -409,4 +418,26 @@ public class Tools {
 	    }   
 		return value;
 	}
+	
+	/**
+     * @describe 依据某个字段对集合进行排序
+     * @author ...
+     * @date 
+     * @param list
+     *            待排序的集合
+     * @param fieldName
+     *            依据这个字段进行排序
+     * @param asc
+     *            如果为true，是正序；为false，为倒序
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> void sort(List<T> list, String fieldName, boolean asc) {
+        Comparator<?> mycmp = ComparableComparator.getInstance();
+        mycmp = ComparatorUtils.nullLowComparator(mycmp); // 允许null
+        if (!asc) {
+            mycmp = ComparatorUtils.reversedComparator(mycmp); // 逆序
+        }
+        Collections.sort(list, new BeanComparator(fieldName, mycmp));
+    }
+    
 }

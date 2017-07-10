@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<data>
+<project text="交易数据">
+	<ds id="transCode" dataURL="http://localhost:9191/zqi/report/getDataSourceBySql?sql=SELECT transCode from i_jgd GROUP BY transCode ORDER BY transCode DESC" descURL="transCode.desc.xml">调仓名称</ds>
+	<ds id="transParse" dataURL="http://localhost:9191/zqi/report/" descURL="transCode.desc.xml">调仓名称</ds>
+</project>
+</data>

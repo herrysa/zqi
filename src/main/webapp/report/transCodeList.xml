@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--By Supcan TreeList -->
+<TreeList>
+	<Properties dataURL="getDataXml?sql=SELECT transCode from i_jgd GROUP BY transCode ORDER BY transCode DESC">
+	</Properties>
+	<Cols>
+		<Col name="transCode"  width="150" align="center">交易名称</Col>
+	</Cols>
+</TreeList>

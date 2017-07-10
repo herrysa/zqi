@@ -24,6 +24,15 @@ import com.zqi.frame.dao.IZqiDao;
 public class ZqiDao implements IZqiDao{
 
 	JdbcTemplate jdbcTemplate;
+	
+	JdbcTemplate jdbcTemplate2;
+	public JdbcTemplate getJdbcTemplate2() {
+		return jdbcTemplate2;
+	}
+	@Autowired
+	public void setJdbcTemplate2(JdbcTemplate jdbcTemplate2) {
+		this.jdbcTemplate2 = jdbcTemplate2;
+	}
 	DataSource dataSource;
 	
 	public DataSource getDataSource() {
@@ -74,6 +83,11 @@ public class ZqiDao implements IZqiDao{
 	@Override
 	public List findAll(String sql) {
 		return jdbcTemplate.queryForList(sql);
+	}
+	
+	@Override
+	public List findAll(String sql,Class T) {
+		return jdbcTemplate.queryForList(sql,T);
 	}
 
 	@Override
